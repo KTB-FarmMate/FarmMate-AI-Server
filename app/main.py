@@ -6,7 +6,7 @@ import uvicorn
 
 app = FastAPI()
 
-app.include_router(openai_router, prefix="/openai")
+app.include_router(openai_router, prefix="chat")
 
 
 # 실행
