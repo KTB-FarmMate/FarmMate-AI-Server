@@ -29,7 +29,7 @@ async def createThread() -> dict:
     """
     try:
         thread = client.beta.threads.create()
-        return {"thread_id": thread.id}
+        return {"threadId": thread.id}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -49,10 +49,10 @@ class Message(BaseModel):
 class ThreadResponse(BaseModel):
     """
     Thread 내용의 반환 형태
-    thread_id : 채팅방(Thread)의 고유식별자
+    threadId : 채팅방(Thread)의 고유식별자
     messages : 채팅방에서 이루어진 대화 목록
     """
-    thread_id: str
+    threadId: str
     messages: List[Message]
 
 
@@ -84,7 +84,7 @@ async def get_thread(threadId: str = Query(..., description="채팅방 ID")):
     ]
 
     return {
-        'thread_id': threadId,
+        'threadId': threadId,
         'messages': messages_data
     }
 
@@ -93,7 +93,7 @@ class MessageRequest(BaseModel):
     """
     요청자로부터 전달된 Message 정보
     """
-    thread_id: str
+    threadId: str
     message: str
 
 
@@ -102,24 +102,24 @@ async def sendMessage(request: MessageRequest):
     """
     사용자가 특정 Thread에 메시지를 전송하고, 이에 대한 AI의 답변을 생성하는 함수 \n
     :param request: MessageRequest 객체로, 사용자가 전송할 메시지 및 Thread ID를 포함 \n
-        - thread_id (str): 메시지를 보낼 Thread의 고유 식별자 \n
+        - threadId (str): 메시지를 보낼 Thread의 고유 식별자 \n
         - message (str): 사용자가 전송하는 메시지 내용 \n
     :return: AI의 답변을 포함한 JSON 객체를 반환. 답변이 없거나 문제가 있을 경우 204 No Content 또는 오류 메시지 반환 \n
-        - thread_id (str): 해당 Thread의 고유 식별자 \n
+        - threadId (str): 해당 Thread의 고유 식별자 \n
         - content (str): AI가 생성한 텍스트 응답 \n
     """
     try:
-        thread_id = request.thread_id
+        threadId = request.threadId
         message = request.message
 
-        # thread_id가 없을 경우, BAD_REQUEST 반환
-        if not thread_id:
+        # threadId 없을 경우, BAD_REQUEST 반환
+        if not threadId:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="전달된 Thread ID가 없습니다.")
 
-        # thread_id가 있어서, 기존에 존재하는 thread를 가져옴
-        thread = client.beta.threads.retrieve(thread_id=thread_id)
+        # threadId 있어서, 기존에 존재하는 thread를 가져옴
+        thread = client.beta.threads.retrieve(thread_id=threadId)
 
-        # thread_id에 해당하는 채팅방에 user가 전달한 message를 기반으로 message 생성
+        # threadId 해당하는 채팅방에 user가 전달한 message를 기반으로 message 생성
         client.beta.threads.messages.create(
             thread_id=thread.id,
             role="user",
@@ -134,7 +134,7 @@ async def sendMessage(request: MessageRequest):
 
         # Run 완료 대기
         while True:
-            run = client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
+            run = client.beta.threads.runs.retrieve(thread_id=threadId, run_id=run.id)
             if run.status == "completed":
                 break
             elif run.status in ["failed", "cancelled", "expired"]:
@@ -142,7 +142,7 @@ async def sendMessage(request: MessageRequest):
             time.sleep(1)
 
         # 최신 응답 가져오기
-        messages = client.beta.threads.messages.list(thread_id=thread_id, order="desc", limit=1)
+        messages = client.beta.threads.messages.list(thread_id=threadId, order="desc", limit=1)
 
         # 메시지가 없는 경우
         if not messages.data:
@@ -153,7 +153,7 @@ async def sendMessage(request: MessageRequest):
             if message.role == "assistant":
                 for content in message.content:
                     if content.type == 'text':
-                        return {'thread_id': thread_id, 'content': content.text.value}
+                        return {'threadId': threadId, 'content': content.text.value}
         return Response(status_code=204)  # 데이터가 없을 때 204 반환
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
