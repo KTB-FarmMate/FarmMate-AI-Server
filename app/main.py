@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from app.api.openai import router as openai_router
-from core.config import Settings
+from app.core.config import Settings
 import uvicorn
 
 

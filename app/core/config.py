@@ -5,7 +5,10 @@ import os
 # .env 파일 로드
 load_dotenv()
 
+
 class Settings(BaseSettings):
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY")
+    ASSISTANT_ID: str = os.getenv("ASSISTANT_ID")
+
 
 settings = Settings()
