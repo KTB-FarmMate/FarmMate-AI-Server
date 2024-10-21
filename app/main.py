@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from app.api.openai import router as openai_router
-from app.api.weather import router as weather_router
+from app.api.openai.openai import router as openai_router
+from app.api.weather.weather import router as weather_router
 from app.core.config import Settings
 import uvicorn
 
