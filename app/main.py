@@ -7,7 +7,7 @@ import uvicorn
 
 app = FastAPI()
 
-app.include_router(openai_router, prefix="/threads")
+app.include_router(openai_router, prefix="/members/{memberId}/threads")
 app.include_router(weather_router, prefix="/weather")
 
 
