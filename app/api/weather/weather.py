@@ -1,5 +1,6 @@
 import os
 import requests
+from starlette.status import HTTP_404_NOT_FOUND
 
 from app.core.config import settings
 from fastapi import APIRouter, HTTPException, status, Request, Query, Response
@@ -22,19 +23,25 @@ class KakaoLocalService:
         params = {
             "query": address
         }
-        response = requests.get(self.KAKAO_API_URL, headers=headers, params=params)
-        response.raise_for_status()  # HTTP 오류 발생 시 예외 처리
+        try:
+            response = requests.get(self.KAKAO_API_URL, headers=headers, params=params)
+            response.raise_for_status()  # HTTP 오류 발생 시 예외 처리
 
-        data = response.json()
-        print(data)
-        if data['documents']:
-            document = data['documents'][0]
-            x = document['x']
-            y = document['y']
-            # CoordinateVO와 유사한 딕셔너리 형태로 반환
-            return {'x': x, 'y': y}
-        else:
-            return None
+            data = response.json()
+            if data['documents']:
+                document = data['documents'][0]
+                x = document['x']
+                y = document['y']
+                # CoordinateVO와 유사한 딕셔너리 형태로 반환
+                return {'x': x, 'y': y}
+            else:
+                raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="주소가 올바르지 않음")
+        except HTTPException as e:
+            raise e
+        except requests.exceptions.RequestException as e:
+            raise HTTPException(status_code=500, detail=f"API 요청 실패: {str(e)}")
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"알 수 없는 오류: {str(e)}")
 
 
 kakao_service = KakaoLocalService()
