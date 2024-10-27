@@ -36,8 +36,6 @@ assistant = client.beta.assistants.retrieve(assistant_id=settings.ASSISTANT_ID)
 T = TypeVar('T')
 
 """HTTP 상태 코드 정의"""
-
-
 # OK = HTTP_200_OK                          # 200: 성공
 # CREATED = HTTP_201_CREATED                # 201: 리소스 생성됨
 # NO_CONTENT = HTTP_204_NO_CONTENT         # 204: 성공했지만 반환할 컨텐츠 없음
@@ -416,7 +414,7 @@ class ModifyMessageData(BaseModel):
     message: str = Field("", description="수정 결과 메시지")
 
 
-@router.patch("/{thread_id}", response_model=BaseResponse[ModifyMessageData])
+@router.patch("/{thread_id}", response_model=create_response)
 async def modify_message(memberId: str, thread_id: str, request: ModifyMessageRequest):
     """
     특정 채팅방의 주소 정보를 수정합니다.
