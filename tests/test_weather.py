@@ -5,7 +5,6 @@ import asyncio
 from httpx import AsyncClient
 from unittest.mock import Mock
 from fastapi import status
-from openai import base_url
 
 # 프로젝트의 루트 디렉토리를 모듈 검색 경로에 추가
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -24,18 +23,21 @@ async def test_get_weather_success():
     """
     async with AsyncClient(app=app, base_url="http://testserver") as ac:
         response = await ac.get("/weather?address=경기 성남시 분당구 대왕판교로 660 유스페이스1 A동 405호")
+        assert response.is_success == True
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
-        assert data["x"] and data["y"]
+        assert data["message"] == "날씨 정보를 성공적으로 조회했습니다."
+        assert data["data"]["T1H"]
 
 # 2. 비정상 주소 입력
 @pytest.mark.asyncio
-async def test_get_weather_success():
+async def test_get_weather_not_valid():
     """
     비정상 요청(존재하지 않는 주소)시 테스트
     """
     async with AsyncClient(app=app, base_url="http://testserver") as ac:
         response = await ac.get("/weather?address=UNKNOWN_ADDRESS")
+        assert response.is_success == False
         assert response.status_code == status.HTTP_404_NOT_FOUND
         data = response.json()
-        assert data['detail'] == "주소가 올바르지 않음"
+        assert data["message"] == "날씨 정보 조회에 실패했습니다."
