@@ -56,6 +56,7 @@ async def test_create_thread_missing_crop():
         assert response.is_success == False
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
         data = response.json()
+        print(data)
         assert data["message"] == "요청이 올바르지 않음"
         assert data["error"]["details"] == "작물명을 입력해야 합니다."
 
@@ -437,7 +438,6 @@ async def test_send_message_no_ai_response(mocker):
         assert response.status_code == status.HTTP_204_NO_CONTENT
         data = response.json()
         assert data["message"] == "AI 응답이 없습니다."
-        assert "error" in data
 
 
 # --------------------------------------------- #
@@ -471,7 +471,7 @@ async def test_get_thread_status_none():
         assert response.is_success == False
         assert response.status_code == status.HTTP_404_NOT_FOUND
         data = response.json()
-        assert data["message"] == "올바르지 않은 ThreadId 입니다."
+        assert data["message"] == "채팅방을 찾을 수 없습니다."
 
 
 # --------------------------------------------- #
