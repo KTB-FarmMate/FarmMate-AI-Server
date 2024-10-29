@@ -47,7 +47,7 @@ RUN pip install --no-cache-dir tomli==2.0.2
 RUN pip install --no-cache-dir urllib3==2.2.3
 
 # 깃 레포지토리에서 프로젝트 파일을 복사
-COPY ./FarmMate-AI-Server .
+COPY . .
 
 # 애플리케이션 포트를 외부에 노출
 EXPOSE 8000
