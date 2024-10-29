@@ -1,6 +1,6 @@
  pipeline {
     agent {
-        label 'farmmate-java-build-agent'
+        label 'farmmate-java-python-build-agent'
     }
 
     environment {
