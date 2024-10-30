@@ -111,12 +111,12 @@ class KakaoLocalService:
 
     def __init__(self):
         self.API_KEY = settings.KAKAO_LOCAL_API_KEY
+        self.url = 'http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst'
 
     def convert_address_to_coordinate(self, address):
         def get_weather(lon: float, lat: float):
-            url = 'http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst'
             param = LamcParameter()
-            nx, ny = lamcproj(lon, lat, 0, param)  # 위도, 경도를 격자 좌표로 변환
+            nx, ny = lamcproj(lon, lat, 0, param)
 
             today = datetime.now().strftime("%Y%m%d")
             times = int(datetime.now().strftime("%H"))
@@ -133,9 +133,9 @@ class KakaoLocalService:
                         'nx': nx,
                         'ny': ny
                     }
-                    response = requests.get(url, params=params)
-                    response.raise_for_status()  # HTTP 오류 체크
-                    response_data = response.json()  # JSON 파싱
+                    response = requests.get(self.url, params=params)
+                    response.raise_for_status()
+                    response_data = response.json()
                     if response_data["response"]["header"]["resultCode"] != "00":
                         continue
                     values = {
@@ -145,7 +145,7 @@ class KakaoLocalService:
                     return values
                 except requests.exceptions.RequestException as e:
                     continue
-            return HTTPException(status_code=HTTP_500_INTERNAL_SERVER_ERROR)
+            return HTTPException(status_code=HTTP_500_INTERNAL_SERVER_ERROR, detail="날씨 정보를 가져오지 못했습니다")
 
         headers = {"Authorization": f"KakaoAK {self.API_KEY}"}
         response = requests.get(self.KAKAO_API_URL, headers=headers, params={"query": address})
@@ -155,7 +155,8 @@ class KakaoLocalService:
             document = data["documents"][0]
             return get_weather(float(document['x']), float(document['y']))
         else:
-            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="주소가 올바르지 않음")
+            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="주소가 올바르지 않습니다.")
+
 
 
 kakao_service = KakaoLocalService()
