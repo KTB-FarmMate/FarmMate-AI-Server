@@ -28,8 +28,8 @@ async def test_create_thread():
     """
     async with AsyncClient(app=app, base_url="http://testserver") as ac:
         payload = {
-            "crop": "토마토",
-            "address": "서울특별시 강남구"
+            "crop": "감자",
+            "address": "경기 성남시 분당구 대왕판교로 660"
         }
         response = await ac.post(f"{URI}/threads/", json=payload)
         assert response.is_success == True
@@ -38,6 +38,7 @@ async def test_create_thread():
         data = response.json()
         assert data["message"] == "채팅방이 성공적으로 생성되었습니다."
         assert "data" in data
+        print(data)
         return data["data"]["threadId"]  # 다음 테스트에서 사용할 수 있도록 threadId 반환
 
 
@@ -158,16 +159,18 @@ async def test_send_message_success():
     """
     올바른 threadId와 메시지를 전송하여 AI 응답이 올바르게 생성되는지 테스트합니다.
     """
-    thread_id = await test_create_thread()
+    # thread_id = await test_create_thread()
+    thread_id = "thread_xBn6dZlM3QCvwDOIkKnk0GuR"
     async with AsyncClient(app=app, base_url="http://testserver") as ac:
         payload = {
             "threadId": thread_id,
-            "message": "오늘 날씨는 어떤가요?"
+            "message": "근데, 나 감자 처음 심어서 마트에서 사서 해도 되나?"
         }
         response = await ac.post(f"{URI}/threads/message", json=payload)
         assert response.is_success == True
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
+        print(data)
         assert data["message"] == "메시지를 성공적으로 전송하였습니다."
 
 @pytest.mark.asyncio
@@ -227,10 +230,12 @@ async def test_modify_message_success():
     """
     정상적인 thread_id 와 address로 정상적으로 적용되는지 테스트합니다.
     """
-    thread_id = await test_create_thread()
+    # thread_id = await test_create_thread()
+    thread_id = "thread_xBn6dZlM3QCvwDOIkKnk0GuR"
     async with AsyncClient(app=app, base_url="http://testserver") as ac:
         payload = {
-            "address": "경기도 성남시 분당구 판교역로"
+            "address": "전라남도 고흥군 점암면",
+            "plantedAt": "2024-10-29T10:20:10"
         }
         response = await ac.patch(f"{URI}/threads/{thread_id}", json=payload)
         assert response.is_success == True
@@ -457,6 +462,7 @@ async def test_get_thread_status():
         assert response.is_success == True
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
+        print(data)
         assert data["message"] == "상대 정보가 올바르게 반환 되었습니다."
 
 
