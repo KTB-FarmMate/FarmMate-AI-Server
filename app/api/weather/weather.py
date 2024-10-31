@@ -115,6 +115,12 @@ class KakaoLocalService:
 
     def convert_address_to_coordinate(self, address):
         def get_weather(lon: float, lat: float):
+            def isint(s):
+                try:
+                    int(s)
+                    return True
+                except ValueError:
+                    return False
             param = LamcParameter()
             nx, ny = lamcproj(lon, lat, 0, param)
 
@@ -136,10 +142,11 @@ class KakaoLocalService:
                     response = requests.get(self.url, params=params)
                     response.raise_for_status()
                     response_data = response.json()
+                    print(response)
                     if response_data["response"]["header"]["resultCode"] != "00":
                         continue
                     values = {
-                        item["category"]: item["obsrValue"]
+                        item["category"]: int(item["obsrValue"]) if isint(item["obsrValue"]) else float(item["obsrValue"])
                         for item in response_data["response"]["body"]["items"]["item"]
                     }
                     return values
