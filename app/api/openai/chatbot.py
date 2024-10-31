@@ -621,22 +621,23 @@ class ThreadStatus:
 
     # 하늘 상태와 비 여부 설정 함수
     def get_sky_condition(self, pty_value):
-        if pty_value == '0':
-            return "맑음", "비안옴"
-        elif pty_value == '1':
-            return "비", "비옴"
-        elif pty_value == '2':
-            return "비/눈", "비/눈"
-        elif pty_value == '3':
-            return "눈", "눈옴"
-        elif pty_value == '5':
-            return "빗방울", "비옴"
-        elif pty_value == '6':
-            return "빗방울눈날림", "비옴"
-        elif pty_value == '7':
-            return "눈날림", "눈옴"
-        else:
-            return "알 수 없음", "알 수 없음"
+        match pty_value:
+            case 0:
+                return "맑음", "비안옴"
+            case 1:
+                return "비", "비옴"
+            case 2:
+                return "비/눈", "비/눈"
+            case 3:
+                return "눈", "눈옴"
+            case 5:
+                return "빗방울", "비옴"
+            case 6:
+                return "빗방울눈날림", "비옴"
+            case 7:
+                return "눈날림", "눈옴"
+            case _:
+                return "알 수 없음", "알 수 없음"
 
     # 풍향 설정 함수
     def get_wind_direction(self, vec_value):
