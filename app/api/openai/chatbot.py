@@ -134,8 +134,6 @@ async def create_thread(memberId: str, request: CreateThreadRequest) -> JSONResp
             raise ValueError('주소는 문자열이어야 합니다.')
         if not address.strip():
             raise ValueError("주소를 입력해야 합니다.")
-        if re.search(r'[^\w\s]', address):
-            raise ValueError('주소에는 특수 문자가 포함될 수 없습니다.')
         client.beta.threads.messages.create(
             thread_id=thread.id,
             role="assistant",
