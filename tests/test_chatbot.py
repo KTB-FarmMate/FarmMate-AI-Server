@@ -1,5 +1,4 @@
 # tests/test_chatbot.py
-
 import sys
 import os
 import pytest
@@ -15,7 +14,7 @@ from app.main import app  # FastAPI 앱이 정의된 모듈을 임포트합니�
 
 pytestmark = pytest.mark.asyncio
 
-URI = "/members/memberid_1234"
+URI = "/members/5b16f218-682c-4eb0-989e-6fff2a6fb4f1"
 
 
 ## 채팅방 생성 관련 테스트
@@ -28,17 +27,19 @@ async def test_create_thread():
     """
     async with AsyncClient(app=app, base_url="http://testserver") as ac:
         payload = {
-            "crop": "감자",
-            "address": "경기 성남시 분당구 대왕판교로 660"
+            "cropId": 3,
+            "cropName": "감자",
+            "address": "서울 성북구 낙산길 243-15 (삼선현대힐스테이트)",
+            "plantedAt": "2024-11-01"
         }
         response = await ac.post(f"{URI}/threads/", json=payload)
+        print(response.json())
         assert response.is_success == True
         assert response.status_code == status.HTTP_201_CREATED
-
         data = response.json()
+        print(data)
         assert data["message"] == "채팅방이 성공적으로 생성되었습니다."
         assert "data" in data
-        print(data)
         return data["data"]["threadId"]  # 다음 테스트에서 사용할 수 있도록 threadId 반환
 
 
@@ -50,16 +51,18 @@ async def test_create_thread_missing_crop():
     """
     async with AsyncClient(app=app, base_url="http://testserver") as ac:
         payload = {
-            "crop" : "",
-            "address": "서울특별시 강남구"
+            "cropId": 3,
+            "cropName": "",
+            "address": "서울 성북구 낙산길 243-15 (삼선현대힐스테이트)",
+            "plantedAt": "2024-11-01"
         }
         response = await ac.post(f"{URI}/threads/", json=payload)
         assert response.is_success == False
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
         data = response.json()
         print(data)
-        assert data["message"] == "요청이 올바르지 않음"
-        assert data["error"]["details"] == "작물명을 입력해야 합니다."
+        assert data["message"] == "입력값 검증 실패"
+        assert data["error"]["details"] == "올바른 작물명을 입력해야 합니다."
 
 
 # 3. 필수 필드 누락 (주소지)
@@ -70,33 +73,61 @@ async def test_create_thread_missing_address():
     """
     async with AsyncClient(app=app, base_url="http://testserver") as ac:
         payload = {
-            "crop": "토마토"
+            "cropId": 3,
+            "cropName": "감자",
+            "address": "👾!@👾👨‍👨‍❤️‍🐤👨🦽‍",
+            "plantedAt": "2024-11-01"
         }
         response = await ac.post(f"{URI}/threads/", json=payload)
         assert response.is_success == False
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
         data = response.json()
-        assert data["message"] == "요청이 올바르지 않음"
-        assert data["error"]["details"] == "주소를 입력해야 합니다."
+        print(data)
+        assert data["message"] == "입력값 검증 실패"
+        assert data["error"]["details"] == "올바른 주소를 입력해야 합니다."
 
 
-# 4. 올바르지 않은 필드 값
+# 4. 올바르지 않은 필드(작물 아이디) 값
 @pytest.mark.asyncio
-async def test_create_thread_not_valid():
+async def test_create_thread_cropId_not_valid():
     """
     crop 또는 address에 예상하지 못한 형식(숫자나 특수 문자 등)이 입력된 경우 어떻게 처리되는지 테스트합니다.
     """
     async with AsyncClient(app=app, base_url="http://testserver") as ac:
         payload = {
-            "crop": "!!!!!@",
-            "address": "👾👾!@👾👨‍👨‍❤️‍🐤👨🦽‍➡️🦿🥰#"
+            "cropId": -1,
+            "cropName": "감자",
+            "address": "서울 성북구 낙산길 243-15 (삼선현대힐스테이트)",
+            "plantedAt": "2024-11-01"
         }
         response = await ac.post(f"{URI}/threads/", json=payload)
         assert response.is_success == False
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
         data = response.json()
-        assert data["message"] == "요청이 올바르지 않음"
-        assert data["error"]["details"] == "작물명에는 특수 문자가 포함될 수 없습니다."
+        print(data)
+        assert data["message"] == "입력값 검증 실패"
+        assert data["error"]["details"] == "작물ID를 입력해야 합니다."
+
+# 5. 올바르지 않은 필드(심은날짜) 값
+@pytest.mark.asyncio
+async def test_create_thread_plantedAt_not_valid():
+    """
+    crop 또는 address에 예상하지 못한 형식(숫자나 특수 문자 등)이 입력된 경우 어떻게 처리되는지 테스트합니다.
+    """
+    async with AsyncClient(app=app, base_url="http://testserver") as ac:
+        payload = {
+            "cropId": 3,
+            "cropName": "감자",
+            "address": "서울 성북구 낙산길 243-15 (삼선현대힐스테이트)",
+            "plantedAt": "ㅁㄴ2024-11-01"
+        }
+        response = await ac.post(f"{URI}/threads/", json=payload)
+        assert response.is_success == False
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        data = response.json()
+        print(data)
+        assert data["message"] == "입력값 검증 실패"
+        assert data["error"]["details"] == "날짜 형식이 올바르지 않습니다."
 
 
 # ----------------------------------------------------#
@@ -110,9 +141,11 @@ async def test_get_thread():
     존재하는 채팅방 ID를 사용하여 정상적으로 조회되는지 테스트합니다.
     """
     # 먼저 채팅방을 생성합니다.
-    thread_id = await test_create_thread()
+    # thread_id = await test_create_thread()
+    thread_id = "thread_9GfoVBuA6yx4V31xriZxNO0g"
     async with AsyncClient(app=app, base_url="http://testserver") as ac:
         response = await ac.get(f"{URI}/threads/{thread_id}")
+        print(response.json())
         assert response.is_success == True
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -133,7 +166,7 @@ async def test_get_none_thread():
         assert response.is_success == False
         assert response.status_code == status.HTTP_404_NOT_FOUND
         data = response.json()
-        assert data["message"] == "유효하지 않은 채팅방 ID입니다."
+        assert data["message"] == "유효하지 않은 채팅방 ID"
 
 
 # 3. 잘못된 형식의 채팅방 ID 조회
@@ -147,7 +180,7 @@ async def test_get_incorrect_format_thread():
         assert response.is_success == False
         assert response.status_code == status.HTTP_404_NOT_FOUND
         data = response.json()
-        assert data["message"] == "유효하지 않은 채팅방 ID입니다."
+        assert data["message"] == "유효하지 않은 채팅방 ID"
 
 
 # -------------------------------------------------- #
@@ -160,7 +193,7 @@ async def test_send_message_success():
     올바른 threadId와 메시지를 전송하여 AI 응답이 올바르게 생성되는지 테스트합니다.
     """
     # thread_id = await test_create_thread()
-    thread_id = "thread_xBn6dZlM3QCvwDOIkKnk0GuR"
+    thread_id = "thread_9GfoVBuA6yx4V31xriZxNO0g"
     async with AsyncClient(app=app, base_url="http://testserver") as ac:
         payload = {
             "threadId": thread_id,

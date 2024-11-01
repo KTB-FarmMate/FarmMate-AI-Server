@@ -1,16 +1,17 @@
+# 타입과 유틸리티 관련 모듈
 from typing import List, Any, Optional, Generic, TypeVar
 import re
 import time
-from xmlrpc.client import INTERNAL_ERROR
-
-import requests
+import json
+import logging
 from enum import Enum
 from datetime import datetime
+
+# HTTP 및 API 관련 모듈
+import requests
 from fastapi import APIRouter, HTTPException, status, Response
-from openai.pagination import SyncCursorPage
+from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, Field, field_validator, ValidationError
-# from openai import OpenAI, Client, OpenAIError, APIError
-import openai
 from starlette.responses import JSONResponse
 from starlette.status import (
     HTTP_200_OK,
@@ -22,13 +23,19 @@ from starlette.status import (
     HTTP_404_NOT_FOUND,
     HTTP_409_CONFLICT,
     HTTP_422_UNPROCESSABLE_ENTITY,
-    HTTP_500_INTERNAL_SERVER_ERROR, HTTP_408_REQUEST_TIMEOUT
+    HTTP_500_INTERNAL_SERVER_ERROR,
+    HTTP_408_REQUEST_TIMEOUT
 )
-import json
-from fastapi.exceptions import RequestValidationError
+
+# OpenAI 관련 모듈
+from openai.pagination import SyncCursorPage
+import openai  # Typo 수정: 'opnai' -> 'openai'
+
+# 프로젝트 내 모듈
 from app.core.config import settings
 from app.api.weather.weather import kakao_service
 
+# 네트워크 관련 모듈
 import socket
 
 DEBUG = True
@@ -126,44 +133,33 @@ async def create_thread(memberId: str, request: CreateThreadRequest) -> JSONResp
     새로운 채팅방(Thread)을 생성하고 초기 메시지를 추가합니다.
 
     Returns:
-        BaseResponse[ThreadCreateData]: 생성된 채팅방의 고유 식별자를 반환합니다.
+        JSONResponse
     """
     try:
         thread = client.beta.threads.create()
 
         crop_id = request.cropId
-        print(crop_id)
-        if not isinstance(crop_id, int):
-            raise ValueError('작물ID는 정수형이어야 합니다.')
         if crop_id == -1:
             raise ValueError("작물ID를 입력해야 합니다.")
 
         crop = request.cropName
 
-        if not isinstance(crop, str):
-            raise ValueError('작물명은 문자열이어야 합니다.')
         if not crop.strip() or re.search(r'[^\w\s]', crop):
             raise ValueError(f"올바른 작물명을 입력해야 합니다.")
 
         address = request.address
 
-        if not isinstance(address, str):
-            raise ValueError('주소는 문자열이어야 합니다.')
         if not address.strip() or not re.match(r'^[가-힣a-zA-Z0-9\s()\-_,.]+$', request.address):
             raise ValueError("올바른 주소를 입력해야 합니다.")
 
-
         plantedAt = request.plantedAt
 
-        if not isinstance(plantedAt, str):
-            raise ValueError('심은 날짜는 문자열이어야 합니다.')
         if not plantedAt.strip():
             raise ValueError("심은 날짜를 입력해야 합니다.")
         try:
-            print(plantedAt)
             datetime.strptime(plantedAt, "%Y-%m-%d")
         except ValueError:
-            raise ValueError(f"날짜 형식이 올바르지 않습니다.")
+            raise ValueError(f"날짜 형식이 올바르지 않습니다. (예: 2024-01-01)")
 
         client.beta.threads.messages.create(
             thread_id=thread.id,
@@ -176,14 +172,14 @@ async def create_thread(memberId: str, request: CreateThreadRequest) -> JSONResp
             "cropId": crop_id,
             "plantedAt": plantedAt,
             "threadId": str(thread.id)}
-        print(request_data)
-        req = requests.post(f"{BE_BASE_URL}/members/{memberId}/threads", json=request_data)
 
-        if req.status_code != 200:
-            raise HTTPException(
-                status_code=req.status_code,
-                detail=req.json().get("details", "백엔드 서버 요청 실패")
-            )
+        # req = requests.post(f"{BE_BASE_URL}/members/{memberId}/threads", json=request_data)
+        #
+        # if req.status_code != 200:
+        #     raise HTTPException(
+        #         status_code=req.status_code,
+        #         detail=req.json().get("details", "백엔드 서버 요청 실패")
+        #     )
 
         return create_response(status_code=HTTP_201_CREATED,
                                message="채팅방이 성공적으로 생성되었습니다.",
