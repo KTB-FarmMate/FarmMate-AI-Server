@@ -1,12 +1,16 @@
 from typing import List, Any, Optional, Generic, TypeVar
 import re
 import time
+from xmlrpc.client import INTERNAL_ERROR
+
+import requests
 from enum import Enum
 from datetime import datetime
 from fastapi import APIRouter, HTTPException, status, Response
 from openai.pagination import SyncCursorPage
 from pydantic import BaseModel, Field, field_validator, ValidationError
-from openai import OpenAI, Client
+# from openai import OpenAI, Client, OpenAIError, APIError
+import openai
 from starlette.responses import JSONResponse
 from starlette.status import (
     HTTP_200_OK,
@@ -25,10 +29,16 @@ from fastapi.exceptions import RequestValidationError
 from app.core.config import settings
 from app.api.weather.weather import kakao_service
 
+import socket
+
+DEBUG = True
+
+BE_BASE_URL = "http://15.164.175.127:8080/api"
+
 router = APIRouter()
 
 # OpenAI API 클라이언트 생성
-client: Client = OpenAI(api_key=settings.OPENAI_API_KEY)
+client: openai.Client = openai.OpenAI(api_key=settings.OPENAI_API_KEY)
 
 # ASSISTANT_ID를 사용하여 Assistant 인스턴스 가져오기
 assistant = client.beta.assistants.retrieve(assistant_id=settings.ASSISTANT_ID)
@@ -100,8 +110,10 @@ def create_response(*,
 
 
 class CreateThreadRequest(BaseModel):
-    crop: str = Field("", description="재배할 작물 이름")
+    cropId: int = Field(-1, description="재배할 작물의 고유식별자")
+    cropName: str = Field("", description="재배할 작물 이름")
     address: str = Field("", description="농사를 짓는 지역 주소")
+    plantedAt: str = Field("", description="작물을 심은 날짜")
 
 
 class ThreadCreateData(BaseModel):
@@ -119,67 +131,148 @@ async def create_thread(memberId: str, request: CreateThreadRequest) -> JSONResp
     try:
         thread = client.beta.threads.create()
 
-        crop = request.crop
+        crop_id = request.cropId
+        print(crop_id)
+        if not isinstance(crop_id, int):
+            raise ValueError('작물ID는 정수형이어야 합니다.')
+        if crop_id == -1:
+            raise ValueError("작물ID를 입력해야 합니다.")
+
+        crop = request.cropName
 
         if not isinstance(crop, str):
             raise ValueError('작물명은 문자열이어야 합니다.')
-        if not crop.strip():
-            raise ValueError("작물명을 입력해야 합니다.")
-        if re.search(r'[^\w\s]', crop):
-            raise ValueError('작물명에는 특수 문자가 포함될 수 없습니다.')
+        if not crop.strip() or re.search(r'[^\w\s]', crop):
+            raise ValueError(f"올바른 작물명을 입력해야 합니다.")
 
         address = request.address
 
         if not isinstance(address, str):
             raise ValueError('주소는 문자열이어야 합니다.')
-        if not address.strip():
-            raise ValueError("주소를 입력해야 합니다.")
+        if not address.strip() or not re.match(r'^[가-힣a-zA-Z0-9\s()\-_,.]+$', request.address):
+            raise ValueError("올바른 주소를 입력해야 합니다.")
+
+
+        plantedAt = request.plantedAt
+
+        if not isinstance(plantedAt, str):
+            raise ValueError('심은 날짜는 문자열이어야 합니다.')
+        if not plantedAt.strip():
+            raise ValueError("심은 날짜를 입력해야 합니다.")
+        try:
+            print(plantedAt)
+            datetime.strptime(plantedAt, "%Y-%m-%d")
+        except ValueError:
+            raise ValueError(f"날짜 형식이 올바르지 않습니다.")
+
         client.beta.threads.messages.create(
             thread_id=thread.id,
             role="assistant",
-            content=f"[시스템 메시지] 사용자는 주소 : {address}에서 작물 : {crop}을(를) 재배하고 있습니다.",
+            content=f"[시스템 메시지] 사용자는 심은날짜 : {plantedAt}, 주소 : {address}에서 작물 : {crop}을(를) 재배하고 있습니다.",
         )
+
+        request_data = {
+            "address": address,
+            "cropId": crop_id,
+            "plantedAt": plantedAt,
+            "threadId": str(thread.id)}
+        print(request_data)
+        req = requests.post(f"{BE_BASE_URL}/members/{memberId}/threads", json=request_data)
+
+        if req.status_code != 200:
+            raise HTTPException(
+                status_code=req.status_code,
+                detail=req.json().get("details", "백엔드 서버 요청 실패")
+            )
 
         return create_response(status_code=HTTP_201_CREATED,
                                message="채팅방이 성공적으로 생성되었습니다.",
                                data={"threadId": thread.id})
 
     except ValueError as e:
-        return create_response(status_code=HTTP_422_UNPROCESSABLE_ENTITY,
-                               message="요청이 올바르지 않음",
-                               error=ErrorDetail(
-                                   code="VALUE_ERROR",
-                                   message="요청 매개변수가 올바르지 않습니다.",
-                                   details=str(e)
-                               ).to_dict()
-                               )
+        return create_response(
+            status_code=HTTP_422_UNPROCESSABLE_ENTITY,
+            message="입력값 검증 실패",
+            error=ErrorDetail(
+                code="VALIDATION_ERROR",
+                message="입력값이 유효하지 않습니다.",
+                details=str(e)
+            ).to_dict()
+        )
+
+    except openai.APIError as e:
+        return create_response(
+            status_code=HTTP_502_BAD_GATEWAY,
+            message="OpenAI 서비스 오류",
+            error=ErrorDetail(
+                code="OPENAI_API_ERROR",
+                message="OpenAI 서비스 연동 중 오류가 발생했습니다.",
+                details=str(e)
+            ).to_dict()
+        )
+
+    except requests.Timeout:
+        return create_response(
+            status_code=HTTP_504_GATEWAY_TIMEOUT,
+            message="백엔드 서버 응답 시간 초과",
+            error=ErrorDetail(
+                code="BACKEND_TIMEOUT",
+                message="백엔드 서버가 응답하지 않습니다.",
+                details="Request to backend server timed out"
+            ).to_dict()
+        )
+
+    except requests.RequestException as e:
+        return create_response(
+            status_code=HTTP_502_BAD_GATEWAY,
+            message="백엔드 서버 연결 실패",
+            error=ErrorDetail(
+                code="BACKEND_CONNECTION_ERROR",
+                message="백엔드 서버와 통신 중 오류가 발생했습니다.",
+                details=str(e)
+            ).to_dict()
+        )
+
+    except HTTPException as e:
+        return create_response(
+            status_code=e.status_code,
+            message="요청 처리 실패",
+            error=ErrorDetail(
+                code="REQUEST_FAILED",
+                message="요청을 처리할 수 없습니다.",
+                details=str(e.detail)
+            ).to_dict()
+        )
+
     except Exception as e:
-        return create_response(status_code=HTTP_500_INTERNAL_SERVER_ERROR,
-                               message="Internal server error",
-                               error=ErrorDetail(
-                                   code="SERVER_ERROR",
-                                   message="An unexpected error occurred",
-                                   details=str(e)
-                               ).to_dict()
-                               )
+        return create_response(
+            status_code=HTTP_500_INTERNAL_SERVER_ERROR,
+            message="서버 내부 오류",
+            error=ErrorDetail(
+                code="INTERNAL_SERVER_ERROR",
+                message="예기치 않은 오류가 발생했습니다.",
+                details=str(e)
+            ).to_dict()
+        )
+
+
+class Role(str, Enum):
+    USER = "user"
+    ASSITANT = "assistant"
 
 
 class MessageData(BaseModel):
     """
     채팅방의 메시지 구조를 정의합니다.
     """
-    id: str = Field(..., description="OpenAI Thread 내 메시지의 고유 식별자")
-    role: str = Field(..., description="메시지 작성자 (assistant 또는 user)")
-    content: str = Field(..., description="메시지 내용")
-    created_at: str = Field(..., description="메시지 생성 시간")
+    role: Role = Field(..., description="메시지 작성자 (assistant 또는 user)")
+    text: str = Field(..., description="메시지 내용")
 
     def to_dict(self):
         """객체를 딕셔너리로 변환"""
         return {
-            "id": self.id,
             "role": self.role,
-            "content": self.content,
-            "created_at": self.created_at
+            "text": self.text,
         }
 
 
@@ -197,27 +290,13 @@ async def get_thread(memberId: str, thread_id: str):
     특정 채팅방의 메시지 목록을 반환합니다.
     """
     try:
-        try:
-            client.beta.threads.retrieve(thread_id=thread_id)
-        except Exception:
-            return create_response(
-                status_code=HTTP_404_NOT_FOUND,
-                message="유효하지 않은 채팅방 ID입니다.",
-                error=ErrorDetail(
-                    code="NOT_FOUND",
-                    message="채팅방을 찾을 수 없습니다.",
-                    details="Invalid thread_id"
-                ).to_dict()
-            )
-
+        client.beta.threads.retrieve(thread_id=thread_id)
         messages = client.beta.threads.messages.list(thread_id=thread_id, order="asc")
 
         messages_data = [
             MessageData(
-                id=message.id,
-                role=message.role,
-                content=message.content[0].text.value if message.content else "",
-                created_at=time.strftime('%Y-%m-%d %H:%M', time.localtime(message.created_at))
+                role=Role(message.role),
+                text=message.content[0].text.value if message.content else "",
             ).to_dict()
             for message in messages.data
         ]
@@ -227,6 +306,26 @@ async def get_thread(memberId: str, thread_id: str):
             message="채팅방 정보를 가져왔습니다.",
             data={"threadId": thread_id, "messages": messages_data}
         )
+    except openai.AuthenticationError as e:
+        return create_response(
+            status_code=HTTP_401_UNAUTHORIZED,
+            message="유효하지 않은 OPENAI_API_KEY",
+            error=ErrorDetail(
+                code=e.type,
+                message=e.message,
+                details=str(e)
+            ).to_dict()
+        )
+    except openai.NotFoundError as e:
+        return create_response(
+            status_code=HTTP_404_NOT_FOUND,
+            message="유효하지 않은 채팅방 ID",
+            error=ErrorDetail(
+                code=e.type,
+                message=e.message,
+                details=str(e)
+            ).to_dict()
+        )
     except HTTPException as e:
         return create_response(
             status_code=HTTP_400_BAD_REQUEST,
@@ -234,7 +333,7 @@ async def get_thread(memberId: str, thread_id: str):
             error=ErrorDetail(
                 code="HTTP_ERROR",
                 message="요청 처리 중 오류가 발생했습니다.",
-                details=str(e.detail)
+                details=str(e)
             ).to_dict()
         )
     except Exception as e:
