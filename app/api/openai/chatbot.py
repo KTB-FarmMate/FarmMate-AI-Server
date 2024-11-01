@@ -466,7 +466,7 @@ async def send_message(memberId: str, request: MessageRequest):
             return create_response(
                 status_code=HTTP_200_OK,
                 message="메시지를 성공적으로 전송하였습니다.",
-                data={"threadId": request.threadId, "message": content}
+                data={"threadId": request.threadId, "text": content}
             )
 
         return create_response(
