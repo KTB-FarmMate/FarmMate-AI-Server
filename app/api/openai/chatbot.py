@@ -29,7 +29,7 @@ from starlette.status import (
 
 # OpenAI 관련 모듈
 from openai.pagination import SyncCursorPage
-import openai  # Typo 수정: 'opnai' -> 'openai'
+import openai
 
 # 프로젝트 내 모듈
 from app.core.config import settings
@@ -78,10 +78,8 @@ class BaseResponse(BaseModel, Generic[T]):
 
 # 메시지 관련 모델
 class Message(BaseModel):
-    id: str
     role: str
     content: str
-    created_at: str
 
 
 class ThreadDetail(BaseModel):
@@ -499,7 +497,7 @@ async def send_message(memberId: str, request: MessageRequest):
 
 class ModifyMessageRequest(BaseModel):
     address: str = Field("", description="변경할 주소")
-    plantedAt: datetime = Field(None, description="변경할 심은 날짜 (YYYY-MM-DDTHH:MM:SS 형식)")  # ISO 형식 사용
+    plantedAt: datetime = Field(None, description="변경할 심은 날짜 (YYYY-MM-DD 형식)")
 
 
 class ModifyMessageData(BaseModel):
