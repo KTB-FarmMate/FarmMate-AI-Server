@@ -227,6 +227,7 @@ async def send_message(memberId: str, thread_id: str, request: MessageRequest):
 
 
 class ModifyMessageRequest(BaseModel):
+    cropId: int = Field(-1, description="변경할 작물 ID")
     address: str = Field("", description="변경할 주소")
     plantedAt: datetime = Field(None, description="변경할 심은 날짜 (YYYY-MM-DD 형식)")
 
@@ -272,6 +273,21 @@ async def modify_message(memberId: str, thread_id: str, request: ModifyMessageRe
             )
         time.sleep(1)
 
+
+    request_data = {
+        "address": request.address,
+        "cropId": request.cropId,
+        "plantedAt": request.plantedAt,
+        "threadId": str(thread.id)
+    }
+
+    req = requests.patch(f"{BE_BASE_URL}/members/{memberId}/threads", json=request_data)
+
+    if req.status_code != 200:
+        raise HTTPException(
+            status_code=req.status_code,
+            detail=req.json().get("details", "백엔드 서버 요청 실패")
+        )
     return create_response(
         status_code=HTTP_200_OK,
         message="주소가 성공적으로 변경되었습니다.",
@@ -283,6 +299,14 @@ async def modify_message(memberId: str, thread_id: str, request: ModifyMessageRe
 async def delete_thread(memberId: str, thread_id: str):
     """특정 채팅방을 삭제합니다."""
     client.beta.threads.delete(thread_id)
+
+    req = requests.delete(f"{BE_BASE_URL}/members/{memberId}/threads/{thread_id}", json=request_data)
+
+    if req.status_code != 200:
+        raise HTTPException(
+            status_code=req.status_code,
+            detail=req.json().get("details", "백엔드 서버 요청 실패")
+        )
     return create_response(status_code=HTTP_204_NO_CONTENT, message="채팅방이 성공적으로 삭제되었습니다.")
 
 
