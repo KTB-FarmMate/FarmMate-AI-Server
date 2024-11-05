@@ -149,24 +149,26 @@ async def test_get_thread():
         assert response.is_success == True
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
+        print(data)
         assert data["message"] == "채팅방 정보를 가져왔습니다."
         assert "data" in data
         assert data["data"]["threadId"] == thread_id
         assert "messages" in data["data"]
 
 
-# 2. 존재하지 않는 채팅방 조회
+# 2. 올바르지 않은  채팅방 조회
 @pytest.mark.asyncio
 async def test_get_none_thread():
     """
-    잘못된 또는 존재하지 않는 채팅방 ID로 조회했을 때 적절한 에러가 반환되는지 테스트합니다.
+    잘못된 또는 올바르지 않은  채팅방 ID로 조회했을 때 적절한 에러가 반환되는지 테스트합니다.
     """
     async with AsyncClient(app=app, base_url="http://testserver") as ac:
         response = await ac.get(f"{URI}/threads/NoneThreadID")
         assert response.is_success == False
         assert response.status_code == status.HTTP_404_NOT_FOUND
         data = response.json()
-        assert data["message"] == "유효하지 않은 채팅방 ID"
+        print(data)
+        assert data["message"] == "유효하지 않은 리소스 ID"
 
 
 # 3. 잘못된 형식의 채팅방 ID 조회
@@ -180,7 +182,8 @@ async def test_get_incorrect_format_thread():
         assert response.is_success == False
         assert response.status_code == status.HTTP_404_NOT_FOUND
         data = response.json()
-        assert data["message"] == "유효하지 않은 채팅방 ID"
+        print(data)
+        assert data["message"] == "유효하지 않은 리소스 ID"
 
 
 # -------------------------------------------------- #
@@ -196,10 +199,9 @@ async def test_send_message_success():
     thread_id = "thread_9GfoVBuA6yx4V31xriZxNO0g"
     async with AsyncClient(app=app, base_url="http://testserver") as ac:
         payload = {
-            "threadId": thread_id,
             "message": "근데, 나 감자 처음 심어서 마트에서 사서 해도 되나?"
         }
-        response = await ac.post(f"{URI}/threads/message", json=payload)
+        response = await ac.post(f"{URI}/threads/{thread_id}", json=payload)
         assert response.is_success == True
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -215,11 +217,11 @@ async def test_send_message_missing_thread_id():
         payload = {
             "message": "오늘 날씨는 어떤가요?"
         }
-        response = await ac.post(f"{URI}/threads/message", json=payload)
+        response = await ac.post(f"{URI}/threads/", json=payload)
         assert response.is_success == False
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
         data = response.json()
-        assert data["message"] == "채팅방 ID가 누락되었습니다."
+        assert data["message"] == "입력값 검증 실패"
 
 @pytest.mark.asyncio
 async def test_send_message_missing_message():
@@ -229,29 +231,32 @@ async def test_send_message_missing_message():
     thread_id = await test_create_thread()
     async with AsyncClient(app=app, base_url="http://testserver") as ac:
         payload = {
-            "threadId": thread_id
+            "message": ""
         }
-        response = await ac.post(f"{URI}/threads/message", json=payload)
+        response = await ac.post(f"{URI}/threads/{thread_id}", json=payload)
         assert response.is_success == False
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
         data = response.json()
-        assert data["message"] == "메시지가 누락되었습니다."
+        print(data)
+        assert data["message"] == "입력값 검증 실패"
+        assert data["error"]["message"] == "입력값이 유효하지 않습니다."
 
 @pytest.mark.asyncio
 async def test_send_message_none_thread():
     """
-    존재하지 않는 threadId로 메시지를 보낼 때 올바른 에러가 반환되는지 테스트합니다.
+    올바르지 않은  threadId로 메시지를 보낼 때 올바른 에러가 반환되는지 테스트합니다.
     """
     async with AsyncClient(app=app, base_url="http://testserver") as ac:
         payload = {
-            "threadId": "NoneThreadID",
             "message": "오늘 날씨는 어떤가요?"
         }
-        response = await ac.post(f"{URI}/threads/message", json=payload)
+        response = await ac.post(f"{URI}/threads/NoneThreadId", json=payload)
         assert response.is_success == False
         assert response.status_code == status.HTTP_404_NOT_FOUND
         data = response.json()
-        assert data["message"] == "올바르지 않은 ThreadId 입니다."
+        print(data)
+        assert data["message"] == "유효하지 않은 리소스 ID"
+        assert data["error"]["message"] == "올바르지 않은 Thread ID입니다."
 
 # ----------------------------------------------------- #
 
@@ -290,14 +295,16 @@ async def test_modify_message_missing_address():
         assert response.is_success == False
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
         data = response.json()
-        assert data["message"] == "주소가 누락되었습니다."
+        print(data)
+        assert data["message"] == "입력값 검증 실패"
+        assert data["error"]["details"] == "주소가 누락되었습니다."
 
 
 # 3. 올바르지 않은 thread_id
 @pytest.mark.asyncio
 async def test_modify_message_invalid_thread_id():
     """
-    존재하지 않는 thread_id로 주소 변경을 시도할 때 에러가 발생하는지 테스트합니다.
+    올바르지 않은  thread_id로 주소 변경을 시도할 때 에러가 발생하는지 테스트합니다.
     """
     async with AsyncClient(app=app, base_url="http://testserver") as ac:
         payload = {
@@ -307,7 +314,9 @@ async def test_modify_message_invalid_thread_id():
         assert response.is_success == False
         assert response.status_code == status.HTTP_404_NOT_FOUND
         data = response.json()
-        assert data["message"] == "올바르지 않은 ThreadId 입니다."
+        print(data)
+        assert data["message"] == "유효하지 않은 리소스 ID"
+        assert data["error"]["message"] == "올바르지 않은 Thread ID입니다."
 
 
 # ----------------------------------------------------- #
@@ -330,7 +339,7 @@ async def test_delete_thread_success():
         assert data["message"] == "채팅방이 성공적으로 삭제되었습니다."
 
 
-# 2. 존재하지 않는 채팅방 삭제
+# 2. 올바르지 않은  채팅방 삭제
 @pytest.mark.asyncio
 async def test_delete_thread_none():
     """
@@ -341,7 +350,9 @@ async def test_delete_thread_none():
         assert response.is_success == False
         assert response.status_code == status.HTTP_404_NOT_FOUND
         data = response.json()
-        assert data["message"] == "채팅방을 찾을 수 없습니다."
+        print(data)
+        assert data["message"] == "유효하지 않은 리소스 ID"
+        assert data["error"]["message"] == "올바르지 않은 Thread ID입니다."
 
 
 # ------------------------------------------------ #
@@ -361,10 +372,11 @@ async def test_send_message_ai_response_success():
             "threadId": thread_id,
             "message": "오늘 날씨는 어떤가요?"
         }
-        response = await ac.post(f"{URI}/threads/message", json=payload)
+        response = await ac.post(f"{URI}/threads/{thread_id}", json=payload)
         assert response.is_success == True
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
+        print(data)
         assert data["data"]["threadId"] == thread_id
 
 
@@ -388,11 +400,13 @@ async def test_send_message_ai_response_failed(mocker):
             "threadId": thread_id,
             "message": "오늘 날씨는 어떤가요?"
         }
-        response = await ac.post(f"{URI}/threads/message", json=payload)
+        response = await ac.post(f"{URI}/threads/{thread_id}", json=payload)
         assert response.is_success == False
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
         data = response.json()
-        assert data["message"] == "응답 생성에 실패했습니다."
+        print(data)
+        assert data["message"] == "서버 내부 오류가 발생했습니다."
+        assert data["error"]["message"] == "AI 응답 생성 실패: failed"
 
 
 # 3. AI 응답 생성 취소
@@ -416,11 +430,13 @@ async def test_send_message_ai_response_cancelled(mocker):
             "threadId": thread_id,
             "message": "오늘 날씨는 어떤가요?"
         }
-        response = await ac.post(f"{URI}/threads/message", json=payload)
+        response = await ac.post(f"{URI}/threads/{thread_id}", json=payload)
         assert response.is_success == False
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
         data = response.json()
-        assert data["message"] == "응답 생성이 취소되었습니다."
+        print(data)
+        assert data["message"] == "서버 내부 오류가 발생했습니다."
+        assert data["error"]["message"] == "AI 응답 생성 실패: cancelled"
 
 
 # 4. AI 응답 시간 초과
@@ -443,11 +459,13 @@ async def test_send_message_ai_response_timeout(mocker):
             "threadId": thread_id,
             "message": "오늘 날씨는 어떤가요?"
         }
-        response = await ac.post(f"{URI}/threads/message", json=payload)
+        response = await ac.post(f"{URI}/threads/{thread_id}", json=payload)
         assert response.is_success == False
         assert response.status_code == status.HTTP_408_REQUEST_TIMEOUT
         data = response.json()
-        assert data["message"] == "응답 생성이 시간 초과되었습니다."
+        print(data)
+        assert data["message"] == "요청을 처리할 수 없습니다."
+        assert data["error"]["message"] == "AI 응답 생성 실패: expired"
 
 
 # 5. AI 응답 없음
@@ -471,11 +489,13 @@ async def test_send_message_no_ai_response(mocker):
             "message": "오늘 날씨는 어떤가요?"
         }
 
-        response = await ac.post(f"{URI}/threads/message", json=payload)
-        assert response.is_success == True
-        assert response.status_code == status.HTTP_204_NO_CONTENT
+        response = await ac.post(f"{URI}/threads/{thread_id}", json=payload)
+        assert response.is_success == False
+        assert response.status_code == status.HTTP_404_NOT_FOUND
         data = response.json()
-        assert data["message"] == "AI 응답이 없습니다."
+        print(data)
+        assert data["message"] == "리소스를 찾을 수 없습니다."
+        assert data["error"]["message"] == "AI 응답이 없습니다."
 
 
 # --------------------------------------------- #
@@ -496,21 +516,22 @@ async def test_get_thread_status():
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
         print(data)
-        assert data["message"] == "상대 정보가 올바르게 반환 되었습니다."
+        assert data["message"] == "상태 정보가 올바르게 반환되었습니다."
 
 
-# 2. 존재하지 않는 채팅방의 상태 정보 조회
+# 2. 올바르지 않은  채팅방의 상태 정보 조회
 @pytest.mark.asyncio
 async def test_get_thread_status_none():
     """
-    존재하지 않는 채팅방의 상태 정보를 조회했을 때 적절한 에러가 반환되는지 테스트합니다.
+    올바르지 않은  채팅방의 상태 정보를 조회했을 때 적절한 에러가 반환되는지 테스트합니다.
     """
     async with AsyncClient(app=app, base_url="http://testserver") as ac:
         response = await ac.get(f"{URI}/threads/NoneThreadID/status")
         assert response.is_success == False
         assert response.status_code == status.HTTP_404_NOT_FOUND
         data = response.json()
-        assert data["message"] == "채팅방을 찾을 수 없습니다."
+        assert data["message"] == "유효하지 않은 리소스 ID"
+        assert data["error"]["message"] == "올바르지 않은 Thread ID입니다."
 
 
 # --------------------------------------------- #
