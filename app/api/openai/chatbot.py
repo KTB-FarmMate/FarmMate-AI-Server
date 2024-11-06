@@ -6,6 +6,7 @@ import json
 import logging
 from enum import Enum
 from datetime import datetime
+from httpx import AsyncClient
 
 # HTTP 및 API 관련 모듈
 import requests
@@ -16,7 +17,7 @@ from starlette.status import (
     HTTP_200_OK,
     HTTP_201_CREATED,
     HTTP_204_NO_CONTENT, HTTP_500_INTERNAL_SERVER_ERROR, HTTP_408_REQUEST_TIMEOUT, HTTP_422_UNPROCESSABLE_ENTITY,
-    HTTP_404_NOT_FOUND,
+    HTTP_404_NOT_FOUND, HTTP_409_CONFLICT,
 )
 
 # OpenAI 관련 모듈
@@ -111,13 +112,18 @@ async def create_thread(memberId: str, request: CreateThreadRequest) -> JSONResp
 
     request_data = {
         "address": address,
-        "cropId": crop_id,
+        "cropId": str(crop_id),
         "plantedAt": plantedAt,
         "threadId": str(thread.id)
     }
     req = requests.post(f"{BE_BASE_URL}/members/{memberId}/threads", json=request_data)
 
-    if req.status_code != 200:
+    if req.status_code == HTTP_409_CONFLICT:
+        raise HTTPException(
+            status_code=HTTP_409_CONFLICT,
+            detail="채팅방이 이미 존재합니다.",
+        )
+    if req.status_code != HTTP_201_CREATED:
         raise HTTPException(
             status_code=req.status_code,
             detail=req.json().get("details", "백엔드 서버 요청 실패")
@@ -127,6 +133,29 @@ async def create_thread(memberId: str, request: CreateThreadRequest) -> JSONResp
         message="채팅방이 성공적으로 생성되었습니다.",
         data={"threadId": thread.id}
     )
+
+
+@router.get("")
+async def get_threads(memberId: str):
+    async with AsyncClient() as Client:
+        req = await Client.get(f"{BE_BASE_URL}/members/{memberId}/threads")
+        if req.status_code == HTTP_200_OK:
+            req_json = req.json()
+            if not req_json:
+                raise HTTPException(
+                    status_code=HTTP_404_NOT_FOUND,
+                    detail="요청 결과가 없습니다."
+                )
+            return create_response(
+                status_code=HTTP_200_OK,
+                message="채팅방 정보를 올바르게 가져왔습니다.",
+                data={"threads": req_json}
+            )
+        else:
+            raise HTTPException(
+                status_code=req.status_code,
+                detail="요청 처리 중 오류가 발생했습니다."
+            )
 
 
 class Role(str, Enum):
@@ -150,15 +179,17 @@ class MessageData(BaseModel):
 async def get_thread(memberId: str, thread_id: str):
     """특정 채팅방의 메시지 목록을 반환합니다."""
     thread = client.beta.threads.retrieve(thread_id=thread_id)
-    messages = client.beta.threads.messages.list(thread_id=thread_id, order="asc")
+    messages = client.beta.threads.messages.list(thread_id=thread.id, order="asc")
 
     messages_data = [
         MessageData(
             role=Role(message.role),
-            text=message.content[0].text.value if message.content else "",
+            text=message.content[0].text.value
         ).to_dict()
         for message in messages.data
+        if message.content is not None and "[시스템 메시지]" not in message.content[0].text.value
     ]
+    print(messages_data)
 
     return create_response(
         status_code=HTTP_200_OK,
@@ -229,7 +260,7 @@ async def send_message(memberId: str, thread_id: str, request: MessageRequest):
 class ModifyMessageRequest(BaseModel):
     cropId: int = Field(-1, description="변경할 작물 ID")
     address: str = Field("", description="변경할 주소")
-    plantedAt: datetime = Field(None, description="변경할 심은 날짜 (YYYY-MM-DD 형식)")
+    plantedAt: str = Field(None, description="변경할 심은 날짜 (YYYY-MM-DD 형식)")
 
 
 @router.patch("/{thread_id}")
@@ -239,9 +270,11 @@ async def modify_message(memberId: str, thread_id: str, request: ModifyMessageRe
         raise ValueError("채팅방 ID가 누락되었습니다.")
     if not request.address:
         raise ValueError("주소가 누락되었습니다.")
-
+    if request.cropId == -1:
+        raise ValueError("작물 ID가 누락되었습니다.")
+    if not request.plantedAt:
+        raise ValueError("심은 날짜가 누락되었습니다.")
     thread = client.beta.threads.retrieve(thread_id=thread_id)
-
     client.beta.threads.messages.create(
         thread_id=thread.id,
         role="assistant",
@@ -256,23 +289,22 @@ async def modify_message(memberId: str, thread_id: str, request: ModifyMessageRe
        - 변경된 이유: 사용자의 요청에 따른 심은날짜 업데이트
        """,
     )
-
-    run = client.beta.threads.runs.create(
-        thread_id=thread.id,
-        assistant_id=assistant.id,
-    )
-
-    while True:
-        run_status = client.beta.threads.runs.retrieve(thread_id=thread.id, run_id=run.id)
-        if run_status.status == "completed":
-            break
-        elif run_status.status in ["failed", "cancelled", "expired"]:
-            raise HTTPException(
-                status_code=HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"AI 응답 생성 실패: {run_status.status}"
-            )
-        time.sleep(1)
-
+    # run = client.beta.threads.runs.create(
+    #     thread_id=thread.id,
+    #     assistant_id=assistant.id,
+    #
+    # )
+    #
+    # while True:
+    #     run_status = client.beta.threads.runs.retrieve(thread_id=thread.id, run_id=run.id)
+    #     if run_status.status == "completed":
+    #         break
+    #     elif run_status.status in ["failed", "cancelled", "expired"]:
+    #         raise HTTPException(
+    #             status_code=HTTP_500_INTERNAL_SERVER_ERROR,
+    #             detail=f"AI 응답 생성 실패: {run_status.status}"
+    #         )
+    #     time.sleep(1)
 
     request_data = {
         "address": request.address,
@@ -281,7 +313,7 @@ async def modify_message(memberId: str, thread_id: str, request: ModifyMessageRe
         "threadId": str(thread.id)
     }
 
-    req = requests.patch(f"{BE_BASE_URL}/members/{memberId}/threads", json=request_data)
+    req = requests.patch(f"{BE_BASE_URL}/members/{memberId}/threads/{thread.id}", json=request_data)
 
     if req.status_code != 200:
         raise HTTPException(
@@ -290,7 +322,7 @@ async def modify_message(memberId: str, thread_id: str, request: ModifyMessageRe
         )
     return create_response(
         status_code=HTTP_200_OK,
-        message="주소가 성공적으로 변경되었습니다.",
+        message="채팅방 정보 수정 완료",
         data={"message": "주소가 성공적으로 변경되었습니다."}
     )
 
@@ -298,15 +330,14 @@ async def modify_message(memberId: str, thread_id: str, request: ModifyMessageRe
 @router.delete("/{thread_id}")
 async def delete_thread(memberId: str, thread_id: str):
     """특정 채팅방을 삭제합니다."""
-    client.beta.threads.delete(thread_id)
-
-    req = requests.delete(f"{BE_BASE_URL}/members/{memberId}/threads/{thread_id}", json=request_data)
-
-    if req.status_code != 200:
-        raise HTTPException(
-            status_code=req.status_code,
-            detail=req.json().get("details", "백엔드 서버 요청 실패")
-        )
+    async with AsyncClient() as Client:
+        req = await Client.delete(f"{BE_BASE_URL}/members/{memberId}/threads/{thread_id}")
+        if req.status_code != HTTP_204_NO_CONTENT:
+            raise HTTPException(
+                status_code=req.status_code,
+                detail=req.json().get("details", "백엔드 서버 요청 실패")
+            )
+        client.beta.threads.delete(thread_id)
     return create_response(status_code=HTTP_204_NO_CONTENT, message="채팅방이 성공적으로 삭제되었습니다.")
 
 

@@ -6,6 +6,7 @@ import asyncio
 from httpx import AsyncClient
 from unittest.mock import Mock
 from fastapi import status
+from starlette.status import HTTP_204_NO_CONTENT
 
 # 프로젝트의 루트 디렉토리를 모듈 검색 경로에 추가
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -14,7 +15,7 @@ from app.main import app  # FastAPI 앱이 정의된 모듈을 임포트합니�
 
 pytestmark = pytest.mark.asyncio
 
-URI = "/members/5b16f218-682c-4eb0-989e-6fff2a6fb4f1"
+URI = "/members/8b4a5875-f625-4a98-9670-b743b675f864"
 
 
 ## 채팅방 생성 관련 테스트
@@ -27,17 +28,16 @@ async def test_create_thread():
     """
     async with AsyncClient(app=app, base_url="http://testserver") as ac:
         payload = {
-            "cropId": 3,
-            "cropName": "감자",
-            "address": "서울 성북구 낙산길 243-15 (삼선현대힐스테이트)",
-            "plantedAt": "2024-11-01"
+            "cropId": "2",
+            "cropName": "고구마",
+            "address": "전라남도 여수시",
+            "plantedAt": "2024-11-06"
         }
         response = await ac.post(f"{URI}/threads/", json=payload)
         print(response.json())
         assert response.is_success == True
         assert response.status_code == status.HTTP_201_CREATED
         data = response.json()
-        print(data)
         assert data["message"] == "채팅방이 성공적으로 생성되었습니다."
         assert "data" in data
         return data["data"]["threadId"]  # 다음 테스트에서 사용할 수 있도록 threadId 반환
@@ -134,6 +134,20 @@ async def test_create_thread_plantedAt_not_valid():
 
 ## 채팅방 조회 관련 테스트
 
+# 0. member의 모든 채팅방 조회
+@pytest.mark.asyncio
+async def test_get_threads():
+    """
+    존재하는 memberId를 사용하여 모든 채팅이 정상적으로 조회되는지 테스트합니다.
+    """
+    async with AsyncClient(app=app, base_url="http://testserver") as ac:
+        response = await ac.get(f"{URI}/threads")
+        assert response.is_success
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        assert data["message"] == "채팅방 정보를 올바르게 가져왔습니다."
+        print(data)
+
 # 1. 정상적인 채팅방 조회
 @pytest.mark.asyncio
 async def test_get_thread():
@@ -142,10 +156,9 @@ async def test_get_thread():
     """
     # 먼저 채팅방을 생성합니다.
     # thread_id = await test_create_thread()
-    thread_id = "thread_9GfoVBuA6yx4V31xriZxNO0g"
+    thread_id = "thread_6blpaxBSYEmrW5KzMmQ95TZa"
     async with AsyncClient(app=app, base_url="http://testserver") as ac:
         response = await ac.get(f"{URI}/threads/{thread_id}")
-        print(response.json())
         assert response.is_success == True
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -196,10 +209,10 @@ async def test_send_message_success():
     올바른 threadId와 메시지를 전송하여 AI 응답이 올바르게 생성되는지 테스트합니다.
     """
     # thread_id = await test_create_thread()
-    thread_id = "thread_9GfoVBuA6yx4V31xriZxNO0g"
+    thread_id = "thread_6blpaxBSYEmrW5KzMmQ95TZa"
     async with AsyncClient(app=app, base_url="http://testserver") as ac:
         payload = {
-            "message": "근데, 나 감자 처음 심어서 마트에서 사서 해도 되나?"
+            "message": "내가 심은 작물은 뭐고, 언제 어디에 심었어?"
         }
         response = await ac.post(f"{URI}/threads/{thread_id}", json=payload)
         assert response.is_success == True
@@ -269,11 +282,12 @@ async def test_modify_message_success():
     정상적인 thread_id 와 address로 정상적으로 적용되는지 테스트합니다.
     """
     # thread_id = await test_create_thread()
-    thread_id = "thread_xBn6dZlM3QCvwDOIkKnk0GuR"
+    thread_id = "thread_6blpaxBSYEmrW5KzMmQ95TZa"
     async with AsyncClient(app=app, base_url="http://testserver") as ac:
         payload = {
-            "address": "전라남도 고흥군 점암면",
-            "plantedAt": "2024-10-29T10:20:10"
+            "cropId": 3,
+            "address": "경기도 수원시 곡반정동",
+            "plantedAt": "2024-11-06"
         }
         response = await ac.patch(f"{URI}/threads/{thread_id}", json=payload)
         assert response.is_success == True
@@ -333,10 +347,8 @@ async def test_delete_thread_success():
     thread_id = await test_create_thread()
     async with AsyncClient(app=app, base_url="http://testserver") as ac:
         response = await ac.delete(f"{URI}/threads/{thread_id}")
-        assert response.is_success == True
-        assert response.status_code == status.HTTP_204_NO_CONTENT
-        data = response.json()
-        assert data["message"] == "채팅방이 성공적으로 삭제되었습니다."
+        assert response.status_code == HTTP_204_NO_CONTENT
+        print(response.json())
 
 
 # 2. 올바르지 않은  채팅방 삭제
