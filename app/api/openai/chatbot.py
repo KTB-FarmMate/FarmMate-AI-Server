@@ -77,7 +77,7 @@ class ThreadCreateData(BaseModel):
     threadId: str = Field(..., description="생성된 채팅방의 고유 식별자")
 
 
-@router.post("/")
+@router.post("")
 async def create_thread(memberId: str, request: CreateThreadRequest) -> JSONResponse:
     """새로운 채팅방(Thread)을 생성하고 초기 메시지를 추가합니다."""
     thread = client.beta.threads.create()
