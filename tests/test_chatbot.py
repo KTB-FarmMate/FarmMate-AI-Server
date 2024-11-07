@@ -15,7 +15,7 @@ from app.main import app  # FastAPI 앱이 정의된 모듈을 임포트합니�
 
 pytestmark = pytest.mark.asyncio
 
-URI = "/members/b784d936-9e04-4bab-9ed3-e35744165e04"
+URI = "/members/ff33b967-3035-4346-88e0-af925bc70405"
 
 
 ## 채팅방 생성 관련 테스트
@@ -28,16 +28,17 @@ async def test_create_thread():
     """
     async with AsyncClient(app=app, base_url="http://testserver") as ac:
         payload = {
-            "cropId": "3",
+            "cropId": 3,
             "cropName": "고구마",
             "address": "전라남도 여수시",
             "plantedAt": "2024-11-06"
         }
-        response = await ac.post(f"{URI}/threads/", json=payload)
+        response = await ac.post(f"{URI}/threads", json=payload)
         print(response.json())
         assert response.is_success == True
         assert response.status_code == status.HTTP_201_CREATED
         data = response.json()
+        print(data)
         assert data["message"] == "채팅방이 성공적으로 생성되었습니다."
         assert "data" in data
         return data["data"]["threadId"]  # 다음 테스트에서 사용할 수 있도록 threadId 반환
@@ -142,6 +143,7 @@ async def test_get_threads():
     """
     async with AsyncClient(app=app, base_url="http://testserver") as ac:
         response = await ac.get(f"{URI}/threads")
+        print(response)
         assert response.is_success
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -156,9 +158,10 @@ async def test_get_thread():
     """
     # 먼저 채팅방을 생성합니다.
     # thread_id = await test_create_thread()
-    thread_id = "thread_6blpaxBSYEmrW5KzMmQ95TZa"
+    thread_id = "thread_uxQdoflvFkl0lY2bOVwj4j2w"
     async with AsyncClient(app=app, base_url="http://testserver") as ac:
         response = await ac.get(f"{URI}/threads/{thread_id}")
+        print(response.json())
         assert response.is_success == True
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -344,11 +347,12 @@ async def test_delete_thread_success():
     존재하는 threadId를 사용하여 정상적으로 채팅방을 삭제했을 때 올바른 응답이 반환되는지 테스트합니다.
     """
     # 채팅방 생성
-    thread_id = await test_create_thread()
+    # thread_id = await test_create_thread()
+    thread_id = "thread_uxQdoflvFkl0lY2bOVwj4j2w"
     async with AsyncClient(app=app, base_url="http://testserver") as ac:
         response = await ac.delete(f"{URI}/threads/{thread_id}")
-        assert response.status_code == HTTP_204_NO_CONTENT
         print(response.json())
+        assert response.status_code == HTTP_204_NO_CONTENT
 
 
 # 2. 올바르지 않은  채팅방 삭제

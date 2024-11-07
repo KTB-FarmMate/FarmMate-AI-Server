@@ -67,6 +67,7 @@ from starlette.status import (
     HTTP_511_NETWORK_AUTHENTICATION_REQUIRED,
 )
 
+
 def get_status_message(status_code: int) -> str:
     """상태 코드에 따른 적절한 메시지 반환"""
     return {
@@ -129,6 +130,7 @@ def get_status_message(status_code: int) -> str:
         HTTP_510_NOT_EXTENDED: "확장되지 않았습니다.",
         HTTP_511_NETWORK_AUTHENTICATION_REQUIRED: "네트워크 인증이 필요합니다.",
     }.get(status_code, "요청을 처리할 수 없습니다.")
+
 
 def get_error_code(status_code: int) -> str:
     """상태 코드에 따른 에러 코드 반환"""
@@ -273,9 +275,8 @@ def add_exception_handlers(app: FastAPI):
             status_code=exc.status_code,
             message=get_status_message(exc.status_code),  # 상태 코드에 따른 적절한 메시지
             error=ErrorDetail(
-                code=get_error_code(exc.status_code),  # 상태 코드에 따른 에러 코드
-                message=str(exc.detail),
-                details=None  # 필요한 경우에만 상세 정보 제공
+                code=exc.detail.get("errorClassName"),  # 상태 코드에 따른 에러 코드
+                message=str(exc.detail.get("errorMessage"))
             ).to_dict()
         )
 

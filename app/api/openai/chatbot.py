@@ -115,18 +115,19 @@ async def create_thread(memberId: str, request: CreateThreadRequest) -> JSONResp
         "plantedAt": plantedAt,
         "threadId": str(thread.id)
     }
-    req = requests.post(f"{BE_BASE_URL}/members/{memberId}/threads", json=request_data)
 
-    if req.status_code == HTTP_409_CONFLICT:
-        raise HTTPException(
-            status_code=HTTP_409_CONFLICT,
-            detail="채팅방이 이미 존재합니다.",
-        )
-    if req.status_code != HTTP_201_CREATED:
-        raise HTTPException(
-            status_code=req.status_code,
-            detail=req.json().get("details", "백엔드 서버 요청 실패")
-        )
+    async with AsyncClient() as Client:
+        req = await Client.post(f"{BE_BASE_URL}/members/{memberId}/threads", json=request_data)
+        if req.status_code == HTTP_409_CONFLICT:
+            raise HTTPException(
+                status_code=HTTP_409_CONFLICT,
+                detail=req.json(),
+            )
+        if req.status_code != HTTP_201_CREATED:
+            raise HTTPException(
+                status_code=req.status_code,
+                detail=req.json()
+            )
     return create_response(
         status_code=HTTP_201_CREATED,
         message="채팅방이 성공적으로 생성되었습니다.",
@@ -140,11 +141,11 @@ async def get_threads(memberId: str):
         req = await Client.get(f"{BE_BASE_URL}/members/{memberId}/threads")
         if req.status_code == HTTP_200_OK:
             req_json = req.json()
-            if not req_json:
-                raise HTTPException(
-                    status_code=HTTP_404_NOT_FOUND,
-                    detail="요청 결과가 없습니다."
-                )
+            # if not req_json:
+            #     raise HTTPException(
+            #         status_code=HTTP_404_NOT_FOUND,
+            #         detail=req_json
+            #     )
             return create_response(
                 status_code=HTTP_200_OK,
                 message="채팅방 정보를 올바르게 가져왔습니다.",
@@ -153,7 +154,7 @@ async def get_threads(memberId: str):
         else:
             raise HTTPException(
                 status_code=req.status_code,
-                detail="요청 처리 중 오류가 발생했습니다."
+                detail=req.json()
             )
 
 
@@ -334,7 +335,7 @@ async def delete_thread(memberId: str, thread_id: str):
         if req.status_code != HTTP_204_NO_CONTENT:
             raise HTTPException(
                 status_code=req.status_code,
-                detail=req.json().get("details", "백엔드 서버 요청 실패")
+                detail=req.json()
             )
         client.beta.threads.delete(thread_id)
     return create_response(status_code=HTTP_204_NO_CONTENT, message="채팅방이 성공적으로 삭제되었습니다.")
