@@ -15,7 +15,7 @@ from app.main import app  # FastAPI 앱이 정의된 모듈을 임포트합니�
 
 pytestmark = pytest.mark.asyncio
 
-URI = "/members/8b4a5875-f625-4a98-9670-b743b675f864"
+URI = "/members/b784d936-9e04-4bab-9ed3-e35744165e04"
 
 
 ## 채팅방 생성 관련 테스트
@@ -28,7 +28,7 @@ async def test_create_thread():
     """
     async with AsyncClient(app=app, base_url="http://testserver") as ac:
         payload = {
-            "cropId": "2",
+            "cropId": "3",
             "cropName": "고구마",
             "address": "전라남도 여수시",
             "plantedAt": "2024-11-06"
@@ -547,111 +547,3 @@ async def test_get_thread_status_none():
 
 
 # --------------------------------------------- #
-
-## 부하 테스트 (선택적으로 활성화)
-
-# 부하 테스트는 실제 서버 환경에서 주의해서 실행해야 합니다. 필요에 따라 주석을 해제하여 실행할 수 있습니다.
-
-# # 부하 테스트 - 대량의 채팅방 생성 테스트
-# @pytest.mark.asyncio
-# async def test_bulk_create_threads():
-#     """
-#     동시에 여러 개의 채팅방을 생성했을 때 서버가 제대로 처리하는지 확인합니다.
-#     """
-#     thread_ids = []
-#     async with AsyncClient(app=app, base_url="http://testserver") as ac:
-#         tasks = []
-#         for i in range(100):  # 100개의 채팅방을 동시에 생성합니다.
-#             payload = {
-#                 "crop": f"작물_{i}",
-#                 "address": f"주소_{i}"
-#             }
-#             tasks.append(ac.post(f"{URI}/threads/", json=payload))
-#         responses = await asyncio.gather(*tasks)
-#
-#         for response in responses:
-#             assert response.status_code == status.HTTP_201_CREATED
-#             data = response.json()
-#             assert data["success"] is True
-#             assert "data" in data
-#             assert "threadId" in data["data"]
-#             thread_ids.append(data["data"]["threadId"])
-#
-# # 부하 테스트 - 대량의 메시지 전송 테스트
-# @pytest.mark.asyncio
-# async def test_bulk_send_messages():
-#     """
-#     동일한 채팅방에 매우 많은 메시지를 전송했을 때 서버가 문제 없이 처리되는지 테스트합니다.
-#     """
-#     thread_id = await test_create_thread()
-#     async with AsyncClient(app=app, base_url="http://testserver") as ac:
-#         tasks = []
-#         for i in range(10):  # 하나의 채팅방에 10개의 메시지를 전송합니다.
-#             payload = {
-#                 "threadId": thread_id,
-#                 "message": f"메시지_{i}"
-#             }
-#             tasks.append(ac.post(f"{URI}/threads/message", json=payload))
-#         responses = await asyncio.gather(*tasks)
-#
-#         for response in responses:
-#             assert response.status_code == status.HTTP_200_OK
-#             data = response.json()
-#             assert data["success"] is True
-#             assert "data" in data
-#             assert data["data"]["threadId"] == thread_id
-#             assert "message" in data["data"]
-#
-# # 부하 테스트 - 짧은 시간 동안 반복적인 요청 테스트
-# @pytest.mark.asyncio
-# async def test_rapid_fire_requests():
-#     """
-#     매우 짧은 시간 동안 여러 요청을 보냈을 때 서버가 이를 정상적으로 처리하는지 테스트합니다.
-#     """
-#     thread_id = await test_create_thread()
-#     async with AsyncClient(app=app, base_url="http://testserver") as ac:
-#         tasks = []
-#         for i in range(10):  # 1초 동안 10개의 메시지를 전송합니다.
-#             payload = {
-#                 "threadId": thread_id,
-#                 "message": f"빠른 요청 메시지_{i}"
-#             }
-#             tasks.append(ac.post(f"{URI}/threads/message", json=payload))
-#         responses = await asyncio.gather(*tasks)
-#
-#         for response in responses:
-#             assert response.status_code == status.HTTP_200_OK
-#             data = response.json()
-#             assert data["success"] is True
-#             assert "data" in data
-#             assert data["data"]["threadId"] == thread_id
-#             assert "message" in data["data"]
-#
-# # 부하 테스트 - 대량의 채팅방 삭제 테스트
-# @pytest.mark.asyncio
-# async def test_bulk_delete_threads():
-#     """
-#     여러 개의 채팅방을 동시에 삭제했을 때 서버가 제대로 처리하는지 테스트합니다.
-#     """
-#     thread_ids = []
-#     async with AsyncClient(app=app, base_url="http://testserver") as ac:
-#         # 50개의 채팅방을 생성합니다.
-#         for i in range(50):
-#             payload = {
-#                 "crop": f"작물_{i}",
-#                 "address": f"주소_{i}"
-#             }
-#             response = await ac.post(f"{URI}/threads/", json=payload)
-#             assert response.status_code == status.HTTP_201_CREATED
-#             data = response.json()
-#             thread_ids.append(data["data"]["threadId"])
-#
-#         # 동시에 삭제 요청을 보냅니다.
-#         tasks = [ac.delete(f"{URI}/threads/{thread_id}") for thread_id in thread_ids]
-#         responses = await asyncio.gather(*tasks)
-#
-#         for response in responses:
-#             assert response.status_code == status.HTTP_200_OK
-#             data = response.json()
-#             assert data["success"] is True
-#             assert "message" in data
