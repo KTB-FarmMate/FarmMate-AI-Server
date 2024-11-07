@@ -3,7 +3,6 @@ from typing import List, Any, Optional, Generic, TypeVar
 import re
 import time
 import json
-import logging
 from enum import Enum
 from datetime import datetime
 from httpx import AsyncClient
