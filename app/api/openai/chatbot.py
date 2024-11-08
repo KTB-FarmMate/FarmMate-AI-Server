@@ -314,13 +314,15 @@ async def modify_message(memberId: str, thread_id: str, request: ModifyMessageRe
         "threadId": str(thread.id)
     }
 
-    req = requests.patch(f"{BE_BASE_URL}/members/{memberId}/threads/{thread.id}", json=request_data)
-
-    if req.status_code != 200:
-        raise HTTPException(
-            status_code=req.status_code,
-            detail=req.json().get("details", "백엔드 서버 요청 실패")
-        )
+    # req = requests.patch(f"{BE_BASE_URL}/members/{memberId}/threads/{thread.id}", json=request_data)
+    # print(req.json())
+    async with AsyncClient() as Client:
+        req = await Client.patch(f"{BE_BASE_URL}/members/{memberId}/threads/{thread.id}", json=request_data)
+        if req.status_code != 200:
+            raise HTTPException(
+                status_code=req.status_code,
+                detail=req.json()
+            )
     return create_response(
         status_code=HTTP_200_OK,
         message="채팅방 정보 수정 완료",

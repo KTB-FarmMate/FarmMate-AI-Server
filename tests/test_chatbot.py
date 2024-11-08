@@ -284,7 +284,7 @@ async def test_modify_message_success():
     정상적인 thread_id 와 address로 정상적으로 적용되는지 테스트합니다.
     """
     # thread_id = await test_create_thread()
-    thread_id = "thread_6blpaxBSYEmrW5KzMmQ95TZa"
+    thread_id = "thread_0PVErCzYRjSzdIf3a42NWC9F"
     async with AsyncClient(app=app, base_url="http://testserver") as ac:
         payload = {
             "cropId": 3,
@@ -292,6 +292,7 @@ async def test_modify_message_success():
             "plantedAt": "2024-11-06"
         }
         response = await ac.patch(f"{URI}/threads/{thread_id}", json=payload)
+        print(response.json())
         assert response.is_success == True
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
