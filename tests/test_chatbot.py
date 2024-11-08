@@ -158,14 +158,13 @@ async def test_get_thread():
     """
     # 먼저 채팅방을 생성합니다.
     # thread_id = await test_create_thread()
-    thread_id = "thread_uxQdoflvFkl0lY2bOVwj4j2w"
+    thread_id = "thread_cFbmc45Mmst2tRnLmEEnbgnN"
     async with AsyncClient(app=app, base_url="http://testserver") as ac:
         response = await ac.get(f"{URI}/threads/{thread_id}")
-        print(response.json())
         assert response.is_success == True
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
-        print(data)
+        # print(data)
         assert data["message"] == "채팅방 정보를 가져왔습니다."
         assert "data" in data
         assert data["data"]["threadId"] == thread_id

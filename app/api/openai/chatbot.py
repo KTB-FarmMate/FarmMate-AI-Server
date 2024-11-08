@@ -34,7 +34,7 @@ import socket
 
 DEBUG = True
 
-BE_BASE_URL = "http://15.164.175.127:8080/api"
+BE_BASE_URL = "http://farmmate.net/api"
 
 router = APIRouter()
 
@@ -162,6 +162,8 @@ class Role(str, Enum):
     USER = "user"
     ASSITANT = "assistant"
 
+    def __str__(self):
+        return self.value.upper()  # 대문자로 반환
 
 class MessageData(BaseModel):
     """채팅방의 메시지 구조를 정의합니다."""
@@ -170,7 +172,7 @@ class MessageData(BaseModel):
 
     def to_dict(self):
         return {
-            "role": self.role,
+            "role": str(self.role),
             "text": self.text,
         }
 
@@ -186,10 +188,9 @@ async def get_thread(memberId: str, thread_id: str):
             role=Role(message.role),
             text=message.content[0].text.value
         ).to_dict()
-        for message in messages.data
+        for message in messages
         if message.content is not None and "[시스템 메시지]" not in message.content[0].text.value
     ]
-    print(messages_data)
 
     return create_response(
         status_code=HTTP_200_OK,
