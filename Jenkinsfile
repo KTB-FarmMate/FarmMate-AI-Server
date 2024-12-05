@@ -37,16 +37,16 @@
                 }
             }
         }
-        stage('Download Environment') {
-            steps {
-                withAWS(credentials: "${ECR_CREDENTIALS_ID}", region: 'ap-northeast-2') {
-                    sh '''
-                        aws s3 cp "${ENVIRONMENT_KEY}" .env
-                        chmod 600 .env
-                    '''
-                }
-            }
-        }
+        // stage('Download Environment') {
+        //    steps {
+        //        withAWS(credentials: "${ECR_CREDENTIALS_ID}", region: 'ap-northeast-2') {
+        //            sh '''
+        //                aws s3 cp "${ENVIRONMENT_KEY}" .env
+        //                chmod 600 .env
+        //            '''
+        //        }
+        //    }
+        // }
         stage('Deploy to EC2') {
             steps {
                 withCredentials([string(credentialsId: 'ai-server', variable: 'EC2_INSTANCE_IP')]) {
@@ -54,9 +54,9 @@
                         // SSH를 통해 EC2에 연결하고, ECR 이미지를 가져와 실행
                         sshagent([SSH_CREDENTIALS_ID]) {
                             // .env 파일을 EC2로 전송
-                            sh """
-                            scp -o StrictHostKeyChecking=no .env ec2-user@${EC2_INSTANCE_IP}:/home/ec2-user/.env
-                            """
+                            // sh """
+                            // scp -o StrictHostKeyChecking=no .env ec2-user@${EC2_INSTANCE_IP}:/home/ec2-user/.env
+                            // """
 
                             
                             sh """
