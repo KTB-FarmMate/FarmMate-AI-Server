@@ -8,6 +8,7 @@
         ECR_REPO = '211125697339.dkr.ecr.ap-northeast-2.amazonaws.com/farmmate-ai'
         ECR_CREDENTIALS_ID = 'ecr:ap-northeast-2:farmmate-ecr'
         SSH_CREDENTIALS_ID = 'EC2_ssh_key'
+        ENVIRONMENT_KEY = 'ai_environment_key'
     }
 
     stages {
@@ -38,21 +39,11 @@
         }
         stage('Download Environment') {
             steps {
-                withCredentials([
-                    string(credentialsId: 'ai_environment_key', variable: 'ENV_FILE_URL')
-                ]) {
-                    withAWS(credentials: "${ECR_CREDENTIALS_ID}", region: 'ap-northeast-2') {
-                        script {
-                            // S3에서 .env 파일 다운로드
-                            sh '''
-                                #!/bin/bash
-                                set -e
-                                S3_URI="${ENV_FILE_URL}"
-                                aws s3 cp "${S3_URI}" .env
-                                chmod 600 .env
-                            '''
-                        }
-                    }
+                withAWS(credentials: "${ECR_CREDENTIALS_ID}", region: 'ap-northeast-2') {
+                    sh '''
+                        aws s3 cp "${ENVIRONMENT_KEY}" .env
+                        chmod 600 .env
+                    '''
                 }
             }
         }
