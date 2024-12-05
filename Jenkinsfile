@@ -38,12 +38,20 @@
         }
         stage('Download Environment') {
             steps {
-                withAWS(credentials: "${ECR_CREDENTIALS_ID}", region: 'ap-northeast-2') {
-                    script {
-                        // S3에서 .env 파일 다운로드
-                        sh '''
-                            aws s3 cp s3://your-s3-bucket/path/to/fastapi.env .env
-                        '''
+                withCredentials([
+                    string(credentialsId: 'ai_environment_key', variable: 'ENV_FILE_URL')
+                ]) {
+                    withAWS(credentials: "${ECR_CREDENTIALS_ID}", region: 'ap-northeast-2') {
+                        script {
+                            // S3에서 .env 파일 다운로드
+                            sh '''
+                                #!/bin/bash
+                                set -e
+                                S3_URI="${ENV_FILE_URL}"
+                                aws s3 cp "${S3_URI}" .env
+                                chmod 600 .env
+                            '''
+                        }
                     }
                 }
             }
