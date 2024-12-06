@@ -45,11 +45,6 @@ pipeline {
                 ]) {
                     sshagent([SSH_CREDENTIALS_ID]) {
                         sh """
-                        echo "Deploying to EC2 instance at ${EC2_INSTANCE_IP}..."
-
-                        # .env 파일을 EC2로 전송
-                        scp -o StrictHostKeyChecking=no .env ec2-user@${EC2_INSTANCE_IP}:/home/ec2-user/.env
-
                         # EC2에서 Docker 컨테이너 실행 시 env-file 포함
                         ssh -o StrictHostKeyChecking=no ec2-user@${EC2_INSTANCE_IP} '
                         aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin ${ECR_REPO}
