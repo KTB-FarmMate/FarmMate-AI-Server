@@ -76,11 +76,43 @@
             }
         }
         
-        stage('Cleanup Local Docker Images') {
-            steps {
-                script {
+    stage('Cleanup Local Docker Images') {
+        steps {
+            script {
                     // 로컬 Docker 이미지를 삭제하는 단계
                     sh "docker rmi ${ECR_REPO}:latest || true"
+                }
+            }
+        }
+    }
+    stage('Health Check') {
+        steps {
+            script {
+                // Health Check를 위한 변수 설정
+                def healthUrl = "http://${EC2_INSTANCE_IP}:8000/health"
+                def maxRetries = 5
+                def waitSeconds = 10
+                def success = false
+
+                for (int i = 1; i <= maxRetries; i++) {
+                    echo "Health check attempt ${i} of ${maxRetries}"
+                    def response = sh(
+                        script: "curl -s -o /dev/null -w '%{http_code}' ${healthUrl}",
+                        returnStdout: true
+                    ).trim()
+
+                    if (response == '200') {
+                            echo "Health check passed."
+                        success = true
+                        break
+                    } else {
+                        echo "Health check failed with status ${response}. Retrying in ${waitSeconds} seconds..."
+                        sleep(waitSeconds)
+                    }
+                }
+
+                if (!success) {
+                    error "Health check failed after ${maxRetries} attempts."
                 }
             }
         }
