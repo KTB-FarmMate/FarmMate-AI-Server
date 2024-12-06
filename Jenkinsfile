@@ -38,23 +38,6 @@ pipeline {
             }
         }
 
-        stage('Download Environment') {
-            steps {
-                withCredentials([
-                    string(credentialsId: 'ai_environment_key', variable: 'S3_URI')
-                ]) {
-                    withAWS(credentials: "${ECR_CREDENTIALS_ID}", region: 'ap-northeast-2') {
-                        sh '''
-                            echo "Downloading .env file from S3..."
-                            aws s3 cp "${S3_URI}" .env
-                            chmod 600 .env
-                            echo ".env file downloaded and permissions set."
-                        '''
-                    }
-                }
-            }
-        }
-
         stage('Deploy to EC2') {
             steps {
                 withCredentials([
