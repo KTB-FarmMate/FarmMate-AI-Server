@@ -68,27 +68,31 @@ pipeline {
                 ]) {
                     script {
                         def healthUrl = "http://${EC2_INSTANCE_IP}:8000/health"
-                        def maxRetries = 5
-                        def waitSeconds = 10
-                        def success = false
-
+                        def maxRetries = 10          // 최대 재시도 횟수
+                        def waitSeconds = 10         // 재시도 간 대기 시간 (초)
+                        def initialWait = 30         // 초기 대기 시간 (초)
+                        def success = false          // Health Check 성공 여부
+        
+                        echo "Initial wait for ${initialWait} seconds to allow container to start..."
+                        sleep(time: initialWait, unit: 'SECONDS') // 초기 대기 시간
+        
                         for (int i = 1; i <= maxRetries; i++) {
-                            echo "Health check attempt ${i} of ${maxRetries} to ${healthUrl}"
+                            echo "Health check attempt ${i} of ${maxRetries}"
+                            
+                            // curl 명령어를 사용하여 /health 체크
                             def response = sh(
                                 script: "curl -s -o /dev/null -w '%{http_code}' ${healthUrl}",
                                 returnStdout: true
                             ).trim()
-
+        
                             if (response == '200') {
-                                echo "Health check passed."
                                 success = true
                                 break
                             } else {
-                                echo "Health check failed with status ${response}. Retrying in ${waitSeconds} seconds..."
-                                sleep(waitSeconds)
+                                sleep(waitSeconds) // 재시도 전 대기
                             }
                         }
-
+        
                         if (!success) {
                             error "Health check failed after ${maxRetries} attempts."
                         } else {
