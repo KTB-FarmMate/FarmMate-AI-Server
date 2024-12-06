@@ -125,7 +125,7 @@
             echo 'Build failed, keeping the current deployment as it is.'
         }
         always {
-            // Cleanup: 로컬 Docker 시스템을 정리
+            // Cleanup: 로컬 Docker 시스템을 정리 
             sh 'docker system prune -f'
         }
     }
