@@ -87,32 +87,37 @@
     }
     stage('Health Check') {
         steps {
-            script {
-                // Health Check를 위한 변수 설정
-                def healthUrl = "http://${EC2_INSTANCE_IP}:8000/health"
-                def maxRetries = 5
-                def waitSeconds = 10
-                def success = false
+            withCredentials([
+                    string(credentialsId: 'ai-server', variable: 'EC2_INSTANCE_IP')
+            ]) {
+                script {
+                    def healthUrl = "http://${EC2_INSTANCE_IP}:8000/health"
+                    def maxRetries = 5
+                    def waitSeconds = 10
+                    def success = false
 
-                for (int i = 1; i <= maxRetries; i++) {
-                    echo "Health check attempt ${i} of ${maxRetries}"
-                    def response = sh(
-                        script: "curl -s -o /dev/null -w '%{http_code}' ${healthUrl}",
-                        returnStdout: true
-                    ).trim()
+                    for (int i = 1; i <= maxRetries; i++) {
+                        echo "Health check attempt ${i} of ${maxRetries} to ${healthUrl}"
+                        def response = sh(
+                            script: "curl -s -o /dev/null -w '%{http_code}' ${healthUrl}",
+                            returnStdout: true
+                        ).trim()
 
-                    if (response == '200') {
+                        if (response == '200') {
                             echo "Health check passed."
-                        success = true
-                        break
-                    } else {
-                        echo "Health check failed with status ${response}. Retrying in ${waitSeconds} seconds..."
-                        sleep(waitSeconds)
+                            success = true
+                            break
+                        } else {
+                            echo "Health check failed with status ${response}. Retrying in ${waitSeconds} seconds..."
+                            sleep(waitSeconds)
+                        }
                     }
-                }
 
-                if (!success) {
-                    error "Health check failed after ${maxRetries} attempts."
+                    if (!success) {
+                        error "Health check failed after ${maxRetries} attempts."
+                    } else {
+                        echo "Deployment verified successfully via Health Check."
+                    }
                 }
             }
         }
