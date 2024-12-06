@@ -11,6 +11,18 @@ pipeline {
     }
 
     stages {
+        stage('Start Alert'){
+            steps {
+                slackSend (
+                 channel: '#ai-server-alert',
+                 color: '#141414',
+                 message: "🚀 [${env.JOB_NAME}] 작업이 시작되었습니다!\n" +
+                        "- 빌드 번호: #${env.BUILD_NUMBER}\n" +
+                        "- 브랜치: ${env.GIT_BRANCH}\n" + 
+                        "- 시작 시간: ${new Date().format('yyyy-MM-dd HH:mm:ss')}"
+                )
+            }
+        }
         stage('Checkout') {
             steps {
                 // Git 소스 코드를 체크아웃하는 단계
@@ -112,10 +124,33 @@ pipeline {
 
     post {
         success {
-            echo 'Build and deployment successful.'
+            slackSend (
+                 channel: '#ai-server-alert',
+                 color: 'good',
+                 message: "✅ [${env.JOB_NAME}] 작업이 성공적으로 완료되었습니다!\n" +
+                          "- 빌드 번호: #${env.BUILD_NUMBER}\n" +
+                          "- 완료 시간: ${new Date().format('yyyy-MM-dd HH:mm:ss')}\n" +
+                          "- 자세히 보기: ${env.BUILD_URL}"
+            )
+        }
+        unstable {
+            slackSend (
+                 channel: '#ai-server-alert',
+                 color: 'warning',
+                 message: "⚠️ [${env.JOB_NAME}] 작업이 완료되었지만 일부 테스트가 실패했습니다.\n" +
+                          "- 빌드 번호: #${env.BUILD_NUMBER}\n" +
+                          "- 로그 확인: ${env.BUILD_URL}"
+            )
         }
         failure {
-            echo 'Build or deployment failed.'
+            slackSend (
+                 channel: '#ai-server-alert',
+                 color: 'danger',
+                 message: "❌ [${env.JOB_NAME}] 작업이 실패했습니다.\n" +
+                          "- 빌드 번호: #${env.BUILD_NUMBER}\n" +
+                          "- 에러 로그: [여기서 확인](${env.BUILD_URL}/console)\n" +
+                          "- 담당자 확인 부탁드립니다."
+            )
         }
         always {
             // Cleanup: 로컬 Docker 시스템을 정리 
