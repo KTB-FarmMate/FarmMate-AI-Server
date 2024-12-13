@@ -75,6 +75,8 @@ class ThreadCreateData(BaseModel):
 
 @router.post(
     "",
+    summary="채팅방 생성",
+    tags=["채팅방 관련"],
     responses={
         200: {
             "description": "성공적인 응답.",
@@ -153,6 +155,8 @@ class MessageData(BaseModel):
 
 @router.get(
     "/{thread_id}",
+    summary="채팅방 정보 로드",
+    tags=["채팅방 관련"],
     responses={
         200: {
             "description": "성공적인 응답.",
@@ -206,6 +210,8 @@ class MessageRequest(BaseModel):
 
 @router.post(
     "/{thread_id}",
+    summary="채팅방 메시지 전송",
+    tags=["채팅방 관련"],
     responses={
         200: {
             "description": "성공적인 응답.",
@@ -283,6 +289,8 @@ class ModifyMessageRequest(BaseModel):
 
 @router.patch(
     "/{thread_id}",
+    summary="채팅방 정보 수정",
+    tags=["채팅방 관련"],
     responses={
         200: {
             "description": "성공적인 응답.",
@@ -348,6 +356,8 @@ async def modify_message(memberId: str, thread_id: str, request: ModifyMessageRe
 
 @router.delete(
     "/{thread_id}",
+    summary="채팅방 삭제",
+    tags=["채팅방 관련"],
     responses={
         200: {
             "description": "반환되지 않음",
@@ -374,6 +384,8 @@ async def delete_thread(memberId: str, thread_id: str):
 
 @router.get(
     "/{thread_id}/status",
+    summary="대시보드 정보 요청",
+    tags=["대시보드 관련"],
     responses={
         200: {
             "description": "반환되지 않음",

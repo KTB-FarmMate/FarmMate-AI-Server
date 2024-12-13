@@ -6,6 +6,8 @@ router = APIRouter()
 
 @router.get(
     "",
+    summary="헬스체크",
+    tags=["헬스체크"],
     responses={
         200: {
             "description": "Successful Response",
