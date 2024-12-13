@@ -3,9 +3,9 @@ from typing import List, Any, Optional, Generic, TypeVar
 import re
 import time
 import json
+import logging
 from enum import Enum
 from datetime import datetime
-from httpx import AsyncClient
 
 # HTTP 및 API 관련 모듈
 import requests
@@ -16,7 +16,7 @@ from starlette.status import (
     HTTP_200_OK,
     HTTP_201_CREATED,
     HTTP_204_NO_CONTENT, HTTP_500_INTERNAL_SERVER_ERROR, HTTP_408_REQUEST_TIMEOUT, HTTP_422_UNPROCESSABLE_ENTITY,
-    HTTP_404_NOT_FOUND, HTTP_409_CONFLICT,
+    HTTP_404_NOT_FOUND,
 )
 
 # OpenAI 관련 모듈
@@ -25,16 +25,13 @@ import openai
 
 # 프로젝트 내 모듈
 from app.core.config import settings
-from app.api.weather.weather import kakao_service
 from app.utils.response import create_response
 from app.models.error import ErrorDetail
 
 # 네트워크 관련 모듈
 import socket
 
-DEBUG = True
-
-BE_BASE_URL = "http://farmmate.net/api"
+# BE_BASE_URL = "http://15.164.175.127:8080/api"
 
 router = APIRouter()
 
@@ -67,7 +64,7 @@ class ThreadDetail(BaseModel):
 
 
 class CreateThreadRequest(BaseModel):
-    cropId: int = Field(-1, description="재배할 작물의 고유식별자")
+    # cropId: int = Field(-1, description="재배할 작물의 고유식별자")
     cropName: str = Field("", description="재배할 작물 이름")
     address: str = Field("", description="농사를 짓는 지역 주소")
     plantedAt: str = Field("", description="작물을 심은 날짜")
@@ -77,14 +74,14 @@ class ThreadCreateData(BaseModel):
     threadId: str = Field(..., description="생성된 채팅방의 고유 식별자")
 
 
-@router.post("")
+@router.post("/")
 async def create_thread(memberId: str, request: CreateThreadRequest) -> JSONResponse:
     """새로운 채팅방(Thread)을 생성하고 초기 메시지를 추가합니다."""
     thread = client.beta.threads.create()
 
-    crop_id = request.cropId
-    if crop_id == -1:
-        raise ValueError("작물ID를 입력해야 합니다.")
+    # crop_id = request.cropId
+    # if crop_id == -1:
+    #     raise ValueError("작물ID를 입력해야 합니다.")
 
     crop = request.cropName
     if not crop.strip() or re.search(r'[^\w\s]', crop):
@@ -109,25 +106,11 @@ async def create_thread(memberId: str, request: CreateThreadRequest) -> JSONResp
         content=f"[시스템 메시지] 사용자는 심은날짜 : {plantedAt}, 주소 : {address}에서 작물 : {crop}을(를) 재배하고 있습니다.",
     )
 
-    request_data = {
-        "address": address,
-        "cropId": str(crop_id),
-        "plantedAt": plantedAt,
-        "threadId": str(thread.id)
-    }
-
-    async with AsyncClient() as Client:
-        req = await Client.post(f"{BE_BASE_URL}/members/{memberId}/threads", json=request_data)
-        if req.status_code == HTTP_409_CONFLICT:
-            raise HTTPException(
-                status_code=HTTP_409_CONFLICT,
-                detail=req.json(),
-            )
-        if req.status_code != HTTP_201_CREATED:
-            raise HTTPException(
-                status_code=req.status_code,
-                detail=req.json()
-            )
+    # if req.status_code != 200:
+    #     raise HTTPException(
+    #         status_code=req.status_code,
+    #         detail=req.json().get("details", "백엔드 서버 요청 실패")
+    #     )
     return create_response(
         status_code=HTTP_201_CREATED,
         message="채팅방이 성공적으로 생성되었습니다.",
@@ -135,35 +118,10 @@ async def create_thread(memberId: str, request: CreateThreadRequest) -> JSONResp
     )
 
 
-@router.get("")
-async def get_threads(memberId: str):
-    async with AsyncClient() as Client:
-        req = await Client.get(f"{BE_BASE_URL}/members/{memberId}/threads")
-        if req.status_code == HTTP_200_OK:
-            req_json = req.json()
-            # if not req_json:
-            #     raise HTTPException(
-            #         status_code=HTTP_404_NOT_FOUND,
-            #         detail=req_json
-            #     )
-            return create_response(
-                status_code=HTTP_200_OK,
-                message="채팅방 정보를 올바르게 가져왔습니다.",
-                data={"threads": req_json}
-            )
-        else:
-            raise HTTPException(
-                status_code=req.status_code,
-                detail=req.json()
-            )
-
-
 class Role(str, Enum):
     USER = "user"
     ASSITANT = "assistant"
 
-    def __str__(self):
-        return self.value.upper()  # 대문자로 반환
 
 class MessageData(BaseModel):
     """채팅방의 메시지 구조를 정의합니다."""
@@ -172,7 +130,7 @@ class MessageData(BaseModel):
 
     def to_dict(self):
         return {
-            "role": str(self.role),
+            "role": self.role,
             "text": self.text,
         }
 
@@ -181,15 +139,14 @@ class MessageData(BaseModel):
 async def get_thread(memberId: str, thread_id: str):
     """특정 채팅방의 메시지 목록을 반환합니다."""
     thread = client.beta.threads.retrieve(thread_id=thread_id)
-    messages = client.beta.threads.messages.list(thread_id=thread.id, order="asc")
+    messages = client.beta.threads.messages.list(thread_id=thread_id, order="asc")
 
     messages_data = [
         MessageData(
             role=Role(message.role),
-            text=message.content[0].text.value
+            text=message.content[0].text.value if message.content else "",
         ).to_dict()
-        for message in messages
-        if message.content is not None and "[시스템 메시지]" not in message.content[0].text.value
+        for message in messages.data
     ]
 
     return create_response(
@@ -259,9 +216,8 @@ async def send_message(memberId: str, thread_id: str, request: MessageRequest):
 
 
 class ModifyMessageRequest(BaseModel):
-    cropId: int = Field(-1, description="변경할 작물 ID")
     address: str = Field("", description="변경할 주소")
-    plantedAt: str = Field(None, description="변경할 심은 날짜 (YYYY-MM-DD 형식)")
+    plantedAt: datetime = Field(None, description="변경할 심은 날짜 (YYYY-MM-DD 형식)")
 
 
 @router.patch("/{thread_id}")
@@ -271,11 +227,9 @@ async def modify_message(memberId: str, thread_id: str, request: ModifyMessageRe
         raise ValueError("채팅방 ID가 누락되었습니다.")
     if not request.address:
         raise ValueError("주소가 누락되었습니다.")
-    if request.cropId == -1:
-        raise ValueError("작물 ID가 누락되었습니다.")
-    if not request.plantedAt:
-        raise ValueError("심은 날짜가 누락되었습니다.")
+
     thread = client.beta.threads.retrieve(thread_id=thread_id)
+
     client.beta.threads.messages.create(
         thread_id=thread.id,
         role="assistant",
@@ -290,42 +244,27 @@ async def modify_message(memberId: str, thread_id: str, request: ModifyMessageRe
        - 변경된 이유: 사용자의 요청에 따른 심은날짜 업데이트
        """,
     )
-    # run = client.beta.threads.runs.create(
-    #     thread_id=thread.id,
-    #     assistant_id=assistant.id,
-    #
-    # )
-    #
-    # while True:
-    #     run_status = client.beta.threads.runs.retrieve(thread_id=thread.id, run_id=run.id)
-    #     if run_status.status == "completed":
-    #         break
-    #     elif run_status.status in ["failed", "cancelled", "expired"]:
-    #         raise HTTPException(
-    #             status_code=HTTP_500_INTERNAL_SERVER_ERROR,
-    #             detail=f"AI 응답 생성 실패: {run_status.status}"
-    #         )
-    #     time.sleep(1)
 
-    request_data = {
-        "address": request.address,
-        "cropId": request.cropId,
-        "plantedAt": request.plantedAt,
-        "threadId": str(thread.id)
-    }
+    run = client.beta.threads.runs.create(
+        thread_id=thread.id,
+        assistant_id=assistant.id,
+    )
 
-    # req = requests.patch(f"{BE_BASE_URL}/members/{memberId}/threads/{thread.id}", json=request_data)
-    # print(req.json())
-    async with AsyncClient() as Client:
-        req = await Client.patch(f"{BE_BASE_URL}/members/{memberId}/threads/{thread.id}", json=request_data)
-        if req.status_code != 200:
+    while True:
+        run_status = client.beta.threads.runs.retrieve(thread_id=thread.id, run_id=run.id)
+        if run_status.status == "completed":
+            break
+        elif run_status.status in ["failed", "cancelled", "expired"]:
             raise HTTPException(
-                status_code=req.status_code,
-                detail=req.json()
+                status_code=HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"AI 응답 생성 실패: {run_status.status}"
             )
+        time.sleep(1)
+
+
     return create_response(
         status_code=HTTP_200_OK,
-        message="채팅방 정보 수정 완료",
+        message="주소가 성공적으로 변경되었습니다.",
         data={"message": "주소가 성공적으로 변경되었습니다."}
     )
 
@@ -333,103 +272,16 @@ async def modify_message(memberId: str, thread_id: str, request: ModifyMessageRe
 @router.delete("/{thread_id}")
 async def delete_thread(memberId: str, thread_id: str):
     """특정 채팅방을 삭제합니다."""
-    async with AsyncClient() as Client:
-        req = await Client.delete(f"{BE_BASE_URL}/members/{memberId}/threads/{thread_id}")
-        if req.status_code != HTTP_204_NO_CONTENT:
-            raise HTTPException(
-                status_code=req.status_code,
-                detail=req.json()
-            )
-        client.beta.threads.delete(thread_id)
+    client.beta.threads.delete(thread_id)
+
+    # req = requests.delete(f"{BE_BASE_URL}/members/{memberId}/threads/{thread_id}", json=request_data)
+    #
+    # if req.status_code != 200:
+    #     raise HTTPException(
+    #         status_code=req.status_code,
+    #         detail=req.json().get("details", "백엔드 서버 요청 실패")
+    #     )
     return create_response(status_code=HTTP_204_NO_CONTENT, message="채팅방이 성공적으로 삭제되었습니다.")
-
-
-class ThreadStatus:
-    def __init__(self, model="gpt-4o-mini"):
-        self.tool = [{
-            "type": "function",
-            "function": {
-                "name": "get_weather",
-                "description": "Converts an address to geographic coordinates and retrieves weather information for those coordinates",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "address": {
-                            "type": "string",
-                            "description": "The address to be converted to coordinates"
-                        }
-                    },
-                    "required": ["address"],
-                    "additionalProperties": False
-                }
-            }
-        }]
-        self.message = None
-        self.model = model
-        self.directions = [
-            "남", "남남서", "남서", "서남서", "서", "서북서", "북서", "북북서",
-            "북", "북북동", "북동", "동북동", "동", "동남동", "남동", "남남동"
-        ]
-
-    def set_message(self, message):
-        self.message = message
-
-    def get_sky_condition(self, pty_value):
-        match pty_value:
-            case 0:
-                return "맑음", "비안옴"
-            case 1:
-                return "비", "비옴"
-            case 2:
-                return "비/눈", "비/눈"
-            case 3:
-                return "눈", "눈옴"
-            case 5:
-                return "빗방울", "비옴"
-            case 6:
-                return "빗방울눈날림", "비옴"
-            case 7:
-                return "눈날림", "눈옴"
-            case _:
-                return "알 수 없음", "알 수 없음"
-
-    def get_wind_direction(self, vec_value):
-        idx = (int((float(vec_value) + 22.5) // 22.5) + 8) % 16
-        return self.directions[idx]
-
-    def get_weather(self):
-        response = client.chat.completions.create(
-            model=self.model,
-            messages=self.message,
-            temperature=0,
-            max_tokens=2048,
-            top_p=0,
-            frequency_penalty=0,
-            presence_penalty=0,
-            tools=self.tool,
-            parallel_tool_calls=True,
-            response_format={"type": "text"},
-            tool_choice="required"
-        )
-
-        if response.choices[0].message.tool_calls:
-            tool_call = response.choices[0].message.tool_calls[0]
-            arguments = json.loads(tool_call.function.arguments)
-            address = arguments.get("address")
-            weather_data = kakao_service.convert_address_to_coordinate(address)
-
-            skyCondition, rainCondition = self.get_sky_condition(weather_data["PTY"])
-            windDirection = self.get_wind_direction(weather_data["VEC"])
-
-            return {
-                "temp": weather_data["T1H"],
-                "skyCondition": skyCondition,
-                "rainProbability": weather_data["RN1"],
-                "rainCondition": rainCondition,
-                "humidity": weather_data["REH"],
-                "windSpeed": weather_data["WSD"],
-                "windDirection": windDirection
-            }
 
 
 @router.get("/{thread_id}/status")
