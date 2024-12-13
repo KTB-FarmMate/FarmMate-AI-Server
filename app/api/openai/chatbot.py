@@ -64,7 +64,6 @@ class ThreadDetail(BaseModel):
 
 
 class CreateThreadRequest(BaseModel):
-    # cropId: int = Field(-1, description="재배할 작물의 고유식별자")
     cropName: str = Field("", description="재배할 작물 이름")
     address: str = Field("", description="농사를 짓는 지역 주소")
     plantedAt: str = Field("", description="작물을 심은 날짜")
@@ -74,7 +73,7 @@ class ThreadCreateData(BaseModel):
     threadId: str = Field(..., description="생성된 채팅방의 고유 식별자")
 
 
-@router.post("/")
+@router.post("")
 async def create_thread(memberId: str, request: CreateThreadRequest) -> JSONResponse:
     """새로운 채팅방(Thread)을 생성하고 초기 메시지를 추가합니다."""
     thread = client.beta.threads.create()
@@ -268,7 +267,6 @@ async def modify_message(memberId: str, thread_id: str, request: ModifyMessageRe
         data={"message": "주소가 성공적으로 변경되었습니다."}
     )
 
-
 @router.delete("/{thread_id}")
 async def delete_thread(memberId: str, thread_id: str):
     """특정 채팅방을 삭제합니다."""
@@ -284,36 +282,32 @@ async def delete_thread(memberId: str, thread_id: str):
     return create_response(status_code=HTTP_204_NO_CONTENT, message="채팅방이 성공적으로 삭제되었습니다.")
 
 
+
+
 @router.get("/{thread_id}/status")
-async def get_thread_status(memberId: str, thread_id: str):
+async def get_thread_status(memberId: str, thread_id: str, cropName: str, plantedAt: str):
     """특정 채팅방의 상태 정보를 반환합니다."""
-    thread = client.beta.threads.retrieve(thread_id=thread_id)
-    messages = client.beta.threads.messages.list(thread_id=thread.id, order="asc")
+    # thread = client.beta.threads.retrieve(thread_id=thread_id)
+    # messages = client.beta.threads.messages.list(thread_id=thread.id, order="asc")
 
-    assistant_message = [
-        {"role": "assistant", "content": message.content[0].text.value}
-        for message in messages
-        if message.role == "assistant" and "[시스템 메시지]" in message.content[0].text.value
-    ]
+    # assistant_message = [
+    #     {"role": "assistant", "content": message.content[0].text.value}
+    #     for message in messages
+    #     if message.role == "assistant" and "[시스템 메시지]" in message.content[0].text.value
+    # ]
 
-    thread_status = ThreadStatus()
-    thread_status.set_message(assistant_message)
-    weather_data = thread_status.get_weather()
+    # thread_status = ThreadStatus()
+    # thread_status.set_message(assistant_message)
+    # weather_data = thread_status.get_weather()
 
     return create_response(
         status_code=HTTP_200_OK,
         message="상태 정보가 올바르게 반환되었습니다.",
         data={
-            "weather": weather_data,
             "recommendedActions": {
                 "0": "물 주기",
                 "1": "비료 주기",
                 "2": "영양제 주기"
-            },
-            "createdAt": {
-                "year": 2024,
-                "month": 12,
-                "day": 14,
             }
         }
     )
