@@ -395,11 +395,7 @@ async def delete_thread(memberId: str, thread_id: str):
                         {
                             "message": "상태 정보가 올바르게 반환되었습니다.",
                             "data": {
-                                "recommendedActions": {
-                                    "0": "물 주기",
-                                    "1": "비료 주기",
-                                    "2": "영양제 주기"
-                                }
+                                "recommendedActions": ["물 주기", "비료 주기", "영양제 주기"]
                             }
                         }
                     }
@@ -426,10 +422,6 @@ async def get_thread_status(memberId: str, thread_id: str, cropName: str, plante
         status_code=HTTP_200_OK,
         message="상태 정보가 올바르게 반환되었습니다.",
         data={
-            "recommendedActions": {
-                "0": "물 주기",
-                "1": "비료 주기",
-                "2": "영양제 주기"
-            }
+            "recommendedActions": ["물 주기", "비료 주기", "영양제 주기"]
         }
     )
