@@ -10,7 +10,13 @@ import uvicorn
 # from fastapi.templating import Jinja2Templates
 
 
-app = FastAPI(debug=True, strict_slashes=False)
+app = FastAPI(debug=True,
+              # strict_slashes=False,
+              openapi_url="/openapi.json",  # 이 경로는 root_path가 자동으로 붙습니다.
+              docs_url="/docs",  # root_path를 앞에 붙여 최종 경로는 /ai/docs가 됩니다.
+              redoc_url="/redoc",
+              root_path="/ai"
+              )
 # 정적 파일 제공
 app.include_router(openai_router, prefix="/members/{memberId}/threads")
 app.include_router(health_router, prefix="/health")
@@ -23,7 +29,6 @@ app.include_router(health_router, prefix="/health")
 
 
 add_exception_handlers(app)
-
 
 # 실행
 if __name__ == "__main__":

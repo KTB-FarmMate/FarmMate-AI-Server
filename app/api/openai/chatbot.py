@@ -73,7 +73,24 @@ class ThreadCreateData(BaseModel):
     threadId: str = Field(..., description="생성된 채팅방의 고유 식별자")
 
 
-@router.post("")
+@router.post(
+    "",
+    responses={
+        200: {
+            "description": "성공적인 응답.",
+            "content": {
+                "application/json": {
+                    "example": {  # Example 값을 설정합니다.
+                        "message": "채팅방이 성공적으로 생성되었습니다.",
+                        "data": {
+                            "threadId": "thread_YiIpm1PYCP8hy443TaIlulAd"
+                        }
+                    }
+                }
+            }
+        }
+    }
+)
 async def create_thread(memberId: str, request: CreateThreadRequest) -> JSONResponse:
     """새로운 채팅방(Thread)을 생성하고 초기 메시지를 추가합니다."""
     thread = client.beta.threads.create()
@@ -134,7 +151,34 @@ class MessageData(BaseModel):
         }
 
 
-@router.get("/{thread_id}")
+@router.get(
+    "/{thread_id}",
+    responses={
+        200: {
+            "description": "성공적인 응답.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "message": "채팅방 정보를 가져왔습니다.",
+                        "data": {
+                            "threadId": "thread_oOr1qnY5H6XTqTQuKTKGHfSY",
+                            "messages": [
+                                {
+                                    "role": "assistant",
+                                    "text": "[시스템 메시지] 사용자는 심은날짜 : 2024-01-01, 주소 : 판교에서 작물 : 감자을(를) 재배하고 있습니다."
+                                },
+                                {
+                                    "role": "user",
+                                    "text": "감자 데이터 줘"
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    }
+)
 async def get_thread(memberId: str, thread_id: str):
     """특정 채팅방의 메시지 목록을 반환합니다."""
     thread = client.beta.threads.retrieve(thread_id=thread_id)
@@ -160,7 +204,25 @@ class MessageRequest(BaseModel):
     message: str = Field("", description="사용자가 보낸 메시지 내용")
 
 
-@router.post("/{thread_id}")
+@router.post(
+    "/{thread_id}",
+    responses={
+        200: {
+            "description": "성공적인 응답.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "message": "메시지를 성공적으로 전송하였습니다.",
+                        "data": {
+                            "threadId": "thread_oOr1qnY5H6XTqTQuKTKGHfSY",
+                            "text": "응답 메시지"
+                        }
+                    }
+                }
+            }
+        }
+    }
+)
 async def send_message(memberId: str, thread_id: str, request: MessageRequest):
     """특정 채팅방에 메시지를 전송하고 AI의 응답을 생성합니다."""
     if not request.message:
@@ -219,7 +281,24 @@ class ModifyMessageRequest(BaseModel):
     plantedAt: datetime = Field(None, description="변경할 심은 날짜 (YYYY-MM-DD 형식)")
 
 
-@router.patch("/{thread_id}")
+@router.patch(
+    "/{thread_id}",
+    responses={
+        200: {
+            "description": "성공적인 응답.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "message": "주소가 성공적으로 변경되었습니다.",
+                        "data": {
+                            "message": "주소가 성공적으로 변경되었습니다."
+                        }
+                    }
+                }
+            }
+        }
+    }
+)
 async def modify_message(memberId: str, thread_id: str, request: ModifyMessageRequest):
     """특정 채팅방의 주소 정보를 수정합니다."""
     if not thread_id:
@@ -260,14 +339,25 @@ async def modify_message(memberId: str, thread_id: str, request: ModifyMessageRe
             )
         time.sleep(1)
 
-
     return create_response(
         status_code=HTTP_200_OK,
         message="주소가 성공적으로 변경되었습니다.",
         data={"message": "주소가 성공적으로 변경되었습니다."}
     )
 
-@router.delete("/{thread_id}")
+
+@router.delete(
+    "/{thread_id}",
+    responses={
+        200: {
+            "description": "반환되지 않음",
+            "content": {"application/json": {"example": {}}},
+        },
+        204: {
+            "description": "성공적으로 삭제되었습니다."
+        }
+    }
+)
 async def delete_thread(memberId: str, thread_id: str):
     """특정 채팅방을 삭제합니다."""
     client.beta.threads.delete(thread_id)
@@ -282,9 +372,29 @@ async def delete_thread(memberId: str, thread_id: str):
     return create_response(status_code=HTTP_204_NO_CONTENT, message="채팅방이 성공적으로 삭제되었습니다.")
 
 
-
-
-@router.get("/{thread_id}/status")
+@router.get(
+    "/{thread_id}/status",
+    responses={
+        200: {
+            "description": "반환되지 않음",
+            "content": {
+                "application/json":
+                    {"example":
+                        {
+                            "message": "상태 정보가 올바르게 반환되었습니다.",
+                            "data": {
+                                "recommendedActions": {
+                                    "0": "물 주기",
+                                    "1": "비료 주기",
+                                    "2": "영양제 주기"
+                                }
+                            }
+                        }
+                    }
+            }
+        }
+    }
+)
 async def get_thread_status(memberId: str, thread_id: str, cropName: str, plantedAt: str):
     """특정 채팅방의 상태 정보를 반환합니다."""
     # thread = client.beta.threads.retrieve(thread_id=thread_id)
