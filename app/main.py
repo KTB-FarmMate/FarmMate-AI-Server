@@ -10,7 +10,7 @@ import uvicorn
 # from fastapi.templating import Jinja2Templates
 
 
-app = FastAPI(debug=True)
+app = FastAPI(debug=True, strict_slashes=False)
 # 정적 파일 제공
 app.include_router(openai_router, prefix="/members/{memberId}/threads")
 app.include_router(health_router, prefix="/health")
