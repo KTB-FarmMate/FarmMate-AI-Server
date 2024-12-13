@@ -388,7 +388,7 @@ async def delete_thread(memberId: str, thread_id: str):
     tags=["대시보드 관련"],
     responses={
         200: {
-            "description": "반환되지 않음",
+            "description": "성공적인 응답",
             "content": {
                 "application/json":
                     {"example":
