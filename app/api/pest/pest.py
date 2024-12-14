@@ -23,7 +23,7 @@ from starlette.status import (
 from app.core.config import settings
 from app.utils.response import ApiResponse, ErrorDetail
 
-from bs4 import BeautifulSoup
+# from bs4 import BeautifulSoup
 
 T = TypeVar('T')
 
@@ -65,61 +65,75 @@ class PestResponse(BaseModel):
 async def get_pests(cropName: str) -> ApiResponse:
     """작물이름을 기준으로 병해충 목록을 제공 합니다."""
 
-    def filter_pests(crop_name: str, pest_list):
-        result = []
-        for li in pest_list:
-            text = li.text
-            match = re.search(r"\([^-]+-([^)]+)\)", text)
-            if match:
-                crop = match.group(1)
-                if crop == crop_name:
-                    result.append(re.sub(r"\(.*?\)", "", text).strip())
-                    print(result)
-        return result
-
-    pest_list_url = r"https://ncpms.rda.go.kr/npms/NewIndcUserListR.np"
-
-    res = requests.get(pest_list_url)
-
-    html = res.text
-
-    soup = BeautifulSoup(html, "html.parser")
-    latest = soup.select_one(".tabelRound tbody tr td:nth-child(2) a")
-
-    latest_number = latest.get_attribute_list("onclick")[0].split("'")[1]
-    # latest_number = 229
-    pest_detail_url = rf"https://ncpms.rda.go.kr/npms/NewIndcUserR.np?indcMon=&indcSeq={latest_number}"
-
-    res = requests.get(pest_detail_url)
-
-    html = res.text
-
-    soup = BeautifulSoup(html, "html.parser")
-
-    forecast_selector = ".forecast li"
-    watch_selector = ".watch li"
-    warning_selector = ".warning li"
-
-    forecast_list = soup.select(forecast_selector)
-
-    watch_list = soup.select(watch_selector)
-
-    warning_list = soup.select(warning_selector)
-
-    # cropName = "오이"
-
-    print("예보 개수 : ", len(forecast_list))
-    result_forecast = filter_pests(cropName, forecast_list)
-    print(f"{cropName} 병해충 예보 : {len(result_forecast)}")
-
-    print("주의보 개수 : ", len(watch_list))
-    result_watch = filter_pests(cropName, watch_list)
-    print(f"{cropName} 병해충 주의보 : {len(result_watch)}")
-
-    print("경보 개수 : ", len(warning_list))
-    result_warning = filter_pests(cropName, warning_list)
-
-    print(f"{cropName} 병해충 경보: {len(result_warning)}")
+    # def filter_pests(crop_name: str, pest_list):
+    #     result = []
+    #     for li in pest_list:
+    #         text = li.text
+    #         match = re.search(r"\([^-]+-([^)]+)\)", text)
+    #         if match:
+    #             crop = match.group(1)
+    #             if crop == crop_name:
+    #                 result.append(re.sub(r"\(.*?\)", "", text).strip())
+    #                 print(result)
+    #     return result
+    #
+    # pest_list_url = r"https://ncpms.rda.go.kr/npms/NewIndcUserListR.np"
+    #
+    # res = requests.get(pest_list_url)
+    #
+    # html = res.text
+    #
+    # soup = BeautifulSoup(html, "html.parser")
+    # latest = soup.select_one(".tabelRound tbody tr td:nth-child(2) a")
+    #
+    # latest_number = latest.get_attribute_list("onclick")[0].split("'")[1]
+    # # latest_number = 229
+    # pest_detail_url = rf"https://ncpms.rda.go.kr/npms/NewIndcUserR.np?indcMon=&indcSeq={latest_number}"
+    #
+    # res = requests.get(pest_detail_url)
+    #
+    # html = res.text
+    #
+    # soup = BeautifulSoup(html, "html.parser")
+    #
+    # forecast_selector = ".forecast li"
+    # watch_selector = ".watch li"
+    # warning_selector = ".warning li"
+    #
+    # forecast_list = soup.select(forecast_selector)
+    #
+    # watch_list = soup.select(watch_selector)
+    #
+    # warning_list = soup.select(warning_selector)
+    #
+    # # cropName = "오이"
+    #
+    # print("예보 개수 : ", len(forecast_list))
+    # result_forecast = filter_pests(cropName, forecast_list)
+    # print(f"{cropName} 병해충 예보 : {len(result_forecast)}")
+    #
+    # print("주의보 개수 : ", len(watch_list))
+    # result_watch = filter_pests(cropName, watch_list)
+    # print(f"{cropName} 병해충 주의보 : {len(result_watch)}")
+    #
+    # print("경보 개수 : ", len(warning_list))
+    # result_warning = filter_pests(cropName, warning_list)
+    #
+    # print(f"{cropName} 병해충 경보: {len(result_warning)}")
+    result_forecast = [
+            "균핵병",
+            "꽃노랑총채벌레",
+            "노균병",
+            "담배가루이",
+            "오이총채벌레",
+            "온실가루이",
+            "작은뿌리파리",
+            "잿빛곰팡이병",
+            "쥬키니황화모자이크바이러스",
+            "흰가루병"
+        ]
+    result_watch = []
+    result_warning = []
     return ApiResponse(
         message="병해충 정보가 성공적으로 조회되었습니다.",
         data={
