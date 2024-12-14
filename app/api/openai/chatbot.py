@@ -25,8 +25,7 @@ import openai
 
 # 프로젝트 내 모듈
 from app.core.config import settings
-from app.utils.response import create_response
-from app.models.error import ErrorDetail
+from app.utils.response import ApiResponse, ErrorDetail
 
 # 네트워크 관련 모듈
 import socket
@@ -52,15 +51,26 @@ class BaseResponse(BaseModel, Generic[T]):
     error: Optional[ErrorDetail] = None
 
 
-# 메시지 관련 모델
-class Message(BaseModel):
-    role: str
-    content: str
+class Role(str, Enum):
+    USER = "USER"
+    ASSITANT = "ASSISTANT"
+
+
+class MessageData(BaseModel):
+    """채팅방의 메시지 구조를 정의합니다."""
+    role: Role = Field(..., description="메시지 작성자 (USER 또는 ASSISTANT)")
+    text: str = Field(..., description="메시지 내용")
+
+    def to_dict(self):
+        return {
+            "role": self.role,
+            "text": self.text,
+        }
 
 
 class ThreadDetail(BaseModel):
     threadId: str
-    messages: List[Message]
+    messages: List[MessageData]
 
 
 class CreateThreadRequest(BaseModel):
@@ -77,8 +87,10 @@ class ThreadCreateData(BaseModel):
     "",
     summary="채팅방 생성",
     tags=["채팅방 관련"],
+    response_model=ApiResponse[ThreadCreateData],
+    status_code=HTTP_201_CREATED,
     responses={
-        200: {
+        201: {
             "description": "성공적인 응답.",
             "content": {
                 "application/json": {
@@ -93,13 +105,9 @@ class ThreadCreateData(BaseModel):
         }
     }
 )
-async def create_thread(memberId: str, request: CreateThreadRequest) -> JSONResponse:
+async def create_thread(memberId: str, request: CreateThreadRequest) -> ApiResponse:
     """새로운 채팅방(Thread)을 생성하고 초기 메시지를 추가합니다."""
     thread = client.beta.threads.create()
-
-    # crop_id = request.cropId
-    # if crop_id == -1:
-    #     raise ValueError("작물ID를 입력해야 합니다.")
 
     crop = request.cropName
     if not crop.strip() or re.search(r'[^\w\s]', crop):
@@ -124,39 +132,18 @@ async def create_thread(memberId: str, request: CreateThreadRequest) -> JSONResp
         content=f"[시스템 메시지] 사용자는 심은날짜 : {plantedAt}, 주소 : {address}에서 작물 : {crop}을(를) 재배하고 있습니다.",
     )
 
-    # if req.status_code != 200:
-    #     raise HTTPException(
-    #         status_code=req.status_code,
-    #         detail=req.json().get("details", "백엔드 서버 요청 실패")
-    #     )
-    return create_response(
-        status_code=HTTP_201_CREATED,
+    return ApiResponse(
         message="채팅방이 성공적으로 생성되었습니다.",
-        data={"threadId": thread.id}
-    )
-
-
-class Role(str, Enum):
-    USER = "user"
-    ASSITANT = "assistant"
-
-
-class MessageData(BaseModel):
-    """채팅방의 메시지 구조를 정의합니다."""
-    role: Role = Field(..., description="메시지 작성자 (assistant 또는 user)")
-    text: str = Field(..., description="메시지 내용")
-
-    def to_dict(self):
-        return {
-            "role": self.role,
-            "text": self.text,
-        }
+        data={"threadId": thread.id},
+        status_code=HTTP_201_CREATED
+    ).to_response()
 
 
 @router.get(
     "/{thread_id}",
     summary="채팅방 정보 로드",
     tags=["채팅방 관련"],
+    response_model=ApiResponse[ThreadDetail],
     responses={
         200: {
             "description": "성공적인 응답.",
@@ -168,11 +155,11 @@ class MessageData(BaseModel):
                             "threadId": "thread_oOr1qnY5H6XTqTQuKTKGHfSY",
                             "messages": [
                                 {
-                                    "role": "assistant",
+                                    "role": "ASSISTANT",
                                     "text": "[시스템 메시지] 사용자는 심은날짜 : 2024-01-01, 주소 : 판교에서 작물 : 감자을(를) 재배하고 있습니다."
                                 },
                                 {
-                                    "role": "user",
+                                    "role": "USER",
                                     "text": "감자 데이터 줘"
                                 }
                             ]
@@ -190,17 +177,16 @@ async def get_thread(memberId: str, thread_id: str):
 
     messages_data = [
         MessageData(
-            role=Role(message.role),
+            role=Role(message.role.upper()),
             text=message.content[0].text.value if message.content else "",
         ).to_dict()
         for message in messages.data
     ]
 
-    return create_response(
-        status_code=HTTP_200_OK,
+    return ApiResponse(
         message="채팅방 정보를 가져왔습니다.",
         data={"threadId": thread_id, "messages": messages_data}
-    )
+    ).to_response()
 
 
 class MessageRequest(BaseModel):
@@ -273,11 +259,10 @@ async def send_message(memberId: str, thread_id: str, request: MessageRequest):
     latest_message = messages.data[0]
     if latest_message.role == "assistant":
         content = latest_message.content[0].text.value if latest_message.content else ""
-        return create_response(
-            status_code=HTTP_200_OK,
+        return ApiResponse(
             message="메시지를 성공적으로 전송하였습니다.",
             data={"threadId": thread_id, "text": content}
-        )
+        ).to_response()
 
     raise HTTPException(status_code=HTTP_422_UNPROCESSABLE_ENTITY, detail="AI 응답을 찾을 수 없습니다.")
 
@@ -290,6 +275,7 @@ class ModifyMessageRequest(BaseModel):
 @router.patch(
     "/{thread_id}",
     summary="채팅방 정보 수정",
+    response_model=ApiResponse,
     tags=["채팅방 관련"],
     responses={
         200: {
@@ -365,81 +351,63 @@ async def modify_message(memberId: str, thread_id: str, request: ModifyMessageRe
             )
         time.sleep(1)
 
-    return create_response(
-        status_code=HTTP_200_OK,
+    return ApiResponse(
         message="채팅방 정보가 성공적으로 변경되었습니다.",
         data={"message": "채팅방 정보가 성공적으로 변경되었습니다."}
-    )
+    ).to_response()
 
 
 @router.delete(
     "/{thread_id}",
     summary="채팅방 삭제",
+    response_model=None,
+    status_code=204,  # 기본 상태 코드를 204로 설정
     tags=["채팅방 관련"],
     responses={
-        200: {
-            "description": "반환되지 않음",
-            "content": {"application/json": {"example": {}}},
-        },
         204: {
-            "description": "성공적으로 삭제되었습니다."
-        }
+            "description": "성공적으로 삭제되었습니다.",
+            "content": None,  # 본문 없음
+        },
     }
 )
 async def delete_thread(memberId: str, thread_id: str):
     """특정 채팅방을 삭제합니다."""
     client.beta.threads.delete(thread_id)
 
-    # req = requests.delete(f"{BE_BASE_URL}/members/{memberId}/threads/{thread_id}", json=request_data)
-    #
-    # if req.status_code != 200:
-    #     raise HTTPException(
-    #         status_code=req.status_code,
-    #         detail=req.json().get("details", "백엔드 서버 요청 실패")
-    #     )
-    return create_response(status_code=HTTP_204_NO_CONTENT, message="채팅방이 성공적으로 삭제되었습니다.")
+    return None
+    # return ApiResponse(status_code=HTTP_204_NO_CONTENT, message="채팅방이 성공적으로 삭제되었습니다.")
+
+
+class DashBoardResponse(BaseModel):
+    recommendedActions: List[str] = Field([], description="추천 작업에 대한 리스트")
 
 
 @router.get(
     "/{thread_id}/status",
     summary="대시보드 정보 요청",
+    response_model=ApiResponse[DashBoardResponse],
     tags=["대시보드 관련"],
     responses={
         200: {
             "description": "성공적인 응답",
-            "content": {
-                "application/json":
-                    {"example":
-                        {
-                            "message": "상태 정보가 올바르게 반환되었습니다.",
-                            "data": {
-                                "recommendedActions": ["물 주기", "비료 주기", "영양제 주기"]
-                            }
+            "content": {"application/json":
+                {"example":
+                    {
+                        "message": "상태 정보가 올바르게 반환되었습니다.",
+                        "data": {
+                            "recommendedActions": ["물 주기", "비료 주기", "영양제 주기"]
                         }
                     }
+                }
             }
         }
     }
 )
 async def get_thread_status(memberId: str, thread_id: str):
     """특정 채팅방의 상태 정보를 반환합니다."""
-    # thread = client.beta.threads.retrieve(thread_id=thread_id)
-    # messages = client.beta.threads.messages.list(thread_id=thread.id, order="asc")
-
-    # assistant_message = [
-    #     {"role": "assistant", "content": message.content[0].text.value}
-    #     for message in messages
-    #     if message.role == "assistant" and "[시스템 메시지]" in message.content[0].text.value
-    # ]
-
-    # thread_status = ThreadStatus()
-    # thread_status.set_message(assistant_message)
-    # weather_data = thread_status.get_weather()
-
-    return create_response(
-        status_code=HTTP_200_OK,
+    client.beta.threads.retrieve(thread_id=thread_id)
+    return ApiResponse(
         message="상태 정보가 올바르게 반환되었습니다.",
         data={
             "recommendedActions": ["물 주기", "비료 주기", "영양제 주기"]
-        }
-    )
+        }).to_response()
