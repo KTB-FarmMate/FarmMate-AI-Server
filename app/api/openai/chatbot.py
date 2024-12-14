@@ -284,7 +284,7 @@ async def send_message(memberId: str, thread_id: str, request: MessageRequest):
 
 class ModifyMessageRequest(BaseModel):
     address: str = Field("", description="변경할 주소")
-    plantedAt: datetime = Field(None, description="변경할 심은 날짜 (YYYY-MM-DD 형식)")
+    plantedAt: str = Field(None, description="변경할 심은 날짜 (YYYY-MM-DD 형식)")
 
 
 @router.patch(
@@ -297,9 +297,9 @@ class ModifyMessageRequest(BaseModel):
             "content": {
                 "application/json": {
                     "example": {
-                        "message": "주소가 성공적으로 변경되었습니다.",
+                        "message": "채팅방 정보가 성공적으로 변경되었습니다.",
                         "data": {
-                            "message": "주소가 성공적으로 변경되었습니다."
+                            "message": "채팅방 정보가 성공적으로 변경되었습니다."
                         }
                     }
                 }
@@ -311,24 +311,42 @@ async def modify_message(memberId: str, thread_id: str, request: ModifyMessageRe
     """특정 채팅방의 주소 정보를 수정합니다."""
     if not thread_id:
         raise ValueError("채팅방 ID가 누락되었습니다.")
-    if not request.address:
-        raise ValueError("주소가 누락되었습니다.")
+    if request.plantedAt:
+        try:
+            # `request.plantedAt`를 datetime으로 변환 시도
+            datetime.strptime(request.plantedAt, "%Y-%m-%d")
+        except ValueError:
+            raise ValueError("plantedAt는 'YYYY-MM-DD' 형식이어야 합니다.")
+
+    if not request.address and not request.plantedAt:
+        raise ValueError("입력값이 모두 누락 되었습니다.")
 
     thread = client.beta.threads.retrieve(thread_id=thread_id)
+
+    modify_message = """
+    [변경 사항]
+    """
+
+    if request.address:
+        modify_message += f"""
+        - 변경된 주소지: {request.address}
+       - 변경된 이유: 사용자의 요청에 따른 주소지 업데이트
+        """
+
+    if request.plantedAt:
+        modify_message += f"""
+       - 변경된 심은날짜 : {request.plantedAt}
+       - 변경된 이유: 사용자의 요청에 따른 심은날짜 업데이트
+        """
 
     client.beta.threads.messages.create(
         thread_id=thread.id,
         role="assistant",
         content=f"""
        [시스템 메시지]
-       사용자 요청에 따라 주소지 변경 작업이 이루어졌습니다.
-
-       [변경 사항]
-       - 변경된 주소지: {request.address}
-       - 변경된 이유: 사용자의 요청에 따른 주소지 업데이트
-       - 변경된 심은날짜 : {request.plantedAt}
-       - 변경된 이유: 사용자의 요청에 따른 심은날짜 업데이트
-       """,
+       사용자 요청에 따라 채팅방 정보 변경 작업이 이루어졌습니다.
+        앞으로의 사용자에게 제공하는 정보는 변경된 정보를 제공해야 한다.
+       """ + modify_message,
     )
 
     run = client.beta.threads.runs.create(
@@ -349,8 +367,8 @@ async def modify_message(memberId: str, thread_id: str, request: ModifyMessageRe
 
     return create_response(
         status_code=HTTP_200_OK,
-        message="주소가 성공적으로 변경되었습니다.",
-        data={"message": "주소가 성공적으로 변경되었습니다."}
+        message="채팅방 정보가 성공적으로 변경되었습니다.",
+        data={"message": "채팅방 정보가 성공적으로 변경되었습니다."}
     )
 
 
@@ -403,7 +421,7 @@ async def delete_thread(memberId: str, thread_id: str):
         }
     }
 )
-async def get_thread_status(memberId: str, thread_id: str, cropName: str, plantedAt: str):
+async def get_thread_status(memberId: str, thread_id: str):
     """특정 채팅방의 상태 정보를 반환합니다."""
     # thread = client.beta.threads.retrieve(thread_id=thread_id)
     # messages = client.beta.threads.messages.list(thread_id=thread.id, order="asc")
