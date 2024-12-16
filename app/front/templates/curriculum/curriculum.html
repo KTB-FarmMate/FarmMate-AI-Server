@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block style %}
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/curriculum.css') }}">
+{% endblock %}
+
+{% block header %}
+    {% include "header/only_back.html" %}
+{% endblock %}
+
+{% block content %}
+    <div class="curriculum-container">
+        <div class="header flex flex-column">
+            <div class="crop_name">
+                <h3>{{ crop_name }}</h3>
+            </div>
+            <div class="month_navigator_container flex flex-row align-center flex-space-between">
+                <div class="button left">
+                    <img src="{{ url_for('static', path='/img/arrow.png') }}" alt="">
+                </div>
+                <div class="month_viwer">
+                    <select class="month_combo">
+                        <option value="1">1월</option>
+                        <option value="2">2월</option>
+                        <option value="3">3월</option>
+                        <option value="4">4월</option>
+                        <option value="5">5월</option>
+                        <option value="6">6월</option>
+                        <option value="7">7월</option>
+                        <option value="8">8월</option>
+                        <option value="9" selected>9월</option>
+                        <option value="10">10월</option>
+                        <option value="11">11월</option>
+                        <option value="12">12월</option>
+                    </select>
+                </div>
+                <div class="button right">
+                    <img src="{{ url_for('static', path='/img/arrow.png') }}" alt="">
+                </div>
+            </div>
+
+        </div>
+        <div class="content flex flex-column">
+            <div class="work_list flex flex-column">
+                <h3>월간 {{ crop_name }} 필수 농사</h3>
+                <div onclick="window.location.href += '/detail'" class="work_item flex flex-row flex-space-between">
+                    <div class="title">
+                        까다로운 {{ crop_name }} 꼭 해야하는 작업
+                    </div>
+                    <div class="preview_img">
+                        <img src="{{ url_for('static', path='/img/curriculum/page.jpg' ) }}" alt="">
+                    </div>
+                </div>
+                <div onclick="window.location.href += '/detail'" class="work_item flex flex-row flex-space-between">
+                    <div class="title">
+                        까다로운 {{ crop_name }} 꼭 해야하는 작업
+                    </div>
+                    <div class="preview_img">
+                        <img src="{{ url_for('static', path='/img/curriculum/page.jpg' ) }}" alt="">
+                    </div>
+                </div>
+                <div onclick="window.location.href += '/detail'" class="work_item flex flex-row flex-space-between">
+                    <div class="title">
+                        까다로운 {{ crop_name }} 꼭 해야하는 작업
+                    </div>
+                    <div class="preview_img">
+                        <img src="{{ url_for('static', path='/img/curriculum/page.jpg' ) }}" alt="">
+                    </div>
+                </div>
+                <div onclick="window.location.href += '/detail'" class="work_item flex flex-row flex-space-between">
+                    <div class="title">
+                        까다로운 {{ crop_name }} 꼭 해야하는 작업
+                    </div>
+                    <div class="preview_img">
+                        <img src="{{ url_for('static', path='/img/curriculum/page.jpg' ) }}" alt="">
+                    </div>
+                </div>
+            </div>
+            <div class="work_video_list flex flex-column">
+                <h3>전문가 영상</h3>
+                <div class="work_video_container">
+                    <div class="work_video_item">
+                        <div class="video_preview">
+                            <iframe width="560" height="315"
+                                    src="https://www.youtube.com/embed/T6JfTHwBNNQ?si=h2iqftP9MEJBKTmt&amp;controls=0"
+                                    title="YouTube video player" frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        </div>
+                        <div class="video_title">
+                            <p>영상 제목</p>
+                        </div>
+                    </div>
+                    <div class="work_video_item">
+                        <div class="video_preview">
+                            <iframe width="560" height="315"
+                                    src="https://www.youtube.com/embed/T6JfTHwBNNQ?si=h2iqftP9MEJBKTmt&amp;controls=0"
+                                    title="YouTube video player" frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        </div>
+                        <div class="video_title">
+                            <p>영상 제목</p>
+                        </div>
+                    </div>
+                    <div class="work_video_item">
+                        <div class="video_preview">
+                            <iframe width="560" height="315"
+                                    src="https://www.youtube.com/embed/T6JfTHwBNNQ?si=h2iqftP9MEJBKTmt&amp;controls=0"
+                                    title="YouTube video player" frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        </div>
+                        <div class="video_title">
+                            <p>영상 제목</p>
+                        </div>
+                    </div>
+                    <div class="work_video_item">
+                        <div class="video_preview">
+                            <iframe width="560" height="315"
+                                    src="https://www.youtube.com/embed/T6JfTHwBNNQ?si=h2iqftP9MEJBKTmt&amp;controls=0"
+                                    title="YouTube video player" frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        </div>
+                        <div class="video_title">
+                            <p>영상 제목</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block footer %}
+    {% include "footer/footer.html" %}
+{% endblock %}
+
+{% block script %}
+    <script>
+        document.querySelector(".curriculum").dataset.selected = 'true';
+    </script>
+    <script src="{{ url_for('static', path='/js/curriculum.js') }}"></script>
+{% endblock %}

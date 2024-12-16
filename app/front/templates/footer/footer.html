@@ -1,0 +1,27 @@
+<div class="footer_content">
+    <div class="footer_wrapper flex flex-row">
+        <div onclick="location.href=`/front/crop/${select_crop}`" class="navi_container info">
+            <img src="{{ url_for('static', path='/img/navigator/info.png' ) }}" alt="">
+            <div class="navi_btn">정보</div>
+            <div class="select_circle"></div>
+        </div>
+        <div onclick="location.href=`/front/curriculum/${select_crop}`" class="navi_container curriculum">
+            <img src="{{ url_for('static', path='/img/navigator/book.png' ) }}" alt="">
+            <div class="navi_btn">교본</div>
+            <div class="select_circle"></div>
+        </div>
+        <div onclick="location.href=`/front/chatbot/${select_crop}`" class="navi_container chatbot">
+            <img src="{{ url_for('static', path='/img/navigator/chat.png' ) }}" alt="">
+            <div class="navi_btn">채팅</div>
+            <div class="select_circle"></div>
+        </div>
+        <div onclick="location.href=`/front/alarm/${select_crop}`" class="navi_container alarm">
+            <img src="{{ url_for('static', path='/img/navigator/bell.png' ) }}" alt="">
+            <div class="navi_btn">알림</div>
+            <div class="select_circle"></div>
+        </div>
+    </div>
+</div>
+<script>
+    let select_crop = localStorage.getItem("select_crop");
+</script>

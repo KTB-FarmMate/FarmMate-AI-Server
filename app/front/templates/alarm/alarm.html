@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block style %}
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/alarm.css') }}">
+{% endblock %}
+
+{% block header %}
+    {% include "header/only_back.html" %}
+{% endblock %}
+
+{% block content %}
+    {% include "search_bar.html" %}
+    <div class="alarm-container">
+        <div class="this_week flex flex-column">
+            <div class="title">
+                <h3>이번주</h3>
+            </div>
+            <div class="content">
+                <div class="alarm_list flex flex-column">
+                    <div class="alarm_item flex flex-column" data-open="false">
+                        <div class="header flex flex-row justify-between">
+                            <div class="content danger flex flex-row align-center">
+                                <p>
+                                    "무름병" 주의보 등급
+                                </p>
+                            </div>
+                            <div class="toggle">
+                                <img src="{{ url_for('static', path='img/arrow.png') }}" alt="">
+                            </div>
+                        </div>
+                        <div class="details hidden">
+                            <p>
+                                증상설명
+                            </p>
+                            <ul>
+                                <li> 뿌리와 잎자루에 발생한다.
+                                </li>
+                                <li>
+                                    처음에는 근두부에 회백색 수침상으로 나타난다.
+                                </li>
+                                <li>
+                                    진전되면 내부가 담갈색으로 변해 물러 썩으며, 악취가 난다.
+                                </li>
+                                <li>
+                                    지상부는 시들음증상을 나타내며, 잎자루가 물러 썩고 악취가 난다.
+                                </li>
+                                <li>
+                                    심하게 감염된 그루는 전체적으로 물러 썩는다.
+                                </li>
+                            </ul>
+                            <p>
+                                방제방법
+                            </p>
+                            <ul>
+                                <li>
+                                    벼과나 콩과 작물로 돌려짓기한다.
+                                </li>
+                                <li>
+                                    이 병원균은 건조에 약하므로 배수와 통풍이 잘되는 밭을 선택한다.
+                                </li>
+                                <li>
+                                    발병초기부터 등록약제를 이용하여 방제한다.
+                                </li>
+                            </ul>
+
+                        </div>
+                    </div>
+                    <div class="alarm_item flex flex-column" data-open="false">
+                        <div class="header flex flex-row justify-between">
+                            <div class="content danger flex flex-row align-center">
+                                <p>
+                                    "무름병" 주의보 등급
+                                </p>
+                            </div>
+                            <div class="toggle">
+                                <img src="{{ url_for('static', path='img/arrow.png') }}" alt="">
+                            </div>
+                        </div>
+                        <div class="details hidden">
+                            <p>
+                                증상설명
+                            </p>
+                            <ul>
+                                <li> 뿌리와 잎자루에 발생한다.
+                                </li>
+                                <li>
+                                    처음에는 근두부에 회백색 수침상으로 나타난다.
+                                </li>
+                                <li>
+                                    진전되면 내부가 담갈색으로 변해 물러 썩으며, 악취가 난다.
+                                </li>
+                                <li>
+                                    지상부는 시들음증상을 나타내며, 잎자루가 물러 썩고 악취가 난다.
+                                </li>
+                                <li>
+                                    심하게 감염된 그루는 전체적으로 물러 썩는다.
+                                </li>
+                            </ul>
+                            <p>
+                                방제방법
+                            </p>
+                            <ul>
+                                <li>
+                                    벼과나 콩과 작물로 돌려짓기한다.
+                                </li>
+                                <li>
+                                    이 병원균은 건조에 약하므로 배수와 통풍이 잘되는 밭을 선택한다.
+                                </li>
+                                <li>
+                                    발병초기부터 등록약제를 이용하여 방제한다.
+                                </li>
+                            </ul>
+
+                        </div>
+                    </div>
+                    <div class="alarm_item flex flex-column" data-open="false">
+                        <div class="header flex flex-row justify-between">
+                            <div class="content danger flex flex-row align-center">
+                                <p>
+                                    12/07 15:00 호우 주의보
+                                </p>
+                            </div>
+                            <div class="toggle">
+                                <img src="{{ url_for('static', path='img/arrow.png') }}" alt="">
+                            </div>
+                        </div>
+                        <div class="details hidden">
+                            <p>
+                                증상설명
+                            </p>
+                            <ul>
+                                <li> 뿌리와 잎자루에 발생한다.
+                                </li>
+                                <li>
+                                    처음에는 근두부에 회백색 수침상으로 나타난다.
+                                </li>
+                                <li>
+                                    진전되면 내부가 담갈색으로 변해 물러 썩으며, 악취가 난다.
+                                </li>
+                                <li>
+                                    지상부는 시들음증상을 나타내며, 잎자루가 물러 썩고 악취가 난다.
+                                </li>
+                                <li>
+                                    심하게 감염된 그루는 전체적으로 물러 썩는다.
+                                </li>
+                            </ul>
+                            <p>
+                                방제방법
+                            </p>
+                            <ul>
+                                <li>
+                                    벼과나 콩과 작물로 돌려짓기한다.
+                                </li>
+                                <li>
+                                    이 병원균은 건조에 약하므로 배수와 통풍이 잘되는 밭을 선택한다.
+                                </li>
+                                <li>
+                                    발병초기부터 등록약제를 이용하여 방제한다.
+                                </li>
+                            </ul>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="week_before">
+            <div class="title">
+                <h3>2주전</h3>
+            </div>
+            <div class="content">
+                <div class="alarm_list flex flex-column">
+                    <div class="alarm_item flex flex-column" data-open="false">
+                        <div class="header flex flex-row justify-between">
+                            <div class="content danger flex flex-row align-center">
+                                <p>
+                                    "무름병" 주의보 등급
+                                </p>
+                            </div>
+                            <div class="toggle">
+                                <img src="{{ url_for('static', path='img/arrow.png') }}" alt="">
+                            </div>
+                        </div>
+                        <div class="details hidden">
+                            테스트<br>
+                            테스트<br>
+                            테스트<br>
+                            테스트<br>
+                            테스트<br>
+                        </div>
+                    </div>
+                    <div class="alarm_item flex flex-column" data-open="false">
+                        <div class="header flex flex-row justify-between">
+                            <div class="content danger flex flex-row align-center">
+                                <p>
+                                    "무름병" 주의보 등급
+                                </p>
+                            </div>
+                            <div class="toggle">
+                                <img src="{{ url_for('static', path='img/arrow.png') }}" alt="">
+                            </div>
+                        </div>
+                        <div class="details hidden">
+                            테스트<br>
+                            테스트<br>
+                            테스트<br>
+                            테스트<br>
+                            테스트<br>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block footer %}
+    {% include "footer/footer.html" %}
+{% endblock %}
+
+{% block script %}
+    <script src="{{ url_for('static', path='/js/alarm.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        /* 전체 화면 설정 */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f0f0f0;
+        }
+
+        .splash-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        {#background: #4caf50; /* 배경색 */#}
+        }
+
+        .splash-content {
+            text-align: center;
+            opacity: 0; /* 초기 투명도 */
+            animation: fadeIn 2s ease-in-out forwards; /* 서서히 나타나는 효과 */
+        }
+
+        .splash-image {
+            width: 300px;
+            height: auto;
+            margin-bottom: 20px;
+        }
+
+        .splash-text {
+            font-size: 24px;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        /* 애니메이션 키프레임 */
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+    </style>
+    <title>Title</title>
+</head>
+<body>
+
+<div class="splash-container">
+    <div class="splash-content">
+        <img src="{{ url_for('static', path='/img/logo.png') }}" alt="Splash Image" class="splash-image">
+        <h1 class="splash-text"><span style="color: green">Farm</span><span style="color: saddlebrown">Mate</span></h1>
+        <h2 style="font-size: 15px">AI 비서와 함께 시작하는 도시농업</h2>
+    </div>
+</div>
+</body>
+<script src="{{ url_for('static', path='/js/common.js') }}"></script>
+<script src="{{ url_for('static', path='/js/splash.js') }}"></script>
+</html>

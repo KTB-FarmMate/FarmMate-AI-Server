@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block style %}
+    <link href="{{ url_for('static', path='/css/header.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', path='/css/recommend.css') }}" rel="stylesheet">
+{% endblock %}
+{% block header %}
+    <div id="header">
+        <div onclick="goBack();">뒤로</div>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <div class="quiz_container">
+        <!-- 목적 -->
+        <div class="quiz_title">
+            <h4>농사의 목적은 무엇인가요?</h4>
+        </div>
+        <ul class="quiz_list">
+            <li onclick="location.href='/front/recommend/result'">자급자족</li>
+            <li onclick="location.href='/front/recommend/result'">상업</li>
+            <li onclick="location.href='/front/recommend/result'">취미</li>
+        </ul>
+    </div>
+{% endblock %}

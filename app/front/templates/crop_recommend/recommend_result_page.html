@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block style %}
+    <link href="{{ url_for('static', path='/css/header.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', path='/css/recommend.css') }}" rel="stylesheet">
+{% endblock %}
+{% block header %}
+    <div id="header">
+        <div onclick="goBack();">뒤로</div>
+    </div>
+{% endblock %}
+{% block content %}
+    <div style="margin-top: 50vw;" class="recommend_container">
+        <h1>추천 작물</h1>
+        <div id="img_view">
+            <img src="{{ url_for('static', path='img/crops/감자.png') }}" alt="">
+        </div>
+        <div id="recommend_ment">
+            <p>감자를 추천드려요!</p>
+            <p>지금 바로 정보를 생성하시겠어요?</p>
+        </div>
+
+        <div class="recommend_btn">
+            <button onclick="window.location.href ='/front/index'" data-type="no" value="아니오">아니요</button>
+            <button onclick="window.location.href = '/front/crop_create/감자'" data-type="yes" value="예">예</button>
+        </div>
+    </div>
+{% endblock %}

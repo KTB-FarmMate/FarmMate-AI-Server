@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block style %}
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/guidance.css') }}">
+{% endblock %}
+
+{% block header %}
+    {% include "header/only_back.html" %}
+{% endblock %}
+
+{% block content %}
+    <div class="guidance_container flex flex-column">
+        <div class="work_container flex flex-column">
+            <div class="current_title">
+                <h3>현재 생육 단계 : 유묘기 [ 7.11 ~ 8. 10 ]</h3>
+            </div>
+            <div class="work_list">
+                <h2>필수 작업</h2>
+                <div class="work_item">
+                    <div class="title">
+                        묘판 설치 ( 7.11 ~ 7. 31 )
+                    </div>
+                    <div class="content">
+                        물주기: 주 2~3회
+                        - (묘판 건조 방지, 과습 주의).
+                        잡초 제거: 주 1회
+                        - (묘판 주변의 잡초 제거로 생육 방해 예방).
+                        온도: 20~25℃ 유지
+                        - (환기와 차광으로 적정 온도 조절).
+                        병해 예방: 파종 전 씨감자 소독, 배수로 정비를 통한 과습 방지.
+                        작업 내용: 묘판 설치와 주변 정리, 씨감자를 고르게 배치하여 건강한 발아 환경 조성.
+                    </div>
+                </div>
+                <div class="work_item">
+                    <div class="title">
+                        <h3>
+                            싹틔우기 ( 8.1 ~ 8.10 )
+                        </h3>
+                    </div>
+                    <div class="content">
+                        물주기: 주 2~3회
+                        - (묘판의 건조를 방지하며 과습은 피함).
+                        잡초 제거: 주 1회
+                        - (잡초가 묘판에 영향을 주지 않도록 제거).
+                        적정 온도 유지: 15~20℃ 유지
+                        - (지나친 고온을 피하고 환기를 통해 적정 온도를 유지).
+                        싹 관리:
+                        - 싹 길이는 1~2cm가 적합하며, 싹이 과도하게 자라지 않도록 주기적으로 확인.
+                        - 씨감자를 겹치지 않게 배치해 건강한 발아 유도.
+                        병해 예방:
+                        - 파종 전 씨감자를 소독하여 무름병을 예방.
+                        - 통풍을 강화하고, 과습을 방지하기 위해 배수 관리 철저.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="problem_list flex flex-column">
+            <div class="current_title">
+                <h3>예상되는 문제점 [ 6.20 ~ 7.31 ]</h3>
+            </div>
+            <div class="problem_item">
+                <div class="title">
+                    <h3>기상 재해</h3>
+                </div>
+                <div class="content">
+                    - 장마
+                </div>
+            </div>
+            <div class="problem_item">
+                <div class="title">
+                    <h3>병해충</h3>
+                </div>
+                <div class="content">
+                    - 마름병
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block footer %}
+    {% include "footer/footer.html" %}
+{% endblock %}
+
+{% block script %}
+    <script>
+        document.querySelector(".info").dataset.selected = 'true';
+    </script>
+    <script src="{{ url_for('static', path='/js/guidance.js') }}"></script>
+{% endblock %}
