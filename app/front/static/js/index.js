@@ -1,11 +1,7 @@
 window.addEventListener("load", () => {
     const crops = Array.from(document.getElementsByClassName("crop"));
 
-    const memberId = localStorage.getItem("memberId");
-    if (!memberId) {
-        console.error("memberId is missing in localStorage. Please set it before using the application.");
-        return;
-    }
+    const memberId = get_memberId();
     console.log(`${BE_SERVER}/members/${memberId}/threads`);
     const crops_data = JSON.parse(localStorage.getItem("crops_data"));
 
@@ -25,14 +21,14 @@ window.addEventListener("load", () => {
 
                     crop.addEventListener("click", () => {
                         // 이미 생성된 작물 페이지로 이동
-                        window.location.href = `crop/${cropName}`;
+                        window.location.href = `/front/members/${memberId}/crop/${cropName}`;
                         localStorage.setItem("select_crop", cropName);
                     });
                 } else {
                     // fetch 데이터에 작물이 없는 경우
                     crop.addEventListener("click", () => {
                         // 새로운 작물 생성 페이지로 이동
-                        window.location.href = `crop_create/${cropName}`;
+                        window.location.href = `/front/members/${memberId}/crop_create/${cropName}`;
                     });
                 }
             });

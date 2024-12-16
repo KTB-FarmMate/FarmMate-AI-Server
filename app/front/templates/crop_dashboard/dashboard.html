@@ -9,7 +9,7 @@
             <div class="move_home_btn" onclick="goHome();">홈</div>
         </div>
         <div class="right_area">
-            <div onclick="location.href=`/front/crop_modify/{{ crop_name }}`" class="modify_btn">
+            <div onclick="location.href=`/front/members/{{ memberId }}/crop_modify/{{ cropName }}`" class="modify_btn">
                 수정
             </div>
             <div onclick="document.querySelector('.remove_overlay').dataset.visible = 'true';"
@@ -26,7 +26,7 @@
                 <div class="card_title">
                     <h3>날씨</h3>
                 </div>
-                <div onclick="location.href='./{{ crop_name }}/weather/detail'" class="card_detail_btn">
+                <div onclick="location.href='/front/members/{{ memberId }}/{{ cropName }}/weather/detail'" class="card_detail_btn">
                     <span>더보기</span>
                 </div>
             </div>
@@ -50,7 +50,7 @@
                 <div class="card_title">
                     <h4>병해충 알림</h4>
                 </div>
-                <div onclick="location.href='./{{ crop_name }}/pests'" class="card_detail_btn">
+                <div onclick="location.href='/front/members/{{ memberId }}/crop/{{ cropName }}/pests'" class="card_detail_btn">
                     <span>더보기</span>
                 </div>
             </div>
@@ -70,7 +70,7 @@
                 <div class="card_title">
                     <h4>재배 길라잡이</h4>
                 </div>
-                <div onclick="location.href += '/guidance'" class="card_detail_btn">
+                <div onclick="location.href = `/front/members/{{ memberId }}/crop/{{ cropName }}/guidance`" class="card_detail_btn">
                     <span>더보기</span>
                 </div>
             </div>
@@ -108,7 +108,7 @@
                     </button>
                 </div>
                 <div class="remove_overlay_btn">
-                    <button onclick="document.querySelector('.remove_overlay').dataset.visible = 'false';crop_delete('{{ crop_name }}');"
+                    <button onclick="document.querySelector('.remove_overlay').dataset.visible = 'false';crop_delete('{{ crop_name }}, {{ memberId }}');"
                             class="delete_btn">삭제
                     </button>
                 </div>

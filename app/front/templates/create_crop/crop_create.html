@@ -18,7 +18,7 @@
         <label>적성일(작물 심은 날)
             <input name='creation_date' class="crop_data_input" type="text" required>
         </label>
-        <button class="crop_create_btn" onclick="crop_create('{{ crop_name }}');">채팅방 생성</button>
+        <button class="crop_create_btn" onclick="crop_create('{{ cropName }}', '{{ memberId }}');">채팅방 생성</button>
     </div>
 {% endblock %}
 {% block script %}

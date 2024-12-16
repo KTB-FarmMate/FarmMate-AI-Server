@@ -20,8 +20,8 @@
         </div>
 
         <div class="recommend_btn">
-            <button onclick="window.location.href ='/front/index'" data-type="no" value="아니오">아니요</button>
-            <button onclick="window.location.href = '/front/crop_create/감자'" data-type="yes" value="예">예</button>
+            <button onclick="window.location.href =`/front/members/{{ memberId }}`" data-type="no" value="아니오">아니요</button>
+            <button onclick="window.location.href = '/front/members/{{ memberId }}/crop_create/감자'" data-type="yes" value="예">예</button>
         </div>
     </div>
 {% endblock %}

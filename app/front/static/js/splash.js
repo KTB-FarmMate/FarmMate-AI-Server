@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
-
-        if (localStorage.getItem("memberId") == null) {
+        let memberId = localStorage.getItem("memberId");
+        if (memberId == null) {
             fetch(`${BE_SERVER}/members`, {
                 method: "POST",
             })
@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 })
                 .then((data) => {
                     localStorage.setItem("memberId", data["memberId"]);
+                    memberId = data["memberId"];
                 })
                 .catch((error) => {
                     console.error("Fetch error:", error);
@@ -34,9 +35,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         setTimeout(() => {
             if (localStorage.getItem("crops") == null) {
-                location.href = "/front/recommend";
+                location.href = `./members/${memberId}/recommend`;
             } else {
-                location.href = "/front/index";
+                location.href = `./members/${memberId}`;
             }
         }, 2000);
     });

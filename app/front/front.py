@@ -13,116 +13,122 @@ async def splash(request: Request):
     )
 
 
-@router.get("/index", response_class=HTMLResponse)
-async def index_template(request: Request):
+@router.get("/members/{memberId}", response_class=HTMLResponse)
+async def index_template(request: Request, memberId: str):
     return templates.TemplateResponse(
-        "crop_list/index.html", {"request": request, "data": "Hello, FastAPI!"}
+        "crop_list/index.html", {"request": request, "memberId": memberId}
     )
 
 
-@router.get("/crop/{cropName}", response_class=HTMLResponse)
-async def crop(request: Request, cropName: str):
+@router.get("/members/{memberId}/crop/{cropName}", response_class=HTMLResponse)
+async def crop(request: Request, memberId: str, cropName: str):
     return templates.TemplateResponse(
-        "crop_dashboard/dashboard.html", {"request": request, "crop_name": cropName}
+        "crop_dashboard/dashboard.html", {"request": request, "memberId": memberId, "cropName": cropName}
     )
 
 
-@router.get("/recommend", response_class=HTMLResponse)
-async def recommend(request: Request):
+@router.get("/members/{memberId}/recommend", response_class=HTMLResponse)
+async def recommend(request: Request, memberId: str):
     return (templates.TemplateResponse(
-        "crop_recommend/recommend_page.html", {"request": request}
+        "crop_recommend/recommend_page.html", {"request": request, "memberId": memberId}
     ))
 
 
-@router.get("/recommend/{quiz_num}", response_class=HTMLResponse)
-async def recommend(request: Request, quiz_num: str):
+@router.get("/members/{memberId}/recommend/{quiz_num}", response_class=HTMLResponse)
+async def recommend(request: Request, memberId: str, quiz_num: str):
     if quiz_num == "result":
         return templates.TemplateResponse(
-            f"crop_recommend/recommend_result_page.html", {"request": request}
+            f"crop_recommend/recommend_result_page.html", {"request": request, "memberId": memberId}
         )
     return templates.TemplateResponse(
-        f"crop_recommend/recommend_{quiz_num}_page.html", {"request": request}
+        f"crop_recommend/recommend_{quiz_num}_page.html", {"request": request, "memberId": memberId}
     )
 
 
-@router.get("/crop_create/{crop_name}", response_class=HTMLResponse)
-async def crop_create(request: Request, crop_name: str):
+@router.get("/members/{memberId}/crop_create/{cropName}", response_class=HTMLResponse)
+async def crop_create(request: Request, memberId: str, cropName: str):
     return templates.TemplateResponse(
-        "create_crop/crop_create.html", {"request": request, "crop_name": crop_name}
+        "create_crop/crop_create.html", {"request": request, "memberId": memberId, "cropName": cropName}
     )
 
 
-@router.get("/crop_modify/{crop_name}", response_class=HTMLResponse)
-async def crop_modify(request: Request, crop_name: str):
+@router.get("/members/{memberId}/crop_modify/{cropName}", response_class=HTMLResponse)
+async def crop_modify(request: Request, memberId: str, cropName: str):
     return templates.TemplateResponse(
-        "modify_crop/crop_modify.html", {"request": request, "crop_name": crop_name}
+        "modify_crop/crop_modify.html", {"request": request, "memberId": memberId, "cropName": cropName}
     )
 
 
-@router.get("/chatbot/{crop_name}", response_class=HTMLResponse)
-async def chatbot(request: Request, crop_name: str):
+@router.get("/members/{memberId}/crop/{cropName}/chatbot", response_class=HTMLResponse)
+async def chatbot(request: Request, memberId: str, cropName: str):
     return templates.TemplateResponse(
-        "chat/chat.html", {"request": request, "crop_name": crop_name}
+        "chat/chat.html", {"request": request, "memberId": memberId, "cropName": cropName}
     )
 
 
-@router.get("/curriculum/{crop_name}", response_class=HTMLResponse)
-async def curriculum(request: Request, crop_name: str):
+@router.get("/members/{memberId}/crop/{cropName}/curriculum", response_class=HTMLResponse)
+async def curriculum(request: Request, memberId: str, cropName: str):
     return templates.TemplateResponse(
-        "curriculum/curriculum.html", {"request": request, "crop_name": crop_name}
+        "curriculum/curriculum.html", {"request": request, "memberId": memberId, "cropName": cropName}
     )
 
 
-@router.get("/curriculum/{crop_name}/detail", response_class=HTMLResponse)
-async def curriculum_detail(request: Request, crop_name: str):
+@router.get("/members/{memberId}/crop/{cropName}/curriculum/detail", response_class=HTMLResponse)
+async def curriculum_detail(request: Request, memberId: str, cropName: str):
     return templates.TemplateResponse(
-        "curriculum/curriculum_detail.html", {"request": request, "crop_name": crop_name}
+        "curriculum/curriculum_detail.html", {"request": request, "memberId": memberId, "cropName": cropName}
     )
 
 
-@router.get("/alarm/{crop_name}", response_class=HTMLResponse)
-async def alarm(request: Request, crop_name: str):
+@router.get("/members/{memberId}/crop/{cropName}/alarm", response_class=HTMLResponse)
+async def alarm(request: Request, memberId: str, cropName: str):
     return templates.TemplateResponse(
-        "alarm/alarm.html", {"request": request, "crop_name": crop_name}
+        "alarm/alarm.html", {"request": request, "memberId": memberId, "cropName": cropName}
     )
 
 
-@router.get("/bookmark/{crop_name}", response_class=HTMLResponse)
-async def bookmark(request: Request, crop_name: str):
+@router.get("/members/{memberId}/crop/{cropName}/chatbot/bookmark", response_class=HTMLResponse)
+async def bookmark(request: Request, memberId: str, cropName: str):
     return templates.TemplateResponse(
-        "bookmark/bookmark.html", {"request": request, "crop_name": crop_name}
+        "bookmark/bookmark.html", {"request": request, "memberId": memberId, "cropName": cropName}
     )
 
 
-@router.get("/setting", response_class=HTMLResponse)
-async def setting(request: Request):
+@router.get("/members/{memberId}/setting", response_class=HTMLResponse)
+async def setting(request: Request, memberId: str):
     return templates.TemplateResponse(
-        "setting/setting.html", {"request": request}
-    )
-
-@router.get("/crop/{crop_name}/guidance", response_class=HTMLResponse)
-async def guidance(request: Request, crop_name: str):
-    return templates.TemplateResponse(
-        "guidance/guidance.html", {"request": request, "crop_name": crop_name}
-    )
-
-@router.get("/crop/{crop_name}/pests", response_class=HTMLResponse)
-async def pests(request: Request, crop_name: str):
-    return templates.TemplateResponse(
-        "pests/pests.html", {"request": request, "crop_name": crop_name}
-    )
-@router.get("/crop/{crop_name}/pests/{pest_name}", response_class=HTMLResponse)
-async def pests(request: Request, crop_name: str, pest_name:str):
-    return templates.TemplateResponse(
-        "pests/pests_detail.html", {"request": request, "crop_name": crop_name, "pest_name": pest_name}
+        "setting/setting.html", {"request": request, "memberId": memberId}
     )
 
 
-@router.get("/crop/{crop_name}/weather/detail", response_class=HTMLResponse)
-async def pests(request: Request, crop_name: str):
+@router.get("/members/{memberId}/crop/{cropName}/guidance", response_class=HTMLResponse)
+async def guidance(request: Request, memberId: str, cropName: str):
     return templates.TemplateResponse(
-        "weather/weather.html", {"request": request, "crop_name": crop_name}
+        "guidance/guidance.html", {"request": request, "memberId": memberId, "cropName": cropName}
     )
+
+
+@router.get("/members/{memberId}/crop/{cropName}/pests", response_class=HTMLResponse)
+async def pests(request: Request, memberId: str, cropName: str):
+    return templates.TemplateResponse(
+        "pests/pests.html", {"request": request, "memberId": memberId, "cropName": cropName}
+    )
+
+
+@router.get("/members/{memberId}/crop/{cropName}/pests/{pestName}", response_class=HTMLResponse)
+async def pests(request: Request, memberId: str, cropName: str, pestName: str):
+    return templates.TemplateResponse(
+        "pests/pests_detail.html",
+        {"request": request, "memberId": memberId, "cropName": cropName, "pestName": pestName}
+    )
+
+
+@router.get("/members/{memberId}/crop/{cropName}/weather/detail", response_class=HTMLResponse)
+async def pests(request: Request, memberId: str, cropName: str):
+    return templates.TemplateResponse(
+        "weather/weather.html", {"request": request, "memberId": memberId, "cropName": cropName}
+    )
+
 
 @router.get("/test", response_class=HTMLResponse)
 async def test(request: Request):

@@ -1,6 +1,6 @@
-function crop_create(crop_name) {
-    let memberId = localStorage.getItem("memberId");
-
+function crop_create(crop_name, memberId) {
+    // let memberId = localStorage.getItem("memberId");
+    // const memberId = get_memberId;
     // 각 input 요소의 값을 가져옴
     const address = document.querySelector("input[name='address']").value;
     const creationDate = document.querySelector("input[name='creation_date']").value;
@@ -32,7 +32,8 @@ function crop_create(crop_name) {
             }
             return res.json();
         })
-        .then((data) => {
+        .then(data => {
+            console.log(data);
             crops_data[crop_name].threadId = data.threadId;
             crops_data[crop_name].created = true;
             crops_data[crop_name].address = address;
@@ -40,7 +41,7 @@ function crop_create(crop_name) {
             localStorage.setItem("crops_data", JSON.stringify(crops_data));
 
             localStorage.setItem("select_crop", crop_name);
-            location.href = `/front/crop/${crop_name}`;
+            location.href = `/MEMBERS/${memberId}/crop/${crop_name}`;
             // localStorage.setItem("memberId", data["memberId"]);
         })
         .catch((error) => {
@@ -48,9 +49,9 @@ function crop_create(crop_name) {
         });
 }
 
-function crop_delete(crop_name) {
-    let memberId = localStorage.getItem("memberId");
-    let select_crop = localStorage.getItem("select_crop");
+function crop_delete(crop_name, memberId) {
+    // let memberId = localStorage.getItem("memberId");
+    // let select_crop = localStorage.getItem("select_crop");
     let crops_data = JSON.parse(localStorage.getItem("crops_data"));
     let threadId = crops_data[select_crop].threadId;
     fetch(`${BE_SERVER}/members/${memberId}/threads/${threadId}`, {

@@ -10,7 +10,7 @@
             <div class="move_home_btn" onclick="goHome();">홈</div>
         </div>
         <div class="right_area">
-            <div onclick="location.href='/front/bookmark/{{ crop_name }}'">
+            <div onclick="location.href +='/bookmark'">
                 더보기
             </div>
         </div>
@@ -86,7 +86,6 @@
 {% block script %}
     <script>
         document.querySelector(".chatbot").dataset.selected = 'true';
-
     </script>
     <script src="/front/static/js/chat.js"> </script>
 {% endblock %}
