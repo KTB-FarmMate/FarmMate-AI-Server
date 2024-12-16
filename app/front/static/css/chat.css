@@ -86,6 +86,13 @@
     white-space: pre-wrap;
 }
 
+.assistant .message {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    margin: 15px;
+}
+
 .chat_setting {
     display: flex;
     flex-direction: row;
@@ -97,6 +104,14 @@
     flex-direction: row;
     justify-content: flex-end;
     align-items: center;
+}
+
+.user .message {
+    padding-right: 10px;
+    font-size: 13px;
+    white-space: pre-wrap;
+    background: #e9e9e9;
+    border-radius: 10px;
 }
 
 .user .edit_btn img {
@@ -111,8 +126,10 @@
     display: flex;
     flex-direction: column;
     margin-top: 5vh;
-    background: #f7f7f8;
+    background: #d1d1ff;
     padding: 3vw;
+    border-radius: 10px;
+    font-weight: bold;
 }
 
 .assistant .profile_img img {
@@ -126,4 +143,9 @@
 
 .setting_btns img {
     width: 5vw;
+}
+
+.message_list {
+    display: flex;
+    flex-direction: column;
 }

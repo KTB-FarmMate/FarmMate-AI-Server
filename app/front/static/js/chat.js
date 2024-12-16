@@ -34,11 +34,23 @@ function load_messages(memberId, cropName) {
             const messageList = document.querySelector(".message_list");
             messageList.innerHTML = ""; // 기존 메시지 초기화
             console.log(messages);
+            let idx = 0; // 메시지 순서를 나타내는 인덱스
+
             messages["messages"].forEach(msg => {
-                const messageElement = msg.role === "USER"
-                    ? createUserMessage(msg.text)
-                    : createAssistantMessage(msg.text);
-                messageList.appendChild(messageElement);
+                // [시스템 메시지]를 포함하는 메시지는 건너뜀
+                if (!msg.text.includes("[시스템 메시지]")) {
+                    // role이 null인 경우 순서(idx)에 따라 user와 assistant로 분리
+                    const role = msg.role
+                        ? msg.role.toLowerCase()
+                        : (idx % 2 === 0 ? "user" : "assistant");
+
+                    const messageElement = role === "user"
+                        ? createUserMessage(msg.text)
+                        : createAssistantMessage(msg.text);
+
+                    messageList.appendChild(messageElement);
+                    idx++; // 인덱스 증가
+                }
             });
         })
         .catch(error => {
@@ -59,7 +71,7 @@ function createUserMessage(content) {
                 <span>${content}</span>
             </div>
             <div class="edit_btn">
-                <img src="/static/img/edit.png" alt="">
+                <img src="/front/static/img/edit.png" alt="">
             </div>
         </div>
     `;
@@ -76,17 +88,17 @@ function createAssistantMessage(content) {
         <div class="assistant">
             <div class="chat_setting">
                 <div class="profile_img">
-                    <img src="/static/img/logo.png" alt="">
+                    <img src="/front/static/img/logo.png" alt="">
                 </div>
                 <div class="setting_btns flex">
                     <div class="copy">
-                        <img src="/static/img/copy.png" alt="">
+                        <img src="/front/static/img/copy.png" alt="">
                     </div>
                     <div class="share">
-                        <img src="/static/img/share.png" alt="">
+                        <img src="/front/static/img/share.png" alt="">
                     </div>
-                    <div class="bookmark" onclick="handleBookmark(this, 'MEMBER_ID', 'THREAD_ID')">
-                        <img src="/static/img/bookmark.png" alt="">
+                    <div class="bookmark" onclick="handleBookmark(this)">
+                        <img src="/front/static/img/bookmark.png" alt="">
                     </div>
                 </div>
             </div>
@@ -165,9 +177,11 @@ function send_message(memberId, cropName) {
         });
 }
 
-function handleBookmark(element, memberId, cropName) {
+function handleBookmark(element) {
     // 현재 클릭된 bookmark 버튼을 기준으로 부모 .message_list_warpper 찾기
     const wrapper = element.closest(".message_list_warpper");
+    const cropName = get_cropName();
+    const memberId = get_memberId();
 
     if (!wrapper) {
         console.error("message_list_warpper를 찾을 수 없습니다.");
