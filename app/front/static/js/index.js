@@ -2,7 +2,11 @@ window.addEventListener("load", () => {
     const crops = Array.from(document.getElementsByClassName("crop"));
 
     const memberId = localStorage.getItem("memberId");
-
+    if (!memberId) {
+        console.error("memberId is missing in localStorage. Please set it before using the application.");
+        return;
+    }
+    console.log(`${BE_SERVER}/members/${memberId}/threads`);
     const crops_data = JSON.parse(localStorage.getItem("crops_data"));
 
     fetch(`${BE_SERVER}/members/${memberId}/threads`)
