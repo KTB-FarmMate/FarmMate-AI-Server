@@ -38,13 +38,14 @@ function crop_create(crop_name) {
             crops_data[crop_name].address = address;
             crops_data[crop_name].palntedAt = creationDate;
             localStorage.setItem("crops_data", JSON.stringify(crops_data));
+
+            localStorage.setItem("select_crop", crop_name);
+            location.href = `/front/crop/${crop_name}`;
             // localStorage.setItem("memberId", data["memberId"]);
         })
         .catch((error) => {
             console.error("Fetch error:", error);
         });
-    localStorage.setItem("select_crop", crop_name);
-    location.href = `/front/crop/${crop_name}`;
 }
 
 function crop_delete(crop_name) {
