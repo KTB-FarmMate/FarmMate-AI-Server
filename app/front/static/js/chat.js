@@ -1,5 +1,16 @@
-function send_message(element) {
-    if (!element.classList.contains("active")){
+let index = 0; // 현재 출력할 글자의 인덱스
+const interval = Math.random(); // 0.1 ~ 0.2초 랜덤 간격 설정
+
+function typeMessage(messageContext) {
+    if (index < messageContext.length) {
+        messageContext.innerHTML += messageContext[index];
+        index++;
+        setTimeout(typeMessage, interval); // 다음 글자 출력
+    }
+}
+
+function send_message(memberId, threadId) {
+    if (!document.querySelector(".send_btn_area").classList.contains("active")) {
         return;
     }
     let send_input = document.querySelector(".input_area input");
@@ -17,42 +28,46 @@ function send_message(element) {
     user_message.textContent = send_message;
 
     let messageItem = document.querySelector(".assistant .message");
-    let messageContext = `
-        환경: 서늘하고 반그늘진 곳 선택
-        파종:
-        - 봄(3-4월) 또는 가을(8-9월)
-        - 얕게(0.5cm) 파종, 줄 간격 20cm
-        관리:
-        - 물: 토양 촉촉하게 유지
-        - 간격: 밀집 피하기
-        수확:
-        - 파종 후 40-50일
-        - 필요한 만큼 아래 잎부터 수확
-        주의: 더운 여름 피하기, 과습 주의
-        
-        핵심은 다음과 같습니다:
-        1. 상추는 서늘한 환경을 좋아합니다. 너무 더운 여름은 피하세요.
-        2. 봄이나 가을에 파종하고, 얕게 심습니다.
-        3. 물은 자주 주되, 토양이 너무 습하지 않게 주의
-        4. 40-50일 후부터 수확할 수 있으며, 필요한 만큼
-        5. 아래 잎부터 따서 사용하면 됩니다.
-    `;
-
-    let index = 0; // 현재 출력할 글자의 인덱스
-    const interval = Math.random(); // 0.1 ~ 0.2초 랜덤 간격 설정
-
-    function typeMessage() {
-        if (index < messageContext.length) {
-            messageItem.innerHTML += messageContext[index];
-            index++;
-            setTimeout(typeMessage, interval); // 다음 글자 출력
-        }
-    }
-
-    // 메시지 타이핑 시작
-    typeMessage();
-
+    fetch(`${BE_SERVER}/members/${memberId}/threads/${threadId}/messages`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({"message": send_message})
+    })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw response;
+            }
+        })
+        .then(message => {
+            const messageContext = message["message"];
+            typeMessage(messageContext);
+        })
+    // let messageContext = `
+    //     환경: 서늘하고 반그늘진 곳 선택
+    //     파종:
+    //     - 봄(3-4월) 또는 가을(8-9월)
+    //     - 얕게(0.5cm) 파종, 줄 간격 20cm
+    //     관리:
+    //     - 물: 토양 촉촉하게 유지
+    //     - 간격: 밀집 피하기
+    //     수확:
+    //     - 파종 후 40-50일
+    //     - 필요한 만큼 아래 잎부터 수확
+    //     주의: 더운 여름 피하기, 과습 주의
+    //
+    //     핵심은 다음과 같습니다:
+    //     1. 상추는 서늘한 환경을 좋아합니다. 너무 더운 여름은 피하세요.
+    //     2. 봄이나 가을에 파종하고, 얕게 심습니다.
+    //     3. 물은 자주 주되, 토양이 너무 습하지 않게 주의
+    //     4. 40-50일 후부터 수확할 수 있으며, 필요한 만큼
+    //     5. 아래 잎부터 따서 사용하면 됩니다.
+    // `;
 }
+
 function handleBookmark(element, crop_name) {
     // 현재 클릭된 bookmark 버튼을 기준으로 부모 .message_list_warpper 찾기
     const wrapper = element.closest(".message_list_warpper");
@@ -156,7 +171,6 @@ document.addEventListener("DOMContentLoaded", () => {
             sendButtonArea.style.pointerEvents = "none"; // 클릭 불가능
         }
     });
-
 
 
 })
