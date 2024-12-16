@@ -14,7 +14,6 @@ app = FastAPI(
     openapi_url="/openapi.json",
     docs_url="/docs",
     redoc_url="/redoc",
-    root_path="/ai",  # root_path 설정
     servers=[
         {"url": "/ai", "description": "AI 관련 API"},
     ],
@@ -37,7 +36,7 @@ app.include_router(openai_router, prefix="/members/{memberId}/threads")
 app.include_router(pest_router, prefix="/pests")
 
 # # Front 앱 라우터 등록
-front_app.include_router(front_router, prefix="/front")
+front_app.include_router(front_router)
 
 # 정적 파일 디렉토리 설정
 static_dir = Path(__file__).parent / "front/static"
@@ -48,7 +47,7 @@ if not static_dir.exists():
 front_app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 # Front 앱을 메인 앱에 마운트
-app.mount("/", front_app)
+app.mount("/front", front_app)
 
 # 글로벌 예외 핸들러 추가
 add_exception_handlers(app)
