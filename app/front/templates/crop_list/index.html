@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block style %}
-    <link href="/css/index.css" rel="stylesheet">
+    <link href="{{ url_for('static', path='css/index.css') }}" rel="stylesheet">
 {% endblock %}
 {% block header %}
     <div id="header" class="setting">
@@ -52,6 +52,7 @@
 {% block footer %}
 {% endblock %}
 {% block script %}
-{#    <script src="{{ url_for('static', path='/js/index.js') }}"></script>#}
-    <script src="/js/index.js"></script>
+    <script src="{{ url_for('static', path='js/index.js') }}"></script>
+
+{#    <script src="/js/index.js"></script>#}
 {% endblock %}
