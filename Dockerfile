@@ -45,6 +45,7 @@ RUN pip install --no-cache-dir pytest-asyncio==0.24.0
 RUN pip install --no-cache-dir pytest-mock==3.14.0
 RUN pip install --no-cache-dir tomli==2.0.2
 RUN pip install --no-cache-dir urllib3==2.2.3
+RUN pip install --no-cache-dir beautifulsoup4==4.12.3
 
 # 깃 레포지토리에서 프로젝트 파일을 복사
 COPY . .
