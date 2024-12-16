@@ -52,7 +52,7 @@ if not static_dir.exists():
     raise RuntimeError(f"Static directory '{static_dir}'가 존재하지 않습니다.")
 
 # Front 앱에 정적 파일 제공
-front_app.mount("/static", StaticFiles(directory="/front/static"), name="static")
+front_app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 
 # Front 앱을 메인 앱에 마운트
