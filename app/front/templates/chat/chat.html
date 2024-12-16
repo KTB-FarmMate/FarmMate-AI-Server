@@ -55,7 +55,8 @@
                                     <img src="{{ url_for('static', path='/img/share.png') }}" alt="">
 
                                 </div>
-                                <div class="bookmark" onclick="handleBookmark(this, '{{ crop_name }}')">
+                                <div class="bookmark"
+                                     onclick="handleBookmark(this, '{{ memberId }}', '{{ cropName }}')">
                                     <img src="{{ url_for('static', path='/img/bookmark.png') }}" alt="">
                                 </div>
                             </div>
@@ -71,7 +72,7 @@
                 <div class="input_area">
                     <input type="text">
                 </div>
-                <div onclick="send_message(this)" class="send_btn_area">
+                <div onclick="send_message('{{ memberId }}', '{{ cropName }}')" class="send_btn_area">
                     <img src="{{ url_for('static', path='/img/send.png') }}" alt="">
                 </div>
             </div>
@@ -84,8 +85,10 @@
 {% endblock %}
 
 {% block script %}
+    <script src="/front/static/js/chat.js"></script>
     <script>
+        console.log(`{{ memberId }}, {{ cropName }}`)
+        load_messages('{{ memberId }}', '{{ cropName }}');
         document.querySelector(".chatbot").dataset.selected = 'true';
     </script>
-    <script src="/front/static/js/chat.js"> </script>
 {% endblock %}

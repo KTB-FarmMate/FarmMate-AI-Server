@@ -1,62 +1,82 @@
-function load_bookmark(crop_name) {
+function load_bookmark(memberId, cropName) {
     // localStorage에서 bookmarks 데이터를 가져오기
-    let bookmarks = JSON.parse(localStorage.getItem("bookmarks") || `{
-            "감자: [],
-            "고구마": [],
-            "당근": [],
-            "양파": []
-        }`);
-    let bookmarkList = bookmarks[crop_name];
-    console.log(bookmarkList);
-
-    if (!bookmarkList || bookmarkList.length === 0) {
-        console.log(`${crop_name}에 저장된 북마크가 없습니다.`);
+    const crops_data = JSON.parse(localStorage.getItem("crops_data"));
+    const thread_id = crops_data[cropName]?.threadId;
+    console.log(crops_data, cropName);
+    if (!thread_id) {
+        console.error(`${cropName}에 대한 thread_id를 찾을 수 없습니다.`);
         return;
     }
 
-    // 현재 날짜 기준으로 주별 구분
-    const now = new Date();
-    const currentWeekStart = new Date(now.setDate(now.getDate() - now.getDay())); // 이번 주 시작일
+    console.log("thread_id", thread_id);
+
     const container = document.querySelector(".bookmark-container");
-
-    // 주별 데이터 그룹화
-    let weekGroups = {
-        thisWeek: {
-            title: "이번주",
-            items: []
-        }
-    };
-
-    // 데이터를 역순으로 순회
-    for (let i = bookmarkList.length - 1; i >= 0; i--) {
-        const dateEntry = bookmarkList[i];
-        const entryDate = new Date(dateEntry.date); // 날짜 정보
-        const weekDiff = Math.floor((currentWeekStart - entryDate) / (7 * 24 * 60 * 60 * 1000)); // 주 차이 계산
-
-        const weekKey = weekDiff === 0 ? "thisWeek" : `${weekDiff}주전`;
-        if (!weekGroups[weekKey]) {
-            weekGroups[weekKey] = {
-                title: weekDiff === 0 ? "이번주" : `${weekDiff}주전`,
-                items: []
-            };
-        }
-
-        // 날짜별 아이템 추가
-        weekGroups[weekKey].items.push(...dateEntry.items);
+    if (!container) {
+        console.error("bookmark-container를 찾을 수 없습니다.");
+        return;
     }
 
-    // 섹션 동적으로 생성
-    Object.keys(weekGroups).forEach((key) => {
-        const group = weekGroups[key];
-        if (group.items.length > 0) {
-            const section = createWeekSection(group.title);
-            group.items.forEach((entry) => {
-                const itemHTML = createBookmarkItem(entry);
-                section.querySelector(".bookmark_list").appendChild(itemHTML);
+    fetch(`${BE_SERVER}/members/${memberId}/threads/${thread_id}/bookmarks`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (!data || data.length === 0) {
+                console.log(`${cropName}에 저장된 북마크가 없습니다.`);
+                alert("저장된 북마크가 없습니다.");
+                return;
+            }
+
+            // 현재 날짜 기준으로 주별 구분
+            const now = new Date();
+            const currentWeekStart = new Date(now.setDate(now.getDate() - now.getDay())); // 이번 주 시작일
+
+            // 주별 데이터 그룹화
+            let weekGroups = {
+                thisWeek: {
+                    title: "이번주",
+                    items: []
+                }
+            };
+
+            // 데이터를 역순으로 순회
+            data.forEach(entry => {
+                const entryDate = new Date(entry.addedAt); // 추가된 날짜
+                const weekDiff = Math.floor((currentWeekStart - entryDate) / (7 * 24 * 60 * 60 * 1000)); // 주 차이 계산
+
+                const weekKey = weekDiff === 0 ? "thisWeek" : `${weekDiff}주전`;
+                if (!weekGroups[weekKey]) {
+                    weekGroups[weekKey] = {
+                        title: weekDiff === 0 ? "이번주" : `${weekDiff}주전`,
+                        items: []
+                    };
+                }
+
+                weekGroups[weekKey].items.push(entry);
             });
-            container.appendChild(section);
-        }
-    });
+
+            // 기존 컨테이너 초기화
+            container.innerHTML = "";
+
+            // 섹션 동적으로 생성
+            Object.keys(weekGroups).forEach(key => {
+                const group = weekGroups[key];
+                if (group.items.length > 0) {
+                    const section = createWeekSection(group.title);
+                    group.items.forEach(entry => {
+                        const itemHTML = createBookmarkItem(entry);
+                        section.querySelector(".bookmark_list").appendChild(itemHTML);
+                    });
+                    container.appendChild(section);
+                }
+            });
+        })
+        .catch(error => {
+            console.error("Error fetching bookmarks:", error);
+        });
 }
 
 // 주 섹션 생성 함수
@@ -82,20 +102,22 @@ function createBookmarkItem(entry) {
     item.className = "bookmark_item flex flex-column";
     item.setAttribute("data-open", "false");
 
-    const title = entry["질문제목"] || "제목 없음";
-    const content = entry["질문내용"] || "내용 없음";
+    const question = entry.question || "질문 없음";
+    const answer = entry.answer || "답변 없음";
+    const addedAt = new Date(entry.addedAt).toLocaleString(); // 추가된 시간 포맷팅
 
     item.innerHTML = `
         <div class="header flex flex-row justify-between">
-            <div class="content danger flex flex-row align-center">
-                <p>${title}</p>
+            <div class="content flex flex-row align-center">
+                <p><strong>질문:</strong> ${question}</p>
             </div>
             <div class="toggle">
-                <img src="" alt="">
+                <img src="/path/to/toggle-icon.png" alt="Toggle">
             </div>
         </div>
         <div class="details hidden">
-            <p>${content}</p>
+            <p><strong>답변:</strong> ${answer}</p>
+            <p><small>${addedAt}</small></p>
         </div>
     `;
 

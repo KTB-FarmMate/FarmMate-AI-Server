@@ -1,3 +1,105 @@
+function fetchWithRetry(url, options = {}, retries = 3, delay = 1000) {
+    return fetch(url, options)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .catch(error => {
+            if (retries > 1) {
+                return new Promise(resolve =>
+                    setTimeout(() => resolve(fetchWithRetry(url, options, retries - 1, delay)), delay)
+                );
+            }
+            throw error;
+        });
+}
+
+function load_messages(memberId, cropName) {
+    const crops_data = JSON.parse(localStorage.getItem('crops_data'));
+    console.log(crops_data);
+    const threadId = crops_data[cropName].threadId
+    const url = `${BE_SERVER}/members/${memberId}/threads/${threadId}`;
+
+    const chat_head = document.querySelector('.chat_head ');
+    chat_head.remove();
+    const chat_body = document.querySelector('.macro_container');
+    const message_list = document.querySelector('.message_list');
+    chat_body.remove();
+    message_list.style.display = 'flex';
+
+    fetchWithRetry(url, {}, 3, 1000)
+        .then(messages => {
+            const messageList = document.querySelector(".message_list");
+            messageList.innerHTML = ""; // 기존 메시지 초기화
+            console.log(messages);
+            messages["messages"].forEach(msg => {
+                const messageElement = msg.role === "USER"
+                    ? createUserMessage(msg.text)
+                    : createAssistantMessage(msg.text);
+                messageList.appendChild(messageElement);
+            });
+        })
+        .catch(error => {
+            console.error("Failed to load messages after retries:", error);
+            alert("메시지를 로드하는 중 문제가 발생했습니다.");
+        });
+}
+
+
+// 사용자 메시지 생성
+function createUserMessage(content) {
+    const wrapper = document.createElement("div");
+    wrapper.className = "message_list_warpper flex flex-column";
+
+    wrapper.innerHTML = `
+        <div class="user">
+            <div class="message">
+                <span>${content}</span>
+            </div>
+            <div class="edit_btn">
+                <img src="/static/img/edit.png" alt="">
+            </div>
+        </div>
+    `;
+
+    return wrapper;
+}
+
+// AI 응답 메시지 생성
+function createAssistantMessage(content) {
+    const wrapper = document.createElement("div");
+    wrapper.className = "message_list_warpper flex flex-column";
+
+    wrapper.innerHTML = `
+        <div class="assistant">
+            <div class="chat_setting">
+                <div class="profile_img">
+                    <img src="/static/img/logo.png" alt="">
+                </div>
+                <div class="setting_btns flex">
+                    <div class="copy">
+                        <img src="/static/img/copy.png" alt="">
+                    </div>
+                    <div class="share">
+                        <img src="/static/img/share.png" alt="">
+                    </div>
+                    <div class="bookmark" onclick="handleBookmark(this, 'MEMBER_ID', 'THREAD_ID')">
+                        <img src="/static/img/bookmark.png" alt="">
+                    </div>
+                </div>
+            </div>
+            <div class="message">
+                <span>${content}</span>
+            </div>
+        </div>
+    `;
+
+    return wrapper;
+}
+
+
 let index = 0; // 현재 출력할 글자의 인덱스
 const interval = Math.random(); // 0.1 ~ 0.2초 랜덤 간격 설정
 
@@ -9,66 +111,61 @@ function typeMessage(messageContext) {
     }
 }
 
-function send_message(memberId, threadId) {
+function send_message(memberId, cropName) {
+    // 전송 버튼 비활성화 상태일 경우 함수 종료
+    const crops_data = JSON.parse(localStorage.getItem('crops_data'));
+    console.log(crops_data);
+    const threadId = crops_data[cropName].threadId
     if (!document.querySelector(".send_btn_area").classList.contains("active")) {
         return;
     }
-    let send_input = document.querySelector(".input_area input");
-    let chat_head = document.querySelector(".chat_head");
-    let macro_container = document.querySelector(".macro_container");
-    let message_list = document.querySelector(".message_list");
-    let user_message = document.querySelector(".user .message span");
-    chat_head.style.display = "none";
-    macro_container.style.display = "none";
-    message_list.style.display = "block";
 
-    let send_message = send_input.value;
-    send_input.value = "";
+    const sendInput = document.querySelector(".input_area input");
+    const messageList = document.querySelector(".message_list");
 
-    user_message.textContent = send_message;
+    const userMessageContent = sendInput.value.trim();
+    if (!userMessageContent) {
+        alert("메시지를 입력하세요!");
+        return;
+    }
 
-    let messageItem = document.querySelector(".assistant .message");
+    // 사용자 메시지를 동적으로 추가
+    const userMessage = createUserMessage(userMessageContent);
+    messageList.appendChild(userMessage);
+
+    // 입력 필드 초기화
+    sendInput.value = "";
+
+    // 서버에 메시지 전송
     fetch(`${BE_SERVER}/members/${memberId}/threads/${threadId}/messages`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({"message": send_message})
+        body: JSON.stringify({"message": userMessageContent})
     })
         .then(response => {
-            if (response.ok) {
-                return response.json();
-            } else {
-                throw response;
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
+            return response.json();
         })
-        .then(message => {
-            const messageContext = message["message"];
-            typeMessage(messageContext);
+        .then(data => {
+            const assistantMessageContent = data["message"];
+            // AI 응답 메시지를 동적으로 추가
+            const assistantMessage = createAssistantMessage(assistantMessageContent);
+            messageList.appendChild(assistantMessage);
+
+            // 스크롤 하단 이동
+            messageList.scrollTop = messageList.scrollHeight;
         })
-    // let messageContext = `
-    //     환경: 서늘하고 반그늘진 곳 선택
-    //     파종:
-    //     - 봄(3-4월) 또는 가을(8-9월)
-    //     - 얕게(0.5cm) 파종, 줄 간격 20cm
-    //     관리:
-    //     - 물: 토양 촉촉하게 유지
-    //     - 간격: 밀집 피하기
-    //     수확:
-    //     - 파종 후 40-50일
-    //     - 필요한 만큼 아래 잎부터 수확
-    //     주의: 더운 여름 피하기, 과습 주의
-    //
-    //     핵심은 다음과 같습니다:
-    //     1. 상추는 서늘한 환경을 좋아합니다. 너무 더운 여름은 피하세요.
-    //     2. 봄이나 가을에 파종하고, 얕게 심습니다.
-    //     3. 물은 자주 주되, 토양이 너무 습하지 않게 주의
-    //     4. 40-50일 후부터 수확할 수 있으며, 필요한 만큼
-    //     5. 아래 잎부터 따서 사용하면 됩니다.
-    // `;
+        .catch(error => {
+            console.error("Error sending message:", error);
+            alert("메시지 전송 중 문제가 발생했습니다.");
+        });
 }
 
-function handleBookmark(element, crop_name) {
+function handleBookmark(element, memberId, cropName) {
     // 현재 클릭된 bookmark 버튼을 기준으로 부모 .message_list_warpper 찾기
     const wrapper = element.closest(".message_list_warpper");
 
@@ -76,6 +173,8 @@ function handleBookmark(element, crop_name) {
         console.error("message_list_warpper를 찾을 수 없습니다.");
         return;
     }
+
+    const threadId = JSON.parse(localStorage.getItem("crops_data"))[cropName].threadId;
 
     // user 질문 가져오기
     const userMessage = wrapper.querySelector(".user .message span");
@@ -89,8 +188,26 @@ function handleBookmark(element, crop_name) {
     console.log("질문:", question);
     console.log("답변:", answer);
 
+    fetch(`${BE_SERVER}/members/${memberId}/threads/${threadId}/bookmarks`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            "question": question,
+            "answer": answer,
+            "chattedAt": "2024-12-16T20:29:10.997Z"
+        })
+    }).then(r => {
+        if (r.ok) {
+            return r.json();
+        }
+    }).then(data => {
+        console.log(data);
+    })
+
     // 원하는 작업 수행 (예: localStorage에 저장)
-    saveToBookmarks(question, answer, crop_name);
+    // saveToBookmarks(question, answer, crop_name);
 }
 
 function saveToBookmarks(question, answer, crop_name) {
