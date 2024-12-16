@@ -20,6 +20,13 @@ app = FastAPI(
     ],
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://www.api.farmmate.net"],  # 허용할 도메인 (배포 환경)
+    allow_credentials=True,                     # 자격 증명 (쿠키 등) 허용
+    allow_methods=["*"],                        # 허용할 HTTP 메서드
+    allow_headers=["*"],                        # 허용할 HTTP 헤더
+)
 # Front 앱 생성
 front_app = FastAPI(
     debug=True,
@@ -40,12 +47,12 @@ app.include_router(pest_router, prefix="/pests")
 front_app.include_router(front_router)
 
 # 정적 파일 디렉토리 설정
-# static_dir = Path(__file__).parent / "front/static"
-# if not static_dir.exists():
-#     raise RuntimeError(f"Static directory '{static_dir}'가 존재하지 않습니다.")
+static_dir = Path(__file__).parent / "front/static"
+if not static_dir.exists():
+    raise RuntimeError(f"Static directory '{static_dir}'가 존재하지 않습니다.")
 
 # Front 앱에 정적 파일 제공
-front_app.mount("/static", StaticFiles(directory="./front/static"), name="static")
+front_app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 # Front 앱을 메인 앱에 마운트
 app.mount("/front", front_app)
