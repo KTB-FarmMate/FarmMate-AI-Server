@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block style %}
-    <link rel="stylesheet" href="{{ url_for('static', path='/css/bookmark.css') }}">
+    <link rel="stylesheet" href="/css/bookmark.css">
 {% endblock %}
 
 {% block header %}
@@ -19,7 +19,7 @@
 {% endblock %}
 
 {% block script %}
-    <script src="{{ url_for('static', path='/js/bookmark.js') }}"></script>
+    <script src="/js/bookmark.js"></script>
     <script>
         load_bookmark('{{ crop_name }}');
     </script>
@@ -28,7 +28,7 @@
         document.addEventListener('DOMContentLoaded', function () {
             let imgs = document.querySelectorAll('.toggle img');
             imgs.forEach(img => {
-                img.src = "{{ url_for('static', path='/img/arrow.png') }}"
+                img.src = "/img/arrow.png"
             })
         })
     </script>

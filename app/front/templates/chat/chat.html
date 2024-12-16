@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block style %}
-    <link rel="stylesheet" href="{{ url_for('static', path='/css/chat.css') }}">
+    <link rel="stylesheet" href="/front/static/css/chat.css">
 {% endblock %}
 
 {% block header %}
@@ -88,7 +88,5 @@
         document.querySelector(".chatbot").dataset.selected = 'true';
 
     </script>
-    <script src="{{ url_for('static', path='/js/chat.js') }}">
-
-    </script>
+    <script src="/js/chat.js"> </script>
 {% endblock %}
