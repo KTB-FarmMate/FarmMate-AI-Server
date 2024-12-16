@@ -1,6 +1,10 @@
 document.addEventListener("DOMContentLoaded", () => {
     // 현재 날씨 정보 요청
     let select_crop = localStorage.getItem("select_crop");
+    if (!select_crop) {
+        let select_crop = decodeURIComponent(window.location.pathname.split("/")[3]);
+        localStorage.setItem("select_crop", select_crop);
+    }
     let crop_data = JSON.parse(localStorage.getItem("crops_data"))[select_crop];
     let memberId = localStorage.getItem("memberId");
     let temperature = document.querySelector(".temperature");
