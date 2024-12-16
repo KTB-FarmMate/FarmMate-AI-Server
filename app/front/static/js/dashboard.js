@@ -6,10 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (response.ok){
                 return response.json();
             }
-
-
         })
-
 
     // 병해충 알림 요청
     // 재배 길라잡이 요청
