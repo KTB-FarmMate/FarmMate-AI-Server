@@ -37,6 +37,7 @@ function crop_create(crop_name) {
             crops_data[crop_name].created = true;
             crops_data[crop_name].address = address;
             crops_data[crop_name].palntedAt = creationDate;
+            localStorage.setItem("crops_data", JSON.stringify(crops_data));
             // localStorage.setItem("memberId", data["memberId"]);
         })
         .catch((error) => {
