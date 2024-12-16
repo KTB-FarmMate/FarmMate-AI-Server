@@ -19,7 +19,7 @@
 {% endblock %}
 
 {% block script %}
-    <script src="/js/bookmark.js"></script>
+    <script src="/front/static/js/bookmark.js"></script>
     <script>
         load_bookmark('{{ crop_name }}');
     </script>
@@ -28,7 +28,7 @@
         document.addEventListener('DOMContentLoaded', function () {
             let imgs = document.querySelectorAll('.toggle img');
             imgs.forEach(img => {
-                img.src = "/img/arrow.png"
+                img.src = "/front/static/img/arrow.png"
             })
         })
     </script>
