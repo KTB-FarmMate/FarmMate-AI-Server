@@ -26,7 +26,8 @@
                 <div class="card_title">
                     <h3>날씨</h3>
                 </div>
-                <div onclick="location.href='/front/members/{{ memberId }}/{{ cropName }}/weather/detail'" class="card_detail_btn">
+                <div onclick="location.href='/front/members/{{ memberId }}/{{ cropName }}/weather/detail'"
+                     class="card_detail_btn">
                     <span>더보기</span>
                 </div>
             </div>
@@ -50,16 +51,20 @@
                 <div class="card_title">
                     <h4>병해충 알림</h4>
                 </div>
-                <div onclick="location.href='/front/members/{{ memberId }}/crop/{{ cropName }}/pests'" class="card_detail_btn">
+                <div onclick="location.href='/front/members/{{ memberId }}/crop/{{ cropName }}/pests'"
+                     class="card_detail_btn">
                     <span>더보기</span>
                 </div>
             </div>
             <div class="card_content">
                 <ul class="alert-list">
-                    <li class="alert-high">
+                    <li class="alert-warnings">
                         <span>"탄저병" 경보 등급</span>
                     </li>
-                    <li class="alert-medium">
+                    <li class="alert-advisories">
+                        <span>"무름병" 주의보 등급</span>
+                    </li>
+                    <li class="alert-foreCasts">
                         <span>"무름병" 주의보 등급</span>
                     </li>
                 </ul>
@@ -70,7 +75,8 @@
                 <div class="card_title">
                     <h4>재배 길라잡이</h4>
                 </div>
-                <div onclick="location.href = `/front/members/{{ memberId }}/crop/{{ cropName }}/guidance`" class="card_detail_btn">
+                <div onclick="location.href = `/front/members/{{ memberId }}/crop/{{ cropName }}/guidance`"
+                     class="card_detail_btn">
                     <span>더보기</span>
                 </div>
             </div>
@@ -120,4 +126,9 @@
         document.querySelector(".info").dataset.selected = 'true';
     </script>
     <script src="/front/static/js/crop_data.js"></script>
+    <script>
+        get_weather('{{ memberId }}', '{{ cropName }}')
+        get_pests('{{ cropName }}')
+        get_guidance('{{ memberId }}', '{{ cropName }}');
+    </script>
 {% endblock %}

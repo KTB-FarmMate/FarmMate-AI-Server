@@ -6,12 +6,14 @@ ul.alert-list {
 ul.alert-list li::marker {
     font-size: 25px;
 }
-
-li.alert-high::marker {
+li.foreCasts::marker {
+    color: #73ff73;
+}
+li.warnings::marker {
     color: red;
 }
 
-li.alert-medium::marker {
+li.advisories::marker {
     color: #ffd62c;
 }
 
