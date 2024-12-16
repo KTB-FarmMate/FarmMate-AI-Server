@@ -34,6 +34,7 @@ function get_pests(cropName) {
         .then(data => {
             const warnings = document.querySelector(".alert-warnings");
             warnings.innerHTML = '';
+            console.log(data);
             data["warnings"].forEach(element => {
                 const span = document.createElement("span");
                 span.textContent = element;
