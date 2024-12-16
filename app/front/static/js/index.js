@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("load", () => {
     const crops = Array.from(document.getElementsByClassName("crop"));
 
     const memberId = localStorage.getItem("memberId");
