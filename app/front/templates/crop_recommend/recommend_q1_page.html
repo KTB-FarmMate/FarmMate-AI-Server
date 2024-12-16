@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block style %}
+    <link href="{{ url_for('static', path='/css/header.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', path='/css/recommend.css') }}" rel="stylesheet">
+{% endblock %}
+{% block header %}
+    <div id="header">
+        <div onclick="goBack();">뒤로</div>
+    </div>
+{% endblock %}
+{% block content %}
+    <div class="quiz_container">
+        <div class="quiz_title">
+            <h4>재배하시려고 하는 농업의 유형은 어떻게 되시나요?</h4>
+        </div>
+        <ul class="quiz_list">
+            <li onclick="location.href='/front/recommend/q2'">도시농장(옥상, 공원 등)</li>
+            <li onclick="location.href='/front/recommend/q2'">귀농</li>
+            <li onclick="location.href='/front/recommend/q2'">베란다 농업</li>
+            <li onclick="location.href='/front/recommend/q2'">하우스 농업</li>
+        </ul>
+    </div>
+{% endblock %}

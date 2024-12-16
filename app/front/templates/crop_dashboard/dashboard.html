@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block style %}
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/header.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/footer.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/dashboard.css') }}">
+
+    <style>
+        ul.alert-list {
+            margin: 0;
+        }
+
+        ul.alert-list li::marker {
+            font-size: 25px;
+        }
+
+        li.alert-high::marker {
+            color: red;
+        }
+
+        li.alert-medium::marker {
+            color: #ffd62c;
+        }
+
+    </style>
+{% endblock %}
+{% block header %}
+    <div id="header" class="dashboard">
+        <div class="left_area">
+            <div class="move_home_btn" onclick="goHome();">홈</div>
+        </div>
+        <div class="right_area">
+            <div onclick="location.href=`/front/crop_modify/{{ crop_name }}`" class="modify_btn">
+                수정
+            </div>
+            <div onclick="document.querySelector('.remove_overlay').dataset.visible = 'true';"
+                 class="delete_btn">
+                삭제
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block content %}
+    <div class="card-container flex flex-column">
+        <div class="card weather_card flex flex-column">
+            <div class="card_header flex flex-row">
+                <div class="card_title">
+                    <h3>날씨</h3>
+                </div>
+                <div onclick="location.href='./{{ crop_name }}/weather/detail'" class="card_detail_btn">
+                    <span>더보기</span>
+                </div>
+            </div>
+            <div class="card_content flex flex-row flex-space-between">
+                <img style='width: 20vw;
+    margin: 0 20px 20px;' src="{{ url_for('static', path='/img/sun.png') }}" alt="개쩌는 태양 아이콘">
+                <div class="flex flex-column ">
+                    <div>
+                        <span>온도 : 20 / 27</span>
+                    </div>
+                    <div>
+                        <span>습도 : 60%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card weather_card flex flex-column">
+            <div class="card_header flex flex-row">
+                <div class="card_title">
+                    <h4>병해충 알림</h4>
+                </div>
+                <div onclick="location.href='./{{ crop_name }}/pests'" class="card_detail_btn">
+                    <span>더보기</span>
+                </div>
+            </div>
+            <div class="card_content">
+                <ul class="alert-list">
+                    <li class="alert-high">
+                        <span>"탄저병" 경보 등급</span>
+                    </li>
+                    <li class="alert-medium">
+                        <span>"무름병" 주의보 등급</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="card weather_card flex flex-column">
+            <div class="card_header flex flex-row">
+                <div class="card_title">
+                    <h4>재배 길라잡이</h4>
+                </div>
+                <div onclick="location.href += '/guidance'" class="card_detail_btn">
+                    <span>더보기</span>
+                </div>
+            </div>
+            <div class="card_content">
+                <ul>
+                    <li>묘판 설치</li>
+                    <li>싹 틔우기</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block footer %}
+    {% include "footer/footer.html" %}
+{% endblock %}
+
+{% block script %}
+    <div class="remove_overlay" data-visible="false">
+        <div class="remove_container flex flex-column">
+            <div class="remove_warning_icon">
+                <img src="{{ url_for('static', path='img/warning.png') }}" alt="">
+            </div>
+            <div class="title">
+                <h3>등록된 작물을 삭제합니다.</h3>
+            </div>
+            <div class="ment">
+                <p>삭제된 작물 정보는 되돌릴 수 없습니다.</p>
+                <p>정말 삭제하시겠습니까?</p>
+            </div>
+            <div class="buttons flex flex-row flex-space-between">
+                <div class="remove_overlay_btn">
+                    <button onclick="document.querySelector('.remove_overlay').dataset.visible = 'false'"
+                            class="keep_btn">유지
+                    </button>
+                </div>
+                <div class="remove_overlay_btn">
+                    <button onclick="document.querySelector('.remove_overlay').dataset.visible = 'false';crop_delete('{{ crop_name }}');"
+                            class="delete_btn">삭제
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', path='/js/dashboard.js') }}"></script>
+    <script>
+        document.querySelector(".info").dataset.selected = 'true';
+    </script>
+    <script src="{{ url_for('static', path='/js/crop_data.js') }}"></script>
+{% endblock %}

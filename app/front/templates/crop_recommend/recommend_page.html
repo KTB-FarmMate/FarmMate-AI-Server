@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block style %}
+    <link href="{{ url_for('static', path='/css/recommend.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+    <div style="margin-top: 50vw;" class="recommend_container">
+        <div id="img_view">
+            <img src="{{ url_for('static', path='img/recommend/wave_hand.png') }}" alt="">
+        </div>
+        <div id="recommend_ment">
+            <p>안녕하세요! Farmmate는 처음이시네요.</p>
+            <p>정하신 작물이 없으시면 추천해드려요!</p>
+        </div>
+
+        <div class="recommend_btn">
+            <button data-type="no" value="아니오">아니요</button>
+            <button onclick="window.location.href = '/front/recommend/q1'" data-type="yes" value="예">예</button>
+        </div>
+    </div>
+{% endblock %}
+{% block script %}
+    <script>
+        localStorage.setItem("crops", JSON.stringify({"감자": false, "고구마": false, "당근": false, "양파": false}));
+    </script>
+{% endblock %}

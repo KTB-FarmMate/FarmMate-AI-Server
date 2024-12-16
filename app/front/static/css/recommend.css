@@ -1,0 +1,65 @@
+.recommend_container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#img_view img {
+    width: 30vw;
+}
+
+#img_view {
+    margin-bottom: 50px;
+    margin-top: 20px;
+}
+
+#recommend_ment {
+    font-weight: bold;
+}
+
+.recommend_btn {
+    width: -webkit-fill-available;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-evenly;
+    margin-top: 100px;
+}
+
+.recommend_btn > button[data-type='yes'] {
+    width: 38vw;
+    height: 6vh;
+    border-radius: 10px;
+    border: 1px solid #000000;
+    background: black;
+    color: white;
+    font-weight: bold;
+
+}
+
+.recommend_btn > button[data-type='no'] {
+    width: 38vw;
+    height: 6vh;
+    border-radius: 10px;
+    border: 1px solid #000000;
+    font-weight: bold;
+    background: none;
+}
+
+.quiz_list {
+    list-style: none;
+    padding-left: 0;
+    margin-top: 5vh;
+}
+
+.quiz_list li {
+    padding: 10px;
+    margin: 5px;
+    border-radius: 5px;
+    background: #f0f0f0;
+    font-weight: bold;
+}
+
+.quiz_list li:active {
+    background: #e0e0e0;
+}

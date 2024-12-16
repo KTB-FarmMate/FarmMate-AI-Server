@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block style %}
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/pests_detail.css') }}">
+{% endblock %}
+
+{% block header %}
+    {% include "header/only_back.html" %}
+{% endblock %}
+
+{% block content %}
+    <div class="fests_detail_container flex flex-column">
+        <div class="catalog_container flex flex-column">
+            <div class="title">
+                ▶ 도감정보
+            </div>
+            <div class="content flex flex-row">
+                <div class="fest_img ">
+                    <img src="{{ url_for('static', path='/img/fest.png') }}" alt="">
+                </div>
+                <div class="fest_info">
+                    <div class="fest_name">
+                        한글명: 탄저병
+                    </div>
+                    <div class="fest_name">
+                        한문명: 炭疽病
+                    </div>
+                    <div class="fest_name">
+                        영문명: Anthracnose
+                    </div>
+                    <div class="fest_name">
+                        작물명: 복숭아
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="fests_info_container flex flex-column">
+            <span>▶ 일반정보</span>
+            <div class="occurrence_env_container flex flex-column">
+                <div class="title">
+                    - 발생환경
+                </div>
+                <div class="content">
+                    병든 결과지의 조직 속에서 자낭각 및 균사로 겨울을 지낸 후, 표면에 분생포자를 형성하여 1차 전염원이 된다.
+                    병원균의 전반은 주로 빗방울에 의하여 이루어지며, 6월 중순 이후에 발생이 심하다.
+                </div>
+            </div>
+            <div class="description_container flex flex-column">
+                <div class="title">
+                    - 증상설명
+                </div>
+                <div class="content">
+                    과실, 가지, 잎에 발생한다. 과실에는 갈색의 작은 반점이 형성되고, 점차 커지면서 대형 병무늬가 형성된다.
+                    병반과 병반이 합쳐져 과피가 변색되며, 병반 중앙에는 담홍색의 포자덩어리가 누출된다.
+                    가지에서는 줄기마름증상으로 나타나며, 잎에는 갈색 원형의 병무늬가 형성된다.
+                </div>
+            </div>
+            <div class="control_container flex flex-column">
+                <div class="title">
+                    - 방제방법
+                </div>
+                <div class="content">
+                    - 병든 가지와 열매는 일찍 제거한다.
+                    - 발병초기 등록약제를 살포한다.
+                </div>
+            </div>
+        </div>
+        <div class="fests_img_container flex flex-column">
+            <span>▶ 병 사진 정보</span>
+            <div class="img_list">
+                <img src="{{ url_for('static', path='/img/pests/pest_1.png') }}" alt="">
+                <img src="{{ url_for('static', path='/img/pests/pest_3.png') }}" alt="">
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block footer %}
+    {% include "footer/footer.html" %}
+{% endblock %}
+
+
+{% block script %}
+    <script>
+        document.querySelector(".info").dataset.selected = 'true';
+    </script>
+    <script src="{{ url_for('static', path='/js/pests_detail.js') }}"></script>
+{% endblock %}

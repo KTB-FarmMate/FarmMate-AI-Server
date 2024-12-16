@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block style %}
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/chat.css') }}">
+{% endblock %}
+
+{% block header %}
+    <div id="header" class="dashboard">
+        <div class="left_area">
+            <div class="move_home_btn" onclick="goHome();">홈</div>
+        </div>
+        <div class="right_area">
+            <div onclick="location.href='/front/bookmark/{{ crop_name }}'">
+                더보기
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <div class="chat-container flex flex-column align-center">
+        <div class="chat_head flex flex-column align-center">
+            <img style="width: 25vw;" src="{{ url_for('static', path='/img/logo.png') }}" alt="">
+            <h1 style="margin: 0"><span style="color: #339f00;">Farm</span><span style="color: #896010">Mate</span></h1>
+        </div>
+        <div class="chat_body flex flex-column">
+            <div class="macro_container">
+                <div class="macro_1">
+                    <p>상추 키우는 법 알려줘.</p>
+                </div>
+                <div class="macro_2">
+                    <p>지금 키울만한 작물 추천해줄 수 있어?</p>
+                </div>
+            </div>
+            <div class="message_list">
+                <div class="message_list_warpper flex flex-column">
+                    <div class="user">
+                        <div class="message">
+                            <span>상추 키우는 법</span>
+                        </div>
+                        <div class="edit_btn">
+                            <img src="{{ url_for('static', path='/img/edit.png') }}" alt="">
+                        </div>
+                    </div>
+                    <div class="assistant">
+                        <div class="chat_setting">
+                            <div class="profile_img">
+                                <img src="{{ url_for('static', path='/img/logo.png') }}" alt="">
+                            </div>
+                            <div class="setting_btns flex">
+                                <div class="copy">
+                                    <img src="{{ url_for('static', path='/img/copy.png') }}" alt="">
+                                </div>
+                                <div class="share">
+                                    <img src="{{ url_for('static', path='/img/share.png') }}" alt="">
+
+                                </div>
+                                <div class="bookmark" onclick="handleBookmark(this, '{{ crop_name }}')">
+                                    <img src="{{ url_for('static', path='/img/bookmark.png') }}" alt="">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="message">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="chat_bar_container">
+            <div class="chat_bar_warpper flex flex-row align-center">
+                <div class="input_area">
+                    <input type="text">
+                </div>
+                <div onclick="send_message(this)" class="send_btn_area">
+                    <img src="{{ url_for('static', path='/img/send.png') }}" alt="">
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block footer %}
+    {% include "footer/footer.html" %}
+{% endblock %}
+
+{% block script %}
+    <script>
+        document.querySelector(".chatbot").dataset.selected = 'true';
+
+    </script>
+    <script src="{{ url_for('static', path='/js/chat.js') }}">
+
+    </script>
+{% endblock %}

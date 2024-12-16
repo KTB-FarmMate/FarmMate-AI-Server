@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block style %}
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/curriculum.css') }}">
+    <style>
+        .detail-view img{
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+{% endblock %}
+
+{% block header %}
+    {% include "header/only_back.html" %}
+{% endblock %}
+
+{% block content %}
+    <div class="curriculum-container">
+        <div class="detail-view">
+            <img src="{{ url_for('static', path='/img/curriculum/page.jpg') }}" alt="">
+        </div>
+    </div>
+{% endblock %}
+
+{% block footer %}
+    {% include "footer/footer.html" %}
+{% endblock %}
+
+{% block script %}
+    <script>
+        document.querySelector(".curriculum").dataset.selected = 'true';
+    </script>
+    <script src="{{ url_for('static', path='/js/curriculum.js') }}"></script>
+{% endblock %}
