@@ -10,7 +10,7 @@ function crop_create(crop_name, memberId) {
     const body = {
         address: address,
         cropId: crop_id,
-        palntedAt: creationDate,
+        plantedAt: creationDate,
     }
 
     console.log(body);
@@ -34,7 +34,7 @@ function crop_create(crop_name, memberId) {
             crops_data[crop_name].threadId = data.threadId;
             crops_data[crop_name].created = true;
             crops_data[crop_name].address = address;
-            crops_data[crop_name].palntedAt = creationDate;
+            crops_data[crop_name].plantedAt = creationDate;
             localStorage.setItem("crops_data", JSON.stringify(crops_data));
 
             localStorage.setItem("select_crop", crop_name);
@@ -87,7 +87,7 @@ function crop_modify(crop_name, memberId) {
 
     const body = {
         address: address,
-        palntedAt: creationDate,
+        plantedAt: creationDate,
     }
 
     console.log(body);
@@ -111,7 +111,7 @@ function crop_modify(crop_name, memberId) {
             crops_data[crop_name].threadId = data.threadId;
             crops_data[crop_name].created = true;
             crops_data[crop_name].address = address;
-            crops_data[crop_name].palntedAt = creationDate;
+            crops_data[crop_name].plantedAt = creationDate;
             localStorage.setItem("crops_data", JSON.stringify(crops_data));
 
             localStorage.setItem("select_crop", crop_name);

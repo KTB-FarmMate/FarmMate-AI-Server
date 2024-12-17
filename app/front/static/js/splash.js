@@ -43,11 +43,17 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Crop Fetch error:", error);
         })
     }
-    setTimeout(() => {
-        if (localStorage.getItem("crops") == null) {
-            location.href = `./members/${memberId}/recommend`;
-        } else {
-            location.href = `./members/${memberId}`;
-        }
-    }, 2000);
+    if (memberId != null) {
+
+        setTimeout(() => {
+            if (localStorage.getItem("crops") == null) {
+                location.href = `./members/${memberId}/recommend`;
+            } else {
+                location.href = `./members/${memberId}`;
+            }
+        }, 2000);
+    }else{
+        alert("멤버 아이디가 올바르게 생성되지 않았습니다.");
+        // window.location.reload();
+    }
 });
