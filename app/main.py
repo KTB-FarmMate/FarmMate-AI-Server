@@ -22,10 +22,15 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # 허용할 도메인 (배포 환경)
-    allow_credentials=True,                     # 자격 증명 (쿠키 등) 허용
-    allow_methods=["*"],                        # 허용할 HTTP 메서드
-    allow_headers=["*"],                        # 허용할 HTTP 헤더
+    allow_origins=[
+        "https://farmmate.net",             # FE 도메인 (서브도메인 없이)
+        "https://www.farmmate.net",         # FE 도메인 (www 포함)
+        "https://api.farmmate.net",         # BE 서버 도메인
+        "https://www.api.farmmate.net"      # BE 서버 서브도메인 포함
+    ],
+    allow_credentials=True,  # 쿠키, 인증 정보 포함 허용 (필요시)
+    allow_methods=["*"],     # 모든 HTTP 메소드 허용 (GET, POST 등)
+    allow_headers=["*"],     # 모든 헤더 허용
 )
 # Front 앱 생성
 front_app = FastAPI(
