@@ -33,28 +33,38 @@ function get_pests(cropName) {
         })
         .then(data => {
             const warnings = document.querySelector(".alert-warnings");
-            warnings.innerHTML = '';
             console.log(data);
-            data["warnings"].forEach(element => {
-                const span = document.createElement("span");
-                span.textContent = element;
-                warnings.appendChild(span);
-            })
+            const warnings_list = data["warnings"]
+            if (warnings_list.length > 0) {
+                warnings_list.forEach(element => {
+                    const span = document.createElement("span");
+                    span.textContent = element;
+                    warnings.appendChild(span);
+                })
+            }
             const advisories = document.querySelector(".alert-advisories");
-            advisories.innerHTML = '';
-            data["advisories"].forEach(element => {
-                const span = document.createElement("span");
-                span.textContent = element;
-                advisories.appendChild(span);
-            })
+
+            const advisories_list = data["advisories"]
+            if (advisories_list.length > 0) {
+                advisories.innerHTML = '';
+                advisories_list.forEach(element => {
+                    const span = document.createElement("span");
+                    span.textContent = element;
+                    advisories.appendChild(span);
+                })
+            }
             const foreCasts = document.querySelector(".alert-foreCasts");
-            foreCasts.innerHTML = '';
-            data["foreCasts"].forEach(element => {
-                const span = document.createElement("span");
-                span.textContent = element;
-                foreCasts.appendChild(span);
-            })
-            console.log(data);
+
+            const foreCasts_list = data["foreCasts"];
+            if (foreCasts_list.length > 0) {
+                foreCasts.innerHTML = '';
+                foreCasts_list.forEach(element => {
+                    const span = document.createElement("span");
+                    span.textContent = element;
+                    foreCasts.appendChild(span);
+                })
+                console.log(data);
+            }
         })
 }
 
