@@ -6,8 +6,10 @@ document.addEventListener("DOMContentLoaded", () => {
         })
             .then((res) => {
                 if (!res.ok) {
-                    console.log(res);
-                    throw new Error(`HTTP error! status: ${res.status}`);
+                    return res.text().then(text => {
+                        console.error(`HTTP Error ${res.status}:`, text);
+                        throw new Error(`HTTP error! status: ${res.status}, message: ${text}`);
+                    });
                 }
                 return res.json();
             })
@@ -21,10 +23,14 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
         fetch(`${BE_SERVER}/crops`)
-            .then((response) => {
-                if (response.ok) {
-                    return response.json();
+            .then((res) => {
+                if (!res.ok) {
+                    return res.text().then(text => {
+                        console.error(`HTTP Error ${res.status}:`, text);
+                        throw new Error(`HTTP error! status: ${res.status}, message: ${text}`);
+                    });
                 }
+                return res.json();
             })
             .then(data => {
                 let crops_data = {}
@@ -33,8 +39,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
                 localStorage.setItem("crops_data", JSON.stringify(crops_data));
             }).catch(error => {
-                alert(error);
-                console.error("Crop Fetch error:", error);
+            alert(error);
+            console.error("Crop Fetch error:", error);
         })
     }
     setTimeout(() => {
