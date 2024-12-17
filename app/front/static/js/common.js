@@ -1,4 +1,5 @@
 const BE_SERVER = "https://api.farmmate.net"
+// const BE_SERVER = "http://43.202.163.157:8080"
 
 function get_memberId() {
     const path = window.location.pathname;

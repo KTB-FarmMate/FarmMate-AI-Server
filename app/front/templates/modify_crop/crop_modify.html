@@ -12,13 +12,15 @@
 
 {% block content %}
     <div class="info_container">
-        <label>재배지(주소지)
-            <input class="crop_data_input" type="text">
-        </label>
-        <label>적성일(작물 심은 날)
-            <input class="crop_data_input" type="text">
-        </label>
-        <button class="crop_create_btn" onclick="location.href='/front/crop/감자';">채팅방 정보 수정</button>
+        <form onsubmit="return false;">
+            <label>재배지(주소지)
+                <input name='address' class="crop_data_input" type="text" required>
+            </label>
+            <label>적성일(작물 심은 날)
+                <input name='creation_date' class="crop_data_input" type="date" required>
+            </label>
+            <button class="crop_create_btn" onclick="crop_modify('{{ cropName }}', '{{ memberId }}')">채팅방 정보 수정</button>
+        </form>
     </div>
 {% endblock %}
 {% block script %}
