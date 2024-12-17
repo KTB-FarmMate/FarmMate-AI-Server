@@ -29,7 +29,7 @@ window.addEventListener("load", () => {
                     const cropExists = cropDatas.some(data => data.cropName === cropName);
 
                     if (cropExists) {
-                        dataFound = true; // 데이터가 존재하면 플래그를 true로 설정
+                        dataFound = true;
                         crop.dataset.created = "true"; // 'data-created' 값을 true로 설정
 
                         crop.addEventListener("click", () => {
@@ -43,10 +43,10 @@ window.addEventListener("load", () => {
                     }
                 });
 
-                // 데이터가 발견되면 중단
+                // 데이터가 발견되면 재시도 중단
                 if (dataFound) {
                     console.log("Data found, stopping retries.");
-                    return; // 즉시 중단
+                    return;
                 }
 
                 // 데이터가 없고 시도 횟수가 남아 있으면 재시도
@@ -71,6 +71,4 @@ window.addEventListener("load", () => {
                 }
             });
     })();
-
-
 });
