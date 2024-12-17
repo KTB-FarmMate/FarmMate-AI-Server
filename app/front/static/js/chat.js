@@ -1,21 +1,3 @@
-function fetchWithRetry(url, options = {}, retries = 3, delay = 1000) {
-    return fetch(url, options)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .catch(error => {
-            if (retries > 1) {
-                return new Promise(resolve =>
-                    setTimeout(() => resolve(fetchWithRetry(url, options, retries - 1, delay)), delay)
-                );
-            }
-            throw error;
-        });
-}
-
 function load_messages(memberId, cropName) {
     const crops_data = JSON.parse(localStorage.getItem('crops_data'));
     console.log(crops_data);
@@ -29,7 +11,7 @@ function load_messages(memberId, cropName) {
     chat_body.remove();
     message_list.style.display = 'flex';
 
-    fetchWithRetry(url, {}, 3, 1000)
+    fetchWithRetry(url, {}, 5, 1000)
         .then(messages => {
             const messageList = document.querySelector(".message_list");
             messageList.innerHTML = ""; // 기존 메시지 초기화
@@ -149,7 +131,7 @@ function send_message(memberId, cropName) {
     sendInput.value = "";
 
     // 서버에 메시지 전송
-    fetch(`${BE_SERVER}/members/${memberId}/threads/${threadId}/messages`, {
+    fetchWithRetry(`${BE_SERVER}/members/${memberId}/threads/${threadId}/messages`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -173,7 +155,6 @@ function send_message(memberId, cropName) {
         })
         .catch(error => {
             console.error("Error sending message:", error);
-            alert("메시지 전송 중 문제가 발생했습니다.");
         });
 }
 
@@ -202,7 +183,7 @@ function handleBookmark(element) {
     console.log("질문:", question);
     console.log("답변:", answer);
 
-    fetch(`${BE_SERVER}/members/${memberId}/threads/${threadId}/bookmarks`, {
+    fetchWithRetry(`${BE_SERVER}/members/${memberId}/threads/${threadId}/bookmarks`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
