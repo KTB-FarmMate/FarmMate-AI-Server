@@ -19,15 +19,17 @@ window.addEventListener("load", () => {
             .then(cropDatas => {
                 console.log("Fetched crop data:", cropDatas);
 
-                let dataFound = false; // 데이터가 존재하는지 확인
+                let dataFound = false; // 데이터 존재 여부 플래그
 
                 crops.forEach(crop => {
                     const cropName = crop.dataset.type; // crop 요소의 'data-type' 속성 값 가져오기
-
                     console.log("Checking crop:", cropDatas, cropName);
 
-                    if (cropDatas[cropName]) {
-                        dataFound = true;
+                    // cropDatas 배열에 cropName이 존재하는지 확인
+                    const cropExists = cropDatas.some(data => data.cropName === cropName);
+
+                    if (cropExists) {
+                        dataFound = true; // 데이터가 존재하면 플래그를 true로 설정
                         crop.dataset.created = "true"; // 'data-created' 값을 true로 설정
 
                         crop.addEventListener("click", () => {
@@ -41,17 +43,17 @@ window.addEventListener("load", () => {
                     }
                 });
 
-                // 데이터가 발견되면 재시도 중단
+                // 데이터가 발견되면 중단
                 if (dataFound) {
                     console.log("Data found, stopping retries.");
-                    return;
+                    return; // 즉시 중단
                 }
 
                 // 데이터가 없고 시도 횟수가 남아 있으면 재시도
                 if (attempts < maxAttempts - 1) {
                     attempts++;
                     console.warn(`Attempt ${attempts}/${maxAttempts} failed. Retrying...`);
-                    setTimeout(retryFetch, 100); // 1초 후 재시도
+                    setTimeout(retryFetch, 200); // 1초 후 재시도
                 } else {
                     console.error("Max retries reached. Data not found.");
                 }
@@ -63,11 +65,12 @@ window.addEventListener("load", () => {
                 if (attempts < maxAttempts - 1) {
                     attempts++;
                     console.warn(`Attempt ${attempts}/${maxAttempts} failed. Retrying...`);
-                    setTimeout(retryFetch, 100); // 1초 후 재시도
+                    setTimeout(retryFetch, 200); // 1초 후 재시도
                 } else {
                     console.error("Max retries reached. Fetch failed.");
                 }
             });
     })();
+
 
 });
