@@ -37,14 +37,6 @@ front_app = FastAPI(
         {"url": "/front", "description": "프론트엔드 관련 API"},
     ],
 )
-front_app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # 허용할 도메인 (배포 환경)
-    allow_credentials=True,                     # 자격 증명 (쿠키 등) 허용
-    allow_methods=["*"],                        # 허용할 HTTP 메서드
-    allow_headers=["*"],                        # 허용할 HTTP 헤더
-)
-
 # 메인 앱 라우터 등록
 app.include_router(health_router, prefix="/health")
 app.include_router(openai_router, prefix="/members/{memberId}/threads")
