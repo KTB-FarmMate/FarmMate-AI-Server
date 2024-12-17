@@ -5,35 +5,69 @@ window.addEventListener("load", () => {
     console.log(`${BE_SERVER}/members/${memberId}/threads`);
     const crops_data = JSON.parse(localStorage.getItem("crops_data"));
 
-    fetch(`${BE_SERVER}/members/${memberId}/threads`)
-        .then(response => response.json())
-        .then(cropDatas => {
-            console.log(cropDatas);
+    let attempts = 0; // 시도 횟수
+    const maxAttempts = 5; // 최대 재시도 횟수
 
-            crops.forEach(crop => {
-                const cropName = crop.dataset.type; // crop 요소의 'data-type' 속성 값을 가져옴
+    (function retryFetch() {
+        fetch(`${BE_SERVER}/members/${memberId}/threads`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(cropDatas => {
+                console.log("Fetched crop data:", cropDatas);
 
-                // fetch로 가져온 데이터에 작물이 있는 경우
-                console.log(cropDatas, cropName);
-                if (cropDatas[cropName]) {
-                    crop.dataset.created = "true"; // 'data-created' 값을 true로 설정
-                    // crops_data[cropName].created = true;
+                let dataFound = false; // 데이터가 존재하는지 확인
 
-                    crop.addEventListener("click", () => {
-                        // 이미 생성된 작물 페이지로 이동
-                        window.location.href = `/front/members/${memberId}/crop/${cropName}`;
-                        localStorage.setItem("select_crop", cropName);
-                    });
+                crops.forEach(crop => {
+                    const cropName = crop.dataset.type; // crop 요소의 'data-type' 속성 값 가져오기
+
+                    console.log("Checking crop:", cropDatas, cropName);
+
+                    if (cropDatas[cropName]) {
+                        dataFound = true;
+                        crop.dataset.created = "true"; // 'data-created' 값을 true로 설정
+
+                        crop.addEventListener("click", () => {
+                            window.location.href = `/front/members/${memberId}/crop/${cropName}`;
+                            localStorage.setItem("select_crop", cropName);
+                        });
+                    } else {
+                        crop.addEventListener("click", () => {
+                            window.location.href = `/front/members/${memberId}/crop_create/${cropName}`;
+                        });
+                    }
+                });
+
+                // 데이터가 발견되면 재시도 중단
+                if (dataFound) {
+                    console.log("Data found, stopping retries.");
+                    return;
+                }
+
+                // 데이터가 없고 시도 횟수가 남아 있으면 재시도
+                if (attempts < maxAttempts - 1) {
+                    attempts++;
+                    console.warn(`Attempt ${attempts}/${maxAttempts} failed. Retrying...`);
+                    setTimeout(retryFetch, 100); // 1초 후 재시도
                 } else {
-                    // fetch 데이터에 작물이 없는 경우
-                    crop.addEventListener("click", () => {
-                        // 새로운 작물 생성 페이지로 이동
-                        window.location.href = `/front/members/${memberId}/crop_create/${cropName}`;
-                    });
+                    console.error("Max retries reached. Data not found.");
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching crop data:", error);
+
+                // 에러 발생 시 재시도
+                if (attempts < maxAttempts - 1) {
+                    attempts++;
+                    console.warn(`Attempt ${attempts}/${maxAttempts} failed. Retrying...`);
+                    setTimeout(retryFetch, 100); // 1초 후 재시도
+                } else {
+                    console.error("Max retries reached. Fetch failed.");
                 }
             });
-        })
-        .catch(error => {
-            console.error("Error fetching crop data:", error);
-        });
+    })();
+
 });
