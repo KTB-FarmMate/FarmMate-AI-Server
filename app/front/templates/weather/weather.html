@@ -17,773 +17,368 @@
                 </div>
             </div>
             <div class="card_content flex flex-row flex-space-between">
-                <img style='width: 20vw;
-    margin: 0 20px 20px;' src="{{ url_for('static', path='img/sun.png') }}" alt="개쩌는 태양 아이콘">
+                <img class='weather_img' src="/front/static/img/sun.png" alt="개쩌는 태양 아이콘">
                 <div class="flex flex-column ">
-                    <div>
-                        <span>온도 : 20 / 27</span>
+                    <div>온도 :
+                        <span class="temperature">-2.8</span>
                     </div>
-                    <div>
-                        <span>습도 : 60%</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="days flex flex-column">
-            <h3>일간예보</h3>
-            <div class="card weather_header flex flex-row flex-space-between">
-                <div class="today_weather_item">
-                    <div class="temp">
-                        2°
-                    </div>
-                    <div class="weather_img">
-                        <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                    </div>
-                    <div class="time_stamp">
-                        10시
-                    </div>
-                </div>
-                <div class="today_weather_item">
-                    <div class="temp">
-                        2°
-                    </div>
-                    <div class="weather_img">
-                        <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                    </div>
-                    <div class="time_stamp">
-                        10시
-                    </div>
-                </div>
-                <div class="today_weather_item">
-                    <div class="temp">
-                        2°
-                    </div>
-                    <div class="weather_img">
-                        <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                    </div>
-                    <div class="time_stamp">
-                        10시
-                    </div>
-                </div>
-                <div class="today_weather_item">
-                    <div class="temp">
-                        2°
-                    </div>
-                    <div class="weather_img">
-                        <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                    </div>
-                    <div class="time_stamp">
-                        10시
-                    </div>
-                </div>
-                <div class="today_weather_item">
-                    <div class="temp">
-                        2°
-                    </div>
-                    <div class="weather_img">
-                        <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                    </div>
-                    <div class="time_stamp">
-                        10시
-                    </div>
-                </div>
-                <div class="today_weather_item">
-                    <div class="temp">
-                        2°
-                    </div>
-                    <div class="weather_img">
-                        <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                    </div>
-                    <div class="time_stamp">
-                        10시
-                    </div>
-                </div>
-                <div class="today_weather_item">
-                    <div class="temp">
-                        2°
-                    </div>
-                    <div class="weather_img">
-                        <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                    </div>
-                    <div class="time_stamp">
-                        10시
-                    </div>
-                </div>
-                <div class="today_weather_item">
-                    <div class="temp">
-                        2°
-                    </div>
-                    <div class="weather_img">
-                        <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                    </div>
-                    <div class="time_stamp">
-                        10시
-                    </div>
-                </div>
-                <div class="today_weather_item">
-                    <div class="temp">
-                        2°
-                    </div>
-                    <div class="weather_img">
-                        <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                    </div>
-                    <div class="time_stamp">
-                        10시
+                    <div>습도 :
+                        <span class="humidity">79</span>%
                     </div>
                 </div>
             </div>
         </div>
+{#        <div class="days flex flex-column">#}
+{#            <h3>일간예보</h3>#}
+{#            <div class="card weather_header flex flex-row flex-space-between">#}
+{#                {% for hour in range(24) %}#}
+{#                    <div class="today_weather_item">#}
+{#                        <div class="temp">#}
+{#                            2°#}
+{#                        </div>#}
+{#                        <div class="weather_img">#}
+{#                            <img src="{{ url_for('static', path='img/sun.png') }}" alt="">#}
+{#                        </div>#}
+{#                        <div class="time_stamp">#}
+{#                            {{ "%02d시"|format(hour) }}#}
+{#                        </div>#}
+{#                    </div>#}
+{#                {% endfor %}#}
+{#            </div>#}
+{#        </div>#}
         <div class="weeks flex flex-column">
-            <h3>주간예보</h3>
-            <div class="card week_weather_container weather_header flex flex-row flex-space-between">
-                <div class="card week_weather_item flex flex-row">
-                    <div class="date_section">
-                        <div class="dates flex flex-column">
-                            <div>오늘</div>
-                            <div>11.29.</div>
-                        </div>
-                    </div>
-                    <div class="weather_view_section flex flex-row align-center">
-                        <div class="img_section flex flex-row">
-                            <div class="morning_img flex flex-column">
-                                <div>
-                                    오전
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                            <div class="afternoon_img flex flex-column">
-                                <div>
-                                    오후
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                        </div>
-                        <div class="temp_view_section flex flex-row">
-                            <div class="morning_temp">
-                                -5°
-                            </div>
-                            <div class="afternoon_temp">
-                                5°
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card week_weather_item flex flex-row">
-                    <div class="date_section">
-                        <div class="dates flex flex-column">
-                            <div>오늘</div>
-                            <div>11.29.</div>
-                        </div>
-                    </div>
-                    <div class="weather_view_section flex flex-row align-center">
-                        <div class="img_section flex flex-row">
-                            <div class="morning_img flex flex-column">
-                                <div>
-                                    오전
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                            <div class="afternoon_img flex flex-column">
-                                <div>
-                                    오후
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                        </div>
-                        <div class="temp_view_section flex flex-row">
-                            <div class="morning_temp">
-                                -5°
-                            </div>
-                            <div class="afternoon_temp">
-                                5°
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card week_weather_item flex flex-row">
-                    <div class="date_section">
-                        <div class="dates flex flex-column">
-                            <div>오늘</div>
-                            <div>11.29.</div>
-                        </div>
-                    </div>
-                    <div class="weather_view_section flex flex-row align-center">
-                        <div class="img_section flex flex-row">
-                            <div class="morning_img flex flex-column">
-                                <div>
-                                    오전
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                            <div class="afternoon_img flex flex-column">
-                                <div>
-                                    오후
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                        </div>
-                        <div class="temp_view_section flex flex-row">
-                            <div class="morning_temp">
-                                -5°
-                            </div>
-                            <div class="afternoon_temp">
-                                5°
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card week_weather_item flex flex-row">
-                    <div class="date_section">
-                        <div class="dates flex flex-column">
-                            <div>오늘</div>
-                            <div>11.29.</div>
-                        </div>
-                    </div>
-                    <div class="weather_view_section flex flex-row align-center">
-                        <div class="img_section flex flex-row">
-                            <div class="morning_img flex flex-column">
-                                <div>
-                                    오전
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                            <div class="afternoon_img flex flex-column">
-                                <div>
-                                    오후
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                        </div>
-                        <div class="temp_view_section flex flex-row">
-                            <div class="morning_temp">
-                                -5°
-                            </div>
-                            <div class="afternoon_temp">
-                                5°
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card week_weather_item flex flex-row">
-                    <div class="date_section">
-                        <div class="dates flex flex-column">
-                            <div>오늘</div>
-                            <div>11.29.</div>
-                        </div>
-                    </div>
-                    <div class="weather_view_section flex flex-row align-center">
-                        <div class="img_section flex flex-row">
-                            <div class="morning_img flex flex-column">
-                                <div>
-                                    오전
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                            <div class="afternoon_img flex flex-column">
-                                <div>
-                                    오후
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                        </div>
-                        <div class="temp_view_section flex flex-row">
-                            <div class="morning_temp">
-                                -5°
-                            </div>
-                            <div class="afternoon_temp">
-                                5°
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card week_weather_item flex flex-row">
-                    <div class="date_section">
-                        <div class="dates flex flex-column">
-                            <div>오늘</div>
-                            <div>11.29.</div>
-                        </div>
-                    </div>
-                    <div class="weather_view_section flex flex-row align-center">
-                        <div class="img_section flex flex-row">
-                            <div class="morning_img flex flex-column">
-                                <div>
-                                    오전
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                            <div class="afternoon_img flex flex-column">
-                                <div>
-                                    오후
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                        </div>
-                        <div class="temp_view_section flex flex-row">
-                            <div class="morning_temp">
-                                -5°
-                            </div>
-                            <div class="afternoon_temp">
-                                5°
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card week_weather_item flex flex-row">
-                    <div class="date_section">
-                        <div class="dates flex flex-column">
-                            <div>오늘</div>
-                            <div>11.29.</div>
-                        </div>
-                    </div>
-                    <div class="weather_view_section flex flex-row align-center">
-                        <div class="img_section flex flex-row">
-                            <div class="morning_img flex flex-column">
-                                <div>
-                                    오전
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                            <div class="afternoon_img flex flex-column">
-                                <div>
-                                    오후
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                        </div>
-                        <div class="temp_view_section flex flex-row">
-                            <div class="morning_temp">
-                                -5°
-                            </div>
-                            <div class="afternoon_temp">
-                                5°
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card week_weather_item flex flex-row">
-                    <div class="date_section">
-                        <div class="dates flex flex-column">
-                            <div>오늘</div>
-                            <div>11.29.</div>
-                        </div>
-                    </div>
-                    <div class="weather_view_section flex flex-row align-center">
-                        <div class="img_section flex flex-row">
-                            <div class="morning_img flex flex-column">
-                                <div>
-                                    오전
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                            <div class="afternoon_img flex flex-column">
-                                <div>
-                                    오후
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                        </div>
-                        <div class="temp_view_section flex flex-row">
-                            <div class="morning_temp">
-                                -5°
-                            </div>
-                            <div class="afternoon_temp">
-                                5°
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card week_weather_item flex flex-row">
-                    <div class="date_section">
-                        <div class="dates flex flex-column">
-                            <div>오늘</div>
-                            <div>11.29.</div>
-                        </div>
-                    </div>
-                    <div class="weather_view_section flex flex-row align-center">
-                        <div class="img_section flex flex-row">
-                            <div class="morning_img flex flex-column">
-                                <div>
-                                    오전
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                            <div class="afternoon_img flex flex-column">
-                                <div>
-                                    오후
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                        </div>
-                        <div class="temp_view_section flex flex-row">
-                            <div class="morning_temp">
-                                -5°
-                            </div>
-                            <div class="afternoon_temp">
-                                5°
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card week_weather_item flex flex-row">
-                    <div class="date_section">
-                        <div class="dates flex flex-column">
-                            <div>오늘</div>
-                            <div>11.29.</div>
-                        </div>
-                    </div>
-                    <div class="weather_view_section flex flex-row align-center">
-                        <div class="img_section flex flex-row">
-                            <div class="morning_img flex flex-column">
-                                <div>
-                                    오전
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                            <div class="afternoon_img flex flex-column">
-                                <div>
-                                    오후
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                        </div>
-                        <div class="temp_view_section flex flex-row">
-                            <div class="morning_temp">
-                                -5°
-                            </div>
-                            <div class="afternoon_temp">
-                                5°
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <h3>3일 예보</h3>
+            <div class="card week_weather_container weather_header flex flex-column flex-space-between"
+                 id="forecast-container">
+                <!-- JavaScript로 예보 항목을 동적으로 추가 -->
             </div>
         </div>
 
-        <div class="old_weeks flex flex-column">
-            <h3>과거날씨 ( 2023년 주간 예보 )</h3>
-            <div class="card week_weather_container weather_header flex flex-row flex-space-between">
-                <div class="card week_weather_item flex flex-row">
-                    <div class="date_section">
-                        <div class="dates flex flex-column">
-                            <div>오늘</div>
-                            <div>11.29.</div>
-                        </div>
-                    </div>
-                    <div class="weather_view_section flex flex-row align-center">
-                        <div class="img_section flex flex-row">
-                            <div class="morning_img flex flex-column">
-                                <div>
-                                    오전
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                            <div class="afternoon_img flex flex-column">
-                                <div>
-                                    오후
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                        </div>
-                        <div class="temp_view_section flex flex-row">
-                            <div class="morning_temp">
-                                -5°
-                            </div>
-                            <div class="afternoon_temp">
-                                5°
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card week_weather_item flex flex-row">
-                    <div class="date_section">
-                        <div class="dates flex flex-column">
-                            <div>오늘</div>
-                            <div>11.29.</div>
-                        </div>
-                    </div>
-                    <div class="weather_view_section flex flex-row align-center">
-                        <div class="img_section flex flex-row">
-                            <div class="morning_img flex flex-column">
-                                <div>
-                                    오전
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                            <div class="afternoon_img flex flex-column">
-                                <div>
-                                    오후
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                        </div>
-                        <div class="temp_view_section flex flex-row">
-                            <div class="morning_temp">
-                                -5°
-                            </div>
-                            <div class="afternoon_temp">
-                                5°
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card week_weather_item flex flex-row">
-                    <div class="date_section">
-                        <div class="dates flex flex-column">
-                            <div>오늘</div>
-                            <div>11.29.</div>
-                        </div>
-                    </div>
-                    <div class="weather_view_section flex flex-row align-center">
-                        <div class="img_section flex flex-row">
-                            <div class="morning_img flex flex-column">
-                                <div>
-                                    오전
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                            <div class="afternoon_img flex flex-column">
-                                <div>
-                                    오후
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                        </div>
-                        <div class="temp_view_section flex flex-row">
-                            <div class="morning_temp">
-                                -5°
-                            </div>
-                            <div class="afternoon_temp">
-                                5°
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card week_weather_item flex flex-row">
-                    <div class="date_section">
-                        <div class="dates flex flex-column">
-                            <div>오늘</div>
-                            <div>11.29.</div>
-                        </div>
-                    </div>
-                    <div class="weather_view_section flex flex-row align-center">
-                        <div class="img_section flex flex-row">
-                            <div class="morning_img flex flex-column">
-                                <div>
-                                    오전
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                            <div class="afternoon_img flex flex-column">
-                                <div>
-                                    오후
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                        </div>
-                        <div class="temp_view_section flex flex-row">
-                            <div class="morning_temp">
-                                -5°
-                            </div>
-                            <div class="afternoon_temp">
-                                5°
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card week_weather_item flex flex-row">
-                    <div class="date_section">
-                        <div class="dates flex flex-column">
-                            <div>오늘</div>
-                            <div>11.29.</div>
-                        </div>
-                    </div>
-                    <div class="weather_view_section flex flex-row align-center">
-                        <div class="img_section flex flex-row">
-                            <div class="morning_img flex flex-column">
-                                <div>
-                                    오전
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                            <div class="afternoon_img flex flex-column">
-                                <div>
-                                    오후
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                        </div>
-                        <div class="temp_view_section flex flex-row">
-                            <div class="morning_temp">
-                                -5°
-                            </div>
-                            <div class="afternoon_temp">
-                                5°
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card week_weather_item flex flex-row">
-                    <div class="date_section">
-                        <div class="dates flex flex-column">
-                            <div>오늘</div>
-                            <div>11.29.</div>
-                        </div>
-                    </div>
-                    <div class="weather_view_section flex flex-row align-center">
-                        <div class="img_section flex flex-row">
-                            <div class="morning_img flex flex-column">
-                                <div>
-                                    오전
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                            <div class="afternoon_img flex flex-column">
-                                <div>
-                                    오후
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                        </div>
-                        <div class="temp_view_section flex flex-row">
-                            <div class="morning_temp">
-                                -5°
-                            </div>
-                            <div class="afternoon_temp">
-                                5°
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card week_weather_item flex flex-row">
-                    <div class="date_section">
-                        <div class="dates flex flex-column">
-                            <div>오늘</div>
-                            <div>11.29.</div>
-                        </div>
-                    </div>
-                    <div class="weather_view_section flex flex-row align-center">
-                        <div class="img_section flex flex-row">
-                            <div class="morning_img flex flex-column">
-                                <div>
-                                    오전
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                            <div class="afternoon_img flex flex-column">
-                                <div>
-                                    오후
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                        </div>
-                        <div class="temp_view_section flex flex-row">
-                            <div class="morning_temp">
-                                -5°
-                            </div>
-                            <div class="afternoon_temp">
-                                5°
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card week_weather_item flex flex-row">
-                    <div class="date_section">
-                        <div class="dates flex flex-column">
-                            <div>오늘</div>
-                            <div>11.29.</div>
-                        </div>
-                    </div>
-                    <div class="weather_view_section flex flex-row align-center">
-                        <div class="img_section flex flex-row">
-                            <div class="morning_img flex flex-column">
-                                <div>
-                                    오전
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                            <div class="afternoon_img flex flex-column">
-                                <div>
-                                    오후
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                        </div>
-                        <div class="temp_view_section flex flex-row">
-                            <div class="morning_temp">
-                                -5°
-                            </div>
-                            <div class="afternoon_temp">
-                                5°
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card week_weather_item flex flex-row">
-                    <div class="date_section">
-                        <div class="dates flex flex-column">
-                            <div>오늘</div>
-                            <div>11.29.</div>
-                        </div>
-                    </div>
-                    <div class="weather_view_section flex flex-row align-center">
-                        <div class="img_section flex flex-row">
-                            <div class="morning_img flex flex-column">
-                                <div>
-                                    오전
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                            <div class="afternoon_img flex flex-column">
-                                <div>
-                                    오후
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                        </div>
-                        <div class="temp_view_section flex flex-row">
-                            <div class="morning_temp">
-                                -5°
-                            </div>
-                            <div class="afternoon_temp">
-                                5°
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card week_weather_item flex flex-row">
-                    <div class="date_section">
-                        <div class="dates flex flex-column">
-                            <div>오늘</div>
-                            <div>11.29.</div>
-                        </div>
-                    </div>
-                    <div class="weather_view_section flex flex-row align-center">
-                        <div class="img_section flex flex-row">
-                            <div class="morning_img flex flex-column">
-                                <div>
-                                    오전
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                            <div class="afternoon_img flex flex-column">
-                                <div>
-                                    오후
-                                </div>
-                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">
-                            </div>
-                        </div>
-                        <div class="temp_view_section flex flex-row">
-                            <div class="morning_temp">
-                                -5°
-                            </div>
-                            <div class="afternoon_temp">
-                                5°
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+{#        <div class="old_weeks flex flex-column">#}
+{#            <h3>과거날씨 ( 2023년 주간 예보 )</h3>#}
+{#            <div class="card week_weather_container weather_header flex flex-row flex-space-between">#}
+{#                <div class="card week_weather_item flex flex-row">#}
+{#                    <div class="date_section">#}
+{#                        <div class="dates flex flex-column">#}
+{#                            <div>오늘</div>#}
+{#                            <div>11.29.</div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                    <div class="weather_view_section flex flex-row align-center">#}
+{#                        <div class="img_section flex flex-row">#}
+{#                            <div class="morning_img flex flex-column">#}
+{#                                <div>#}
+{#                                    오전#}
+{#                                </div>#}
+{#                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">#}
+{#                            </div>#}
+{#                            <div class="afternoon_img flex flex-column">#}
+{#                                <div>#}
+{#                                    오후#}
+{#                                </div>#}
+{#                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">#}
+{#                            </div>#}
+{#                        </div>#}
+{#                        <div class="temp_view_section flex flex-row">#}
+{#                            <div class="morning_temp">#}
+{#                                -5°#}
+{#                            </div>#}
+{#                            <div class="afternoon_temp">#}
+{#                                5°#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#                <div class="card week_weather_item flex flex-row">#}
+{#                    <div class="date_section">#}
+{#                        <div class="dates flex flex-column">#}
+{#                            <div>오늘</div>#}
+{#                            <div>11.29.</div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                    <div class="weather_view_section flex flex-row align-center">#}
+{#                        <div class="img_section flex flex-row">#}
+{#                            <div class="morning_img flex flex-column">#}
+{#                                <div>#}
+{#                                    오전#}
+{#                                </div>#}
+{#                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">#}
+{#                            </div>#}
+{#                            <div class="afternoon_img flex flex-column">#}
+{#                                <div>#}
+{#                                    오후#}
+{#                                </div>#}
+{#                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">#}
+{#                            </div>#}
+{#                        </div>#}
+{#                        <div class="temp_view_section flex flex-row">#}
+{#                            <div class="morning_temp">#}
+{#                                -5°#}
+{#                            </div>#}
+{#                            <div class="afternoon_temp">#}
+{#                                5°#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#                <div class="card week_weather_item flex flex-row">#}
+{#                    <div class="date_section">#}
+{#                        <div class="dates flex flex-column">#}
+{#                            <div>오늘</div>#}
+{#                            <div>11.29.</div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                    <div class="weather_view_section flex flex-row align-center">#}
+{#                        <div class="img_section flex flex-row">#}
+{#                            <div class="morning_img flex flex-column">#}
+{#                                <div>#}
+{#                                    오전#}
+{#                                </div>#}
+{#                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">#}
+{#                            </div>#}
+{#                            <div class="afternoon_img flex flex-column">#}
+{#                                <div>#}
+{#                                    오후#}
+{#                                </div>#}
+{#                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">#}
+{#                            </div>#}
+{#                        </div>#}
+{#                        <div class="temp_view_section flex flex-row">#}
+{#                            <div class="morning_temp">#}
+{#                                -5°#}
+{#                            </div>#}
+{#                            <div class="afternoon_temp">#}
+{#                                5°#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#                <div class="card week_weather_item flex flex-row">#}
+{#                    <div class="date_section">#}
+{#                        <div class="dates flex flex-column">#}
+{#                            <div>오늘</div>#}
+{#                            <div>11.29.</div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                    <div class="weather_view_section flex flex-row align-center">#}
+{#                        <div class="img_section flex flex-row">#}
+{#                            <div class="morning_img flex flex-column">#}
+{#                                <div>#}
+{#                                    오전#}
+{#                                </div>#}
+{#                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">#}
+{#                            </div>#}
+{#                            <div class="afternoon_img flex flex-column">#}
+{#                                <div>#}
+{#                                    오후#}
+{#                                </div>#}
+{#                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">#}
+{#                            </div>#}
+{#                        </div>#}
+{#                        <div class="temp_view_section flex flex-row">#}
+{#                            <div class="morning_temp">#}
+{#                                -5°#}
+{#                            </div>#}
+{#                            <div class="afternoon_temp">#}
+{#                                5°#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#                <div class="card week_weather_item flex flex-row">#}
+{#                    <div class="date_section">#}
+{#                        <div class="dates flex flex-column">#}
+{#                            <div>오늘</div>#}
+{#                            <div>11.29.</div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                    <div class="weather_view_section flex flex-row align-center">#}
+{#                        <div class="img_section flex flex-row">#}
+{#                            <div class="morning_img flex flex-column">#}
+{#                                <div>#}
+{#                                    오전#}
+{#                                </div>#}
+{#                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">#}
+{#                            </div>#}
+{#                            <div class="afternoon_img flex flex-column">#}
+{#                                <div>#}
+{#                                    오후#}
+{#                                </div>#}
+{#                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">#}
+{#                            </div>#}
+{#                        </div>#}
+{#                        <div class="temp_view_section flex flex-row">#}
+{#                            <div class="morning_temp">#}
+{#                                -5°#}
+{#                            </div>#}
+{#                            <div class="afternoon_temp">#}
+{#                                5°#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#                <div class="card week_weather_item flex flex-row">#}
+{#                    <div class="date_section">#}
+{#                        <div class="dates flex flex-column">#}
+{#                            <div>오늘</div>#}
+{#                            <div>11.29.</div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                    <div class="weather_view_section flex flex-row align-center">#}
+{#                        <div class="img_section flex flex-row">#}
+{#                            <div class="morning_img flex flex-column">#}
+{#                                <div>#}
+{#                                    오전#}
+{#                                </div>#}
+{#                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">#}
+{#                            </div>#}
+{#                            <div class="afternoon_img flex flex-column">#}
+{#                                <div>#}
+{#                                    오후#}
+{#                                </div>#}
+{#                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">#}
+{#                            </div>#}
+{#                        </div>#}
+{#                        <div class="temp_view_section flex flex-row">#}
+{#                            <div class="morning_temp">#}
+{#                                -5°#}
+{#                            </div>#}
+{#                            <div class="afternoon_temp">#}
+{#                                5°#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#                <div class="card week_weather_item flex flex-row">#}
+{#                    <div class="date_section">#}
+{#                        <div class="dates flex flex-column">#}
+{#                            <div>오늘</div>#}
+{#                            <div>11.29.</div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                    <div class="weather_view_section flex flex-row align-center">#}
+{#                        <div class="img_section flex flex-row">#}
+{#                            <div class="morning_img flex flex-column">#}
+{#                                <div>#}
+{#                                    오전#}
+{#                                </div>#}
+{#                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">#}
+{#                            </div>#}
+{#                            <div class="afternoon_img flex flex-column">#}
+{#                                <div>#}
+{#                                    오후#}
+{#                                </div>#}
+{#                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">#}
+{#                            </div>#}
+{#                        </div>#}
+{#                        <div class="temp_view_section flex flex-row">#}
+{#                            <div class="morning_temp">#}
+{#                                -5°#}
+{#                            </div>#}
+{#                            <div class="afternoon_temp">#}
+{#                                5°#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#                <div class="card week_weather_item flex flex-row">#}
+{#                    <div class="date_section">#}
+{#                        <div class="dates flex flex-column">#}
+{#                            <div>오늘</div>#}
+{#                            <div>11.29.</div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                    <div class="weather_view_section flex flex-row align-center">#}
+{#                        <div class="img_section flex flex-row">#}
+{#                            <div class="morning_img flex flex-column">#}
+{#                                <div>#}
+{#                                    오전#}
+{#                                </div>#}
+{#                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">#}
+{#                            </div>#}
+{#                            <div class="afternoon_img flex flex-column">#}
+{#                                <div>#}
+{#                                    오후#}
+{#                                </div>#}
+{#                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">#}
+{#                            </div>#}
+{#                        </div>#}
+{#                        <div class="temp_view_section flex flex-row">#}
+{#                            <div class="morning_temp">#}
+{#                                -5°#}
+{#                            </div>#}
+{#                            <div class="afternoon_temp">#}
+{#                                5°#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#                <div class="card week_weather_item flex flex-row">#}
+{#                    <div class="date_section">#}
+{#                        <div class="dates flex flex-column">#}
+{#                            <div>오늘</div>#}
+{#                            <div>11.29.</div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                    <div class="weather_view_section flex flex-row align-center">#}
+{#                        <div class="img_section flex flex-row">#}
+{#                            <div class="morning_img flex flex-column">#}
+{#                                <div>#}
+{#                                    오전#}
+{#                                </div>#}
+{#                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">#}
+{#                            </div>#}
+{#                            <div class="afternoon_img flex flex-column">#}
+{#                                <div>#}
+{#                                    오후#}
+{#                                </div>#}
+{#                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">#}
+{#                            </div>#}
+{#                        </div>#}
+{#                        <div class="temp_view_section flex flex-row">#}
+{#                            <div class="morning_temp">#}
+{#                                -5°#}
+{#                            </div>#}
+{#                            <div class="afternoon_temp">#}
+{#                                5°#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#                <div class="card week_weather_item flex flex-row">#}
+{#                    <div class="date_section">#}
+{#                        <div class="dates flex flex-column">#}
+{#                            <div>오늘</div>#}
+{#                            <div>11.29.</div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                    <div class="weather_view_section flex flex-row align-center">#}
+{#                        <div class="img_section flex flex-row">#}
+{#                            <div class="morning_img flex flex-column">#}
+{#                                <div>#}
+{#                                    오전#}
+{#                                </div>#}
+{#                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">#}
+{#                            </div>#}
+{#                            <div class="afternoon_img flex flex-column">#}
+{#                                <div>#}
+{#                                    오후#}
+{#                                </div>#}
+{#                                <img src="{{ url_for('static', path='img/sun.png') }}" alt="">#}
+{#                            </div>#}
+{#                        </div>#}
+{#                        <div class="temp_view_section flex flex-row">#}
+{#                            <div class="morning_temp">#}
+{#                                -5°#}
+{#                            </div>#}
+{#                            <div class="afternoon_temp">#}
+{#                                5°#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
     </div>
 {% endblock %}
 
@@ -797,4 +392,8 @@
         document.querySelector(".info").dataset.selected = 'true';
     </script>
     <script src="{{ url_for('static', path='/js/weather.js') }}"></script>
+    <script>
+    get_current_weather('{{ cropName }}');
+    get_short_weather('{{ cropName }}');
+    </script>
 {% endblock %}
