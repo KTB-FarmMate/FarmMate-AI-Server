@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
 })
 
 
-function get_weather(memberId, cropName) {
+function get_weather(cropName) {
     // 현재 날씨 정보 요청
     const crop_data = JSON.parse(localStorage.getItem("crops_data"))[cropName];
     const temperature = document.querySelector(".temperature");

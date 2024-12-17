@@ -1,4 +1,4 @@
-function get_current_weather(memberId, cropName) {
+function get_current_weather(cropName) {
     // 현재 날씨 정보 요청
     const crop_data = JSON.parse(localStorage.getItem("crops_data"))[cropName];
     const temperature = document.querySelector(".temperature");
@@ -57,6 +57,123 @@ function get_current_weather(memberId, cropName) {
 
         console.log("Weather data used:", data);
     }
+}
+
+// 하늘 상태를 결정하는 함수 (오전/오후 요약용)
+function determineSkyCondition(hours) {
+    const conditionCount = {1: 0, 2: 0, 3: 0, 4: 0};
+    hours.forEach(hour => {
+        conditionCount[hour.skyConditionCode] += 1;
+    });
+
+    // 가장 많이 등장한 skyConditionCode 결정
+    const maxCondition = Object.keys(conditionCount).reduce((a, b) =>
+        conditionCount[a] >= conditionCount[b] ? a : b
+    );
+
+    // skyConditionCode에 따라 이미지 파일명 반환
+    return getSkyImage(parseInt(maxCondition));
+}
+
+// skyConditionCode에 따라 이미지 경로 반환
+function getSkyImage(code) {
+    switch (code) {
+        case 1:
+            return "sun";         // 맑음
+        case 2:
+            return "partly_cloudy"; // 구름조금
+        case 3:
+            return "cloudy";      // 구름많음
+        case 4:
+            return "overcast";    // 흐림
+        default:
+            return "sun";    // 기타
+    }
+}
+
+function get_short_weather(cropName) {
+    const crop_data = JSON.parse(localStorage.getItem("crops_data"))[cropName];
+    fetch(`${BE_SERVER}/weather/short-term?address=${crop_data.address}`)
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error(`HTTP Error: ${response.status}`);
+            }
+        })
+        .then(data => updateWeatherUI(data))
+        .catch(error => {
+            console.error("Failed to fetch current weather, using default data:", error);
+            updateWeatherUI(default_data); // 실패 시 기본 데이터 사용
+        });
+
+    const container = document.getElementById("forecast-container");
+
+    // 데이터 동적 생성
+    forecastData.forEach((day, index) => {
+        // 오전/오후 요약 이미지 결정
+        const morning = day.hourForecastInfos.filter(hour => parseInt(hour.forecastTime) < 12); // 오전 데이터
+        const afternoon = day.hourForecastInfos.filter(hour => parseInt(hour.forecastTime) >= 12); // 오후 데이터
+
+        const morningSky = determineSkyCondition(morning);
+        const afternoonSky = determineSkyCondition(afternoon);
+
+        // 상단 요약 바 생성
+        const dayCard = document.createElement("div");
+        dayCard.className = "card week_weather_item flex flex-column";
+
+        dayCard.innerHTML = `
+        <div class="date_section flex flex-row flex-space-between align-center toggle_header" data-index="${index}">
+            <div class="dates flex flex-column">
+                <div>${index + 1}일 후</div>
+                <div>${day.forecastDate}</div>
+            </div>
+            <div class="weather_summary flex flex-row align-center">
+                <div class="morning_img flex flex-column">
+                    <div>오전</div>
+                    <img src="/front/static/img/${morningSky}.png" alt="오전 날씨">
+                </div>
+                <div class="afternoon_img flex flex-column">
+                    <div>오후</div>
+                    <img src="/front/static/img/${afternoonSky}.png" alt="오후 날씨">
+                </div>
+            </div>
+            <div class="temp_summary">
+                최고: ${day.maxTemperature}° / 최저: ${day.minTemperature}°
+            </div>
+        </div>
+        <div class="hourly_weather_container" id="day-${index}" style="display: none;">
+            <div class="card weather_header flex flex-row flex-space-between">
+                ${day.hourForecastInfos.map(hour => `
+                    <div class="today_weather_item">
+                        <div class="temp">${hour.temperature}°</div>
+                        <div class="weather_img">
+                            <img src="/front/static/img/${getSkyImage(hour.skyConditionCode)}.png" alt="">
+                        </div>
+                        <div class="time_stamp">${hour.forecastTime}</div>
+                        <div class="humidity">습도: ${hour.humidity}%</div>
+                    </div>
+                `).join("")}
+            </div>
+        </div>
+    `;
+
+        container.appendChild(dayCard);
+    });
+
+    // 토글 이벤트
+    document.querySelectorAll(".toggle_header").forEach(header => {
+        header.addEventListener("click", () => {
+            const index = header.dataset.index;
+            const target = document.getElementById(`day-${index}`);
+
+            if (target.style.display === "none" || target.style.display === "") {
+                target.style.display = "block";
+            } else {
+                target.style.display = "none";
+            }
+        });
+    });
 }
 
 
@@ -644,105 +761,4 @@ document.addEventListener("DOMContentLoaded", () => {
             ]
         }
     ]
-
-    const container = document.getElementById("forecast-container");
-
-// 데이터 동적 생성
-    forecastData.forEach((day, index) => {
-        // 오전/오후 요약 이미지 결정
-        const morning = day.hourForecastInfos.filter(hour => parseInt(hour.forecastTime) < 12); // 오전 데이터
-        const afternoon = day.hourForecastInfos.filter(hour => parseInt(hour.forecastTime) >= 12); // 오후 데이터
-
-        const morningSky = determineSkyCondition(morning);
-        const afternoonSky = determineSkyCondition(afternoon);
-
-        // 상단 요약 바 생성
-        const dayCard = document.createElement("div");
-        dayCard.className = "card week_weather_item flex flex-column";
-
-        dayCard.innerHTML = `
-        <div class="date_section flex flex-row flex-space-between align-center toggle_header" data-index="${index}">
-            <div class="dates flex flex-column">
-                <div>${index + 1}일 후</div>
-                <div>${day.forecastDate}</div>
-            </div>
-            <div class="weather_summary flex flex-row align-center">
-                <div class="morning_img flex flex-column">
-                    <div>오전</div>
-                    <img src="/front/static/img/${morningSky}.png" alt="오전 날씨">
-                </div>
-                <div class="afternoon_img flex flex-column">
-                    <div>오후</div>
-                    <img src="/front/static/img/${afternoonSky}.png" alt="오후 날씨">
-                </div>
-            </div>
-            <div class="temp_summary">
-                최고: ${day.maxTemperature}° / 최저: ${day.minTemperature}°
-            </div>
-        </div>
-        <div class="hourly_weather_container" id="day-${index}" style="display: none;">
-            <div class="card weather_header flex flex-row flex-space-between">
-                ${day.hourForecastInfos.map(hour => `
-                    <div class="today_weather_item">
-                        <div class="temp">${hour.temperature}°</div>
-                        <div class="weather_img">
-                            <img src="/front/static/img/${getSkyImage(hour.skyConditionCode)}.png" alt="">
-                        </div>
-                        <div class="time_stamp">${hour.forecastTime}</div>
-                        <div class="humidity">습도: ${hour.humidity}%</div>
-                    </div>
-                `).join("")}
-            </div>
-        </div>
-    `;
-
-        container.appendChild(dayCard);
-    });
-
-// 하늘 상태를 결정하는 함수 (오전/오후 요약용)
-    function determineSkyCondition(hours) {
-        const conditionCount = {1: 0, 2: 0, 3: 0, 4: 0};
-        hours.forEach(hour => {
-            conditionCount[hour.skyConditionCode] += 1;
-        });
-
-        // 가장 많이 등장한 skyConditionCode 결정
-        const maxCondition = Object.keys(conditionCount).reduce((a, b) =>
-            conditionCount[a] >= conditionCount[b] ? a : b
-        );
-
-        // skyConditionCode에 따라 이미지 파일명 반환
-        return getSkyImage(parseInt(maxCondition));
-    }
-
-// skyConditionCode에 따라 이미지 경로 반환
-    function getSkyImage(code) {
-        switch (code) {
-            case 1:
-                return "sun";         // 맑음
-            case 2:
-                return "partly_cloudy"; // 구름조금
-            case 3:
-                return "cloudy";      // 구름많음
-            case 4:
-                return "overcast";    // 흐림
-            default:
-                return "sun";    // 기타
-        }
-    }
-
-// 토글 이벤트
-    document.querySelectorAll(".toggle_header").forEach(header => {
-        header.addEventListener("click", () => {
-            const index = header.dataset.index;
-            const target = document.getElementById(`day-${index}`);
-
-            if (target.style.display === "none" || target.style.display === "") {
-                target.style.display = "block";
-            } else {
-                target.style.display = "none";
-            }
-        });
-    });
-
 })
