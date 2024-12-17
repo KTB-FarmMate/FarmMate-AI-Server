@@ -50,71 +50,45 @@ pipeline {
             }
         }
 
-        stage('Deploy to EC2') {
-            steps {
-                withCredentials([
-                    string(credentialsId: 'ai-server', variable: 'EC2_INSTANCE_IP')
-                ]) {
-                    sshagent([SSH_CREDENTIALS_ID]) {
-                        sh """
-                        # EC2에서 Docker 컨테이너 실행 시 env-file 포함
-                        ssh -o StrictHostKeyChecking=no ec2-user@${EC2_INSTANCE_IP} '
-                        aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin ${ECR_REPO}
-                        docker pull ${ECR_REPO}:latest
-                        docker stop ai_server || true
-                        docker rm ai_server || true
-                        docker run -d --env-file /home/ec2-user/.env --name ai_server -p 8000:8000 ${ECR_REPO}:latest
-                        docker system prune -f
-                        docker image prune -f
-                        '
-                        """
+        stage('Deploy to Instances') {
+            parallel {
+                stage('Deploy to AI1') {
+                    steps {
+                        script {
+                            deployToInstance('ai-server', 'server-ai1')
+                        }
+                    }
+                }
+                stage('Deploy to AI2') {
+                    steps {
+                        script {
+                            deployToInstance('ai-server2', 'server-ai2')
+                        }
                     }
                 }
             }
         }
 
         stage('Health Check') {
-            steps {
-                withCredentials([
-                    string(credentialsId: 'ai-server', variable: 'EC2_INSTANCE_IP')
-                ]) {
-                    script {
-                        def healthUrl = "http://${EC2_INSTANCE_IP}:8000/health"
-                        def maxRetries = 10          // 최대 재시도 횟수
-                        def waitSeconds = 10         // 재시도 간 대기 시간 (초)
-                        def initialWait = 30         // 초기 대기 시간 (초)
-                        def success = false          // Health Check 성공 여부
-        
-                        echo "Initial wait for ${initialWait} seconds to allow container to start..."
-                        sleep(time: initialWait, unit: 'SECONDS') // 초기 대기 시간
-        
-                        for (int i = 1; i <= maxRetries; i++) {
-                            echo "Health check attempt ${i} of ${maxRetries}"
-                            
-                            // curl 명령어를 사용하여 /health 체크
-                            def response = sh(
-                                script: "curl -s -o /dev/null -w '%{http_code}' ${healthUrl}",
-                                returnStdout: true
-                            ).trim()
-        
-                            if (response == '200') {
-                                success = true
-                                break
-                            } else {
-                                sleep(waitSeconds) // 재시도 전 대기
-                            }
+            parallel {
+                stage('Health Check AI1') {
+                    steps {
+                        script {
+                            performHealthCheck('ai-server', 'AI1')
                         }
-        
-                        if (!success) {
-                            error "Health check failed after ${maxRetries} attempts."
-                        } else {
-                            echo "Deployment verified successfully via Health Check."
+                    }
+                }
+                stage('Health Check AI2') {
+                    steps {
+                        script {
+                            performHealthCheck('ai-server2', 'AI2')
                         }
                     }
                 }
             }
         }
 
+        
         stage('Cleanup Local Docker Images') {
             steps {
                 sh "docker rmi ${ECR_REPO}:latest || true"
@@ -155,6 +129,66 @@ pipeline {
         always {
             // Cleanup: 로컬 Docker 시스템을 정리 
             sh 'docker system prune -f'
+        }
+    }
+}
+
+def deployToInstance(instanceCredentialsId, logStream) {
+    withCredentials([
+        string(credentialsId: instanceCredentialsId, variable: 'EC2_INSTANCE_IP')
+    ]) {
+        sshagent([env.SSH_CREDENTIALS_ID]) {
+            sh """
+            ssh -o StrictHostKeyChecking=no ec2-user@${EC2_INSTANCE_IP} '
+            aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin ${ECR_REPO}
+            docker pull ${ECR_REPO}:latest
+            docker stop ai_server || true
+            docker rm ai_server || true
+            docker run -d --env-file /home/ec2-user/.env --name ai_server \
+                -p 8000:8000 ${ECR_REPO}:latest
+            docker system prune -f
+            docker image prune -f
+            '
+            """
+        }
+    }
+}
+
+def performHealthCheck(credentialsId, instanceLabel) {
+    withCredentials([
+        string(credentialsId: credentialsId, variable: 'EC2_INSTANCE_IP')
+    ]) {
+        script {
+            def healthUrl = "http://${EC2_INSTANCE_IP}:8000/health"
+            def maxRetries = 10
+            def waitSeconds = 10
+            def initialWait = 30
+            def success = false
+
+            echo "Initial wait for ${initialWait} seconds to allow container to start..."
+            sleep(time: initialWait, unit: 'SECONDS')
+
+            for (int i = 1; i <= maxRetries; i++) {
+                echo "Health check attempt ${i} of ${maxRetries} for ${instanceLabel}"
+                def response = sh(
+                    script: "curl -s -o /dev/null -w '%{http_code}' ${healthUrl}",
+                    returnStdout: true
+                ).trim()
+
+                if (response == '200') {
+                    success = true
+                    break
+                } else {
+                    echo "Health check failed on attempt ${i}. Retrying in ${waitSeconds} seconds..."
+                    sleep(waitSeconds)
+                }
+            }
+
+            if (!success) {
+                error "Health check failed for ${instanceLabel} after ${maxRetries} attempts."
+            } else {
+                echo "Deployment verified successfully via Health Check for ${instanceLabel}."
+            }
         }
     }
 }
