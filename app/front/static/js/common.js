@@ -5,19 +5,22 @@ function fetchWithRetry(url, options, maxRetries = 5, delay = 1000) {
 
     function attemptFetch() {
         return fetch(url, options)
-            .then((res) => {
-                if (!res.ok) {
-                    console.log(`Attempt ${attempts + 1}: HTTP error! status: ${res.status}`);
-                    throw new Error(`HTTP error! status: ${res.status}`);
+            .then(response => {
+                // HTTP 상태 코드가 200~299가 아닌 경우 에러를 던짐
+                if (!response.ok) {
+                    console.warn(`HTTP error! status: ${response.status} (Attempt ${attempts + 1})`);
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                return res.json();
+                return response.json(); // 정상 응답 반환
             })
-            .catch((error) => {
+            .catch(error => {
+                // 네트워크 오류 또는 HTTP 오류 발생 시 재시도
                 if (attempts < maxRetries - 1) {
                     attempts++;
                     console.warn(`Retrying... (${attempts}/${maxRetries})`);
-                    return new Promise((resolve) => setTimeout(resolve, delay)).then(attemptFetch);
+                    return new Promise(resolve => setTimeout(resolve, delay)).then(attemptFetch);
                 } else {
+                    // 재시도 횟수 초과 시 최종 에러 처리
                     throw new Error(`Max retries reached. Last error: ${error.message}`);
                 }
             });
