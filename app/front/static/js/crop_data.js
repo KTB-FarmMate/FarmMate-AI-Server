@@ -1,3 +1,29 @@
+function fetchWithRetry(url, options, maxRetries = 5, delay = 1000) {
+    let attempts = 0;
+
+    function attemptFetch() {
+        return fetch(url, options)
+            .then((res) => {
+                if (!res.ok) {
+                    console.log(`Attempt ${attempts + 1}: HTTP error! status: ${res.status}`);
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                return res.json();
+            })
+            .catch((error) => {
+                if (attempts < maxRetries - 1) {
+                    attempts++;
+                    console.warn(`Retrying... (${attempts}/${maxRetries})`);
+                    return new Promise((resolve) => setTimeout(resolve, delay)).then(attemptFetch);
+                } else {
+                    throw new Error(`Max retries reached. Last error: ${error.message}`);
+                }
+            });
+    }
+
+    return attemptFetch();
+}
+
 function crop_create(crop_name, memberId) {
     const address = document.querySelector("input[name='address']").value;
     const creationDate = document.querySelector("input[name='creation_date']").value;
@@ -15,21 +41,16 @@ function crop_create(crop_name, memberId) {
 
     console.log(body);
 
-    fetch(`${BE_SERVER}/members/${memberId}/threads`, {
+
+// 사용 예시
+    fetchWithRetry(`${BE_SERVER}/members/${memberId}/threads`, {
         method: "POST",
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(body),
     })
-        .then((res) => {
-            if (!res.ok) {
-                console.log(res);
-                throw new Error(`HTTP error! status: ${res.status}`);
-            }
-            return res.json();
-        })
-        .then(data => {
+        .then((data) => {
             console.log(data);
             crops_data[crop_name].threadId = data.threadId;
             crops_data[crop_name].created = true;
@@ -39,29 +60,22 @@ function crop_create(crop_name, memberId) {
 
             localStorage.setItem("select_crop", crop_name);
             location.href = `/front/members/${memberId}/crop/${crop_name}`;
-            // localStorage.setItem("memberId", data["memberId"]);
         })
         .catch((error) => {
-            console.error("Fetch error:", error);
+            console.error("Fetch error after retries:", error);
         });
 }
 
 function crop_delete(crop_name, memberId) {
     let crops_data = JSON.parse(localStorage.getItem("crops_data"));
     let threadId = crops_data[crop_name].threadId;
-    fetch(`${BE_SERVER}/members/${memberId}/threads/${threadId}`, {
+// DELETE 요청 사용 예시
+    fetchWithRetry(`${BE_SERVER}/members/${memberId}/threads/${threadId}`, {
         method: "DELETE",
         headers: {
             'Content-Type': 'application/json',
-        }
+        },
     })
-        .then((res) => {
-            if (!res.ok) {
-                console.log(res);
-                throw new Error(`HTTP error! status: ${res.status}`);
-            }
-            return res.json();
-        })
         .then(() => {
             crops_data[crop_name].created = false;
             crops_data[crop_name].threadId = '';
@@ -70,6 +84,7 @@ function crop_delete(crop_name, memberId) {
         })
         .catch((error) => {
             console.error("Fetch error:", error);
+            alert(`작물 삭제 실패: ${error.message}`);
         });
 }
 
@@ -92,7 +107,7 @@ function crop_modify(crop_name, memberId) {
 
     console.log(body);
 
-    fetch(`${BE_SERVER}/members/${memberId}/threads`, {
+    fetchWithRetry(`${BE_SERVER}/members/${memberId}/threads`, {
         method: "PATCH",
         headers: {
             'Content-Type': 'application/json',
