@@ -1,3 +1,21 @@
+/**
+ * 메시지의 역할(role)을 결정
+ */
+function determineRole(role, idx) {
+    return role
+        ? role.toLowerCase()
+        : (idx % 2 === 0 ? "user" : "assistant");
+}
+
+/**
+ * 메시지 요소를 생성
+ */
+function createMessageElement(role, text) {
+    return role === "user"
+        ? createUserMessage(text)
+        : createAssistantMessage(text);
+}
+
 function load_messages(memberId, cropName) {
     const crops_data = JSON.parse(localStorage.getItem('crops_data'));
     console.log(crops_data);
@@ -15,20 +33,19 @@ function load_messages(memberId, cropName) {
         .then(messages => {
             const messageList = document.querySelector(".message_list");
             messageList.innerHTML = ""; // 기존 메시지 초기화
-            console.log(messages);
+            console.log("Loaded messages:", messages);
+
+            if (!messages || !Array.isArray(messages["messages"])) {
+                throw new Error("Invalid message data format"); // 데이터 검증
+            }
+
             let idx = 0; // 메시지 순서를 나타내는 인덱스
 
             messages["messages"].forEach(msg => {
-                // [시스템 메시지]를 포함하는 메시지는 건너뜀
-                if (!msg.text.includes("[시스템 메시지]")) {
-                    // role이 null인 경우 순서(idx)에 따라 user와 assistant로 분리
-                    const role = msg.role
-                        ? msg.role.toLowerCase()
-                        : (idx % 2 === 0 ? "user" : "assistant");
-
-                    const messageElement = role === "user"
-                        ? createUserMessage(msg.text)
-                        : createAssistantMessage(msg.text);
+                // 메시지 검증: msg.text와 msg.role의 유효성 확인
+                if (msg.text && !msg.text.includes("[시스템 메시지]")) {
+                    const role = determineRole(msg.role, idx);
+                    const messageElement = createMessageElement(role, msg.text);
 
                     messageList.appendChild(messageElement);
                     idx++; // 인덱스 증가
@@ -37,8 +54,10 @@ function load_messages(memberId, cropName) {
         })
         .catch(error => {
             console.error("Failed to load messages after retries:", error);
-            alert("메시지를 로드하는 중 문제가 발생했습니다.");
+            alert("메시지를 로드하는 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.");
         });
+
+
 }
 
 
@@ -140,18 +159,22 @@ function send_message(memberId, cropName) {
     })
         .then(response => {
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                console.warn(`HTTP error! status: ${response.status}`);
+                return {error: true, status: response.status}; // 에러 객체 반환
             }
             return response.json();
         })
         .then(data => {
+            if (data.error) {
+                console.warn(`Server error with status: ${data.status}`);
+                return; // 에러가 반환되면 이후 로직 실행 안 함
+            }
+
             const assistantMessageContent = data["message"];
-            // AI 응답 메시지를 동적으로 추가
             const assistantMessage = createAssistantMessage(assistantMessageContent);
             messageList.appendChild(assistantMessage);
 
-            // 스크롤 하단 이동
-            messageList.scrollTop = messageList.scrollHeight;
+            messageList.scrollTop = messageList.scrollHeight; // 스크롤 하단 이동
         })
         .catch(error => {
             console.error("Error sending message:", error);
@@ -191,15 +214,27 @@ function handleBookmark(element) {
         body: JSON.stringify({
             "question": question,
             "answer": answer,
-            "chattedAt": "2024-12-16T20:29:10.997Z"
+            "chattedAt": new Date().toISOString() // 현재 시간을 ISO 형식으로 자동 설정
         })
-    }).then(r => {
-        if (r.ok) {
-            return r.json();
-        }
-    }).then(data => {
-        console.log(data);
     })
+        .then(r => {
+            if (!r.ok) {
+                console.error(`HTTP error! status: ${r.status}`);
+                return r.text().then(text => { // 에러 응답이 텍스트일 경우
+                    throw new Error(`Error Response: ${text}`);
+                });
+            }
+            return r.json(); // 성공 응답만 JSON 파싱
+        })
+        .then(data => {
+            console.log("Bookmark response data:", data);
+            // 성공적으로 처리된 데이터를 사용할 수 있음
+        })
+        .catch(error => {
+            console.error("Fetch error while creating bookmark:", error.message);
+            alert(`북마크 저장 실패: ${error.message}`); // 사용자에게 에러 메시지 표시
+        });
+
 
     // 원하는 작업 수행 (예: localStorage에 저장)
     // saveToBookmarks(question, answer, crop_name);
