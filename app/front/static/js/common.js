@@ -11,6 +11,9 @@ function fetchWithRetry(url, options={}, maxRetries = 5, delay = 1000) {
                     console.warn(`HTTP error! status: ${response.status} (Attempt ${attempts + 1})`);
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
+                if (response.status === 204){
+                    return response;
+                }
                 return response.json(); // 정상 응답 반환
             })
             .catch(error => {

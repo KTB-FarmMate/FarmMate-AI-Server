@@ -1,5 +1,3 @@
-
-
 function crop_create(crop_name, memberId) {
     const address = document.querySelector("input[name='address']").value;
     const creationDate = document.querySelector("input[name='creation_date']").value;
@@ -48,16 +46,15 @@ function crop_delete(crop_name, memberId) {
     console.log(crops_data, threadId, crop_name)
     // DELETE 요청 사용 예시
     fetchWithRetry(`${BE_SERVER}/members/${memberId}/threads/${threadId}`, {
-        method: "DELETE",
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        method: "DELETE"
     })
-        .then(() => {
-            crops_data[crop_name].created = false;
-            crops_data[crop_name].threadId = '';
-            alert("작물 삭제 완료");
-            goHome();
+        .then(response => {
+            if (response.ok) {
+                crops_data[crop_name].created = false;
+                crops_data[crop_name].threadId = '';
+                alert("작물 삭제 완료");
+                goHome();
+            }
         })
         .catch((error) => {
             console.error("Fetch error:", error);
