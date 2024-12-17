@@ -38,7 +38,7 @@ function crop_create(crop_name, memberId) {
             localStorage.setItem("crops_data", JSON.stringify(crops_data));
 
             localStorage.setItem("select_crop", crop_name);
-            location.href = `/MEMBERS/${memberId}/crop/${crop_name}`;
+            location.href = `/front/members/${memberId}/crop/${crop_name}`;
             // localStorage.setItem("memberId", data["memberId"]);
         })
         .catch((error) => {
