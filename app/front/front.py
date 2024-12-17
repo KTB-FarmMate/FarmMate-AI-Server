@@ -124,7 +124,7 @@ async def pests(request: Request, memberId: str, cropName: str, pestName: str):
 
 
 @router.get("/members/{memberId}/crop/{cropName}/weather/detail", response_class=HTMLResponse)
-async def pests(request: Request, memberId: str, cropName: str):
+async def weather(request: Request, memberId: str, cropName: str):
     return templates.TemplateResponse(
         "weather/weather.html", {"request": request, "memberId": memberId, "cropName": cropName}
     )

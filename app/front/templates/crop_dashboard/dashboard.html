@@ -26,20 +26,20 @@
                 <div class="card_title">
                     <h3>날씨</h3>
                 </div>
-                <div onclick="location.href='/front/members/{{ memberId }}/{{ cropName }}/weather/detail'"
+                <div onclick="location.href='/front/members/{{ memberId }}/crop/{{cropName}}/weather/detail'"
                      class="card_detail_btn">
                     <span>더보기</span>
                 </div>
             </div>
             <div class="card_content flex flex-row flex-space-between">
-                <img style='width: 20vw;
-    margin: 0 20px 20px;' src="{{ url_for('static', path='/img/sun.png') }}" alt="개쩌는 태양 아이콘">
+                <img style="width: 20vw;
+    margin: 0 20px 20px;" src="/front/static/img/sun.png" alt="개쩌는 태양 아이콘">
                 <div class="flex flex-column ">
                     <div>온도 :
-                        <span class="temperature">20</span>
+                        <span class="temperature">-2.8</span>
                     </div>
                     <div>습도 :
-                        <span class="humidity">50</span>%
+                        <span class="humidity">79</span>%
                     </div>
                 </div>
             </div>
@@ -112,7 +112,7 @@
                     </button>
                 </div>
                 <div class="remove_overlay_btn">
-                    <button onclick="document.querySelector('.remove_overlay').dataset.visible = 'false';crop_delete('{{ crop_name }}, {{ memberId }}');"
+                    <button onclick="document.querySelector('.remove_overlay').dataset.visible = 'false';crop_delete('{{ cropName }}', '{{ memberId }}');"
                             class="delete_btn">삭제
                     </button>
                 </div>

@@ -45,7 +45,8 @@ function crop_create(crop_name, memberId) {
 function crop_delete(crop_name, memberId) {
     let crops_data = JSON.parse(localStorage.getItem("crops_data"));
     let threadId = crops_data[crop_name].threadId;
-// DELETE 요청 사용 예시
+    console.log(crops_data, threadId, crop_name)
+    // DELETE 요청 사용 예시
     fetchWithRetry(`${BE_SERVER}/members/${memberId}/threads/${threadId}`, {
         method: "DELETE",
         headers: {
