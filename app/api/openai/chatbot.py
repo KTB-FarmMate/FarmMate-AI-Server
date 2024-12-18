@@ -6,6 +6,8 @@ import json
 import logging
 from enum import Enum
 from datetime import datetime
+import logging
+
 
 # HTTP 및 API 관련 모듈
 import requests
@@ -42,6 +44,7 @@ assistant = client.beta.assistants.retrieve(assistant_id=settings.ASSISTANT_ID)
 
 T = TypeVar('T')
 
+logging.basicConfig(level=logging.INFO)
 
 class BaseResponse(BaseModel, Generic[T]):
     """기본 응답 모델"""
@@ -132,6 +135,7 @@ async def create_thread(memberId: str, request: CreateThreadRequest) -> ApiRespo
         content=f"[시스템 메시지] 사용자는 심은날짜 : {plantedAt}, 주소 : {address}에서 작물 : {crop}을(를) 재배하고 있습니다.",
     )
 
+    logging.info("[CHATBOT] thread create success.")
     return ApiResponse(
         message="채팅방이 성공적으로 생성되었습니다.",
         data={"threadId": thread.id},
@@ -183,6 +187,7 @@ async def get_thread(memberId: str, thread_id: str):
         for message in messages.data
     ]
 
+    logging.info("[CHATBOT] thread message list return success.")
     return ApiResponse(
         message="채팅방 정보를 가져왔습니다.",
         data={"threadId": thread_id, "messages": messages_data}
@@ -238,11 +243,13 @@ async def send_message(memberId: str, thread_id: str, request: MessageRequest):
         if run_status.status == "completed":
             break
         elif run_status.status in ["failed", "cancelled"]:
+            logging.warning("[CHATBOT] message send failed")
             raise HTTPException(
                 status_code=HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"AI 응답 생성 실패: {run_status.status}"
             )
         elif run_status.status == "expired":
+            logging.warning("[CHATBOT] message send failed")
             raise HTTPException(
                 status_code=HTTP_408_REQUEST_TIMEOUT,
                 detail=f"AI 응답 생성 실패: {run_status.status}"
@@ -251,6 +258,7 @@ async def send_message(memberId: str, thread_id: str, request: MessageRequest):
 
     messages = client.beta.threads.messages.list(thread_id=thread_id, order="desc", limit=1)
     if not messages.data:
+        logging.warning("[CHATBOT] message send failed")
         raise HTTPException(
             status_code=HTTP_404_NOT_FOUND,
             detail="AI 응답이 없습니다."
@@ -259,11 +267,13 @@ async def send_message(memberId: str, thread_id: str, request: MessageRequest):
     latest_message = messages.data[0]
     if latest_message.role == "assistant":
         content = latest_message.content[0].text.value if latest_message.content else ""
+        logging.info("[CHATBOT] message send success.")
         return ApiResponse(
             message="메시지를 성공적으로 전송하였습니다.",
             data={"threadId": thread_id, "text": content}
         ).to_response()
 
+    logging.error("[CHATBOT] message send error")
     raise HTTPException(status_code=HTTP_422_UNPROCESSABLE_ENTITY, detail="AI 응답을 찾을 수 없습니다.")
 
 
@@ -351,6 +361,7 @@ async def modify_message(memberId: str, thread_id: str, request: ModifyMessageRe
             )
         time.sleep(1)
 
+    logging.info("[CHATBOT] message modify success.")
     return ApiResponse(
         message="채팅방 정보가 성공적으로 변경되었습니다.",
         data={"message": "채팅방 정보가 성공적으로 변경되었습니다."}
@@ -374,6 +385,7 @@ async def delete_thread(memberId: str, thread_id: str):
     """특정 채팅방을 삭제합니다."""
     client.beta.threads.delete(thread_id)
 
+    logging.info("[CHATBOT] thread delete success.")
     return None
     # return ApiResponse(status_code=HTTP_204_NO_CONTENT, message="채팅방이 성공적으로 삭제되었습니다.")
 
@@ -406,6 +418,7 @@ class DashBoardResponse(BaseModel):
 async def get_thread_status(memberId: str, thread_id: str):
     """특정 채팅방의 상태 정보를 반환합니다."""
     client.beta.threads.retrieve(thread_id=thread_id)
+    logging.info("[CHATBOT] thread status return success.")
     return ApiResponse(
         message="상태 정보가 올바르게 반환되었습니다.",
         data={
