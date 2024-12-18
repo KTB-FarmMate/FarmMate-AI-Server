@@ -27,25 +27,27 @@ function get_pest_detail(cropName, pestName) {
             throw new Error(response.statusText);
         })
         .then(data => {
-            name_kor.textContent = `한글명: ${data?.sickNameKor || ""}`;
-            name_chn.textContent = `한문명: ${data?.sickNameChn || ""}`;
-            name_eng.textContent = `영문명: ${data?.sickNameEng || ""}`;
-            crop_name.textContent = `작물명: ${data?.cropName || ""}`;
+            name_kor.innerHTML = `한글명: ${data?.sickNameKor || ""}`;
+            name_chn.innerHTML = `한문명: ${data?.sickNameChn || ""}`;
+            name_eng.innerHTML = `영문명: ${data?.sickNameEng || ""}`;
+            crop_name.innerHTML = `작물명: ${data?.cropName || ""}`;
 
             // 발생 환경
-            occurrence_env_content.textContent = data?.["developmentCondition"] ?? "";
+            occurrence_env_content.innerHTML = data?.["developmentCondition"] ?? "";
 
             // 증상
-            description_content.textContent = data?.["symptoms"] ?? "";
+            description_content.innerHTML = data?.["symptoms"] ?? "";
 
             // 예방법
-            control_content.textContent = data?.["preventionMethod"] ?? "";
+            control_content.innerHTML = data?.["preventionMethod"] ?? "";
 
             // 이미지 리스트
             const image_list = data?.["imageList"] ?? [];
 
             let preview_img = "";
-
+            if (image_list.length >= 1){
+                fest_img_list.innerHTML = "";
+            }
             image_list.forEach(image => {
                 if (preview_img === "" && image.iemSpchcknNm === "병증상") {
                     preview_img = image.image;
