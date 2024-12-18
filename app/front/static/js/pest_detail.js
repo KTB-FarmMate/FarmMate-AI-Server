@@ -27,19 +27,19 @@ function get_pest_detail(cropName, pestName) {
             throw new Error(response.statusText);
         })
         .then(data => {
-            name_kor.textContent = data?.["sickNameKor"] ?? "";
-            name_chn.textContent = data?.["sickNameChn"] ?? "";
-            name_eng.textContent = data?.["sickNameEng"] ?? "";
-            crop_name.textContent = data?.["cropName"] ?? "";
+            name_kor.innerHTML = data?.["sickNameKor"] ?? "";
+            name_chn.innerHTML = data?.["sickNameChn"] ?? "";
+            name_eng.innerHTML = data?.["sickNameEng"] ?? "";
+            crop_name.innerHTML = data?.["cropName"] ?? "";
 
             // 발생 환경
-            occurrence_env_content.textContent = data?.["developmentCondition"] ?? "";
+            occurrence_env_content.innerHTML = data?.["developmentCondition"] ?? "";
 
             // 증상
-            description_content.textContent = data?.["symptoms"] ?? "";
+            description_content.innerHTML = data?.["symptoms"] ?? "";
 
             // 예방법
-            control_content.textContent = data?.["preventionMethod"] ?? "";
+            control_content.innerHTML = data?.["preventionMethod"] ?? "";
 
             // 이미지 리스트
             const image_list = data?.["imageList"] ?? [];
@@ -56,7 +56,7 @@ function get_pest_detail(cropName, pestName) {
                 const figcaption_element = document.createElement("figcaption");
                 image_element.src = image.image;
                 image_element.alt = image.imageTitle ?? "";
-                figcaption_element.textContent = image.imageTitle ?? "";
+                figcaption_element.innerHTML = image.imageTitle ?? "";
                 figure_element.appendChild(image_element);
                 fest_img_list.appendChild(figure_element);
             })

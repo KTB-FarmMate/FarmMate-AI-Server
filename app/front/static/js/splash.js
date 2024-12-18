@@ -54,6 +54,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 2000);
     }else{
         alert("멤버 아이디가 올바르게 생성되지 않았습니다.");
-        // window.location.reload();
+        window.location.reload();
     }
 });
