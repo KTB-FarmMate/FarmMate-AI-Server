@@ -1,35 +1,48 @@
 const BE_SERVER = "https://api.farmmate.net"
 // const BE_SERVER = "http://43.202.163.157:8080"
-function fetchWithRetry(url, options={}, maxRetries = 5, delay = 500) {
+async function fetchWithRetry(url, options = {}, maxRetries = 5, delay = 500, sync = false) {
     let attempts = 0;
 
-    function attemptFetch() {
-        return fetch(url, options)
-            .then(response => {
-                // HTTP 상태 코드가 200~299가 아닌 경우 에러를 던짐
-                if (!response.ok) {
-                    console.warn(`HTTP error! status: ${response.status} (Attempt ${attempts + 1})`);
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                if (response.status === 204){
-                    return response;
-                }
-                return response.json(); // 정상 응답 반환
-            })
-            .catch(error => {
-                // 네트워크 오류 또는 HTTP 오류 발생 시 재시도
-                if (attempts < maxRetries - 1) {
-                    attempts++;
-                    console.warn(`Retrying... (${attempts}/${maxRetries})`);
-                    return new Promise(resolve => setTimeout(resolve, delay)).then(attemptFetch);
-                } else {
-                    // 재시도 횟수 초과 시 최종 에러 처리
+    const attemptFetch = async () => {
+        try {
+            const response = await fetch(url, options);
+            if (!response.ok) {
+                console.warn(`HTTP error! status: ${response.status} (Attempt ${attempts + 1})`);
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            if (response.status === 204) {
+                return response;
+            }
+            return await response.json();
+        } catch (error) {
+            if (attempts < maxRetries - 1) {
+                attempts++;
+                console.warn(`Retrying... (${attempts}/${maxRetries})`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+                return attemptFetch();
+            } else {
+                throw new Error(`Max retries reached. Last error: ${error.message}`);
+            }
+        }
+    };
+
+    if (sync) {
+        // 동기처럼 보이도록 await 사용
+        for (let attempt = 0; attempt < maxRetries; attempt++) {
+            try {
+                return await attemptFetch();
+            } catch (error) {
+                console.warn(`Retrying... (${attempt + 1}/${maxRetries})`);
+                if (attempt === maxRetries - 1) {
                     throw new Error(`Max retries reached. Last error: ${error.message}`);
                 }
-            });
+                await new Promise(resolve => setTimeout(resolve, delay)); // 비동기 지연
+            }
+        }
+    } else {
+        // 비동기 실행
+        return attemptFetch();
     }
-
-    return attemptFetch();
 }
 
 function get_memberId() {

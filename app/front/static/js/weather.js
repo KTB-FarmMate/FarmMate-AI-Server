@@ -106,12 +106,15 @@ function get_short_weather(cropName) {
         })
         .then(data => {
             // 오늘 데이터를 별도로 처리
-            const today = data[0];
-            // const todayCard = document.createElement("div");
-            const todayCard = document.querySelector(".days")
-            // todayCard.className = "days flex flex-column";
-
-            todayCard.innerHTML = `
+            const first_day = data[0].forecastDate;
+            const todayDate = new Date().toISOString().split("T")[0]; // 오늘 날짜 (YYYY-MM-DD)
+            if (first_day === todayDate) {
+                // const todayCard = document.createElement("div");
+                const todayCard = document.querySelector(".days")
+                // todayCard.className = "days flex flex-column";
+                const today = data[0];
+                data = data.slice(1);
+                todayCard.innerHTML = `
                 <h3>일간예보</h3>
                 <div class="card weather_header flex flex-row flex-space-between">
                     ${today.hourForecastInfos.map(hour => `
@@ -126,10 +129,11 @@ function get_short_weather(cropName) {
                     `).join("")}
                 </div>
             `;
+            }
             // container.appendChild(todayCard);
 
             // 나머지 2일 처리
-            data.slice(1, 4).forEach((day, index) => {
+            data.forEach((day, index) => {
                 const dayCard = document.createElement("div");
                 dayCard.className = "card week_weather_item flex flex-column";
 
@@ -857,13 +861,15 @@ function get_short_weather(cropName) {
                 }
             ]
 
-            // 오늘 데이터를 별도로 처리
-            const today = data[0];
-            // const todayCard = document.createElement("div");
-            const todayCard = document.querySelector(".days")
-            // todayCard.className = "days flex flex-column";
-
-            todayCard.innerHTML = `
+            const first_day = data[0].forecastDate;
+            const todayDate = new Date().toISOString().split("T")[0]; // 오늘 날짜 (YYYY-MM-DD)
+            if (first_day === todayDate) {
+                // const todayCard = document.createElement("div");
+                const todayCard = document.querySelector(".days")
+                // todayCard.className = "days flex flex-column";
+                const today = data[0];
+                data = data.slice(1);
+                todayCard.innerHTML = `
                 <h3>일간예보</h3>
                 <div class="card weather_header flex flex-row flex-space-between">
                     ${today.hourForecastInfos.map(hour => `
@@ -878,10 +884,10 @@ function get_short_weather(cropName) {
                     `).join("")}
                 </div>
             `;
-            // container.appendChild(todayCard);
+            }
 
             // 나머지 2일 처리
-            data.slice(1, 4).forEach((day, index) => {
+            data.forEach((day, index) => {
                 const dayCard = document.createElement("div");
                 dayCard.className = "card week_weather_item flex flex-column";
 
