@@ -19,7 +19,7 @@ function get_pest_detail(cropName, pestName) {
 
     // 예방 방법
     const control_content = document.querySelector(".control_container .content");
-    fetch(`${BE_SERVER}/pests/${pestName}/${cropName}`)
+    fetch(`${BE_SERVER}/pests/${pestName}?cropName=${cropName}`)
         .then(response => {
             if (response.ok) {
                 return response.json();

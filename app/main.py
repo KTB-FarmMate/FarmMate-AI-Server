@@ -10,14 +10,12 @@ import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 
 # 메인 앱 생성
+# FastAPI 앱 생성 (servers 설정 제거)
 app = FastAPI(
     debug=True,
     openapi_url="/openapi.json",
     docs_url="/docs",
     redoc_url="/redoc",
-    servers=[
-        {"url": "/ai", "description": "AI 관련 API"},
-    ],
 )
 
 app.add_middleware(
@@ -45,7 +43,7 @@ front_app = FastAPI(
 # 메인 앱 라우터 등록
 app.include_router(health_router, prefix="/health")
 app.include_router(openai_router, prefix="/members/{memberId}/threads")
-app.include_router(pest_router, prefix="/pests")
+app.include_router(pest_router, prefix="/ai")
 
 # # Front 앱 라우터 등록
 front_app.include_router(front_router)

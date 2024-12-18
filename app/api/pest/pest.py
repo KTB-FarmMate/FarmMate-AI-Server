@@ -29,6 +29,8 @@ T = TypeVar('T')
 
 router = APIRouter()
 
+logging.basicConfig(level=logging.INFO)
+
 
 class PestResponse(BaseModel):
     """
@@ -40,7 +42,7 @@ class PestResponse(BaseModel):
 
 
 @router.get(
-    "",
+    "/pests",
     summary="작물별 병해충 목록",
     response_model=ApiResponse[PestResponse],
     tags=["병해충 관련"],
@@ -88,9 +90,10 @@ async def get_pests(cropName: str) -> ApiResponse:
     latest_number = latest.get_attribute_list("onclick")[0].split("'")[1]
     # latest_number = 229
     pest_detail_url = rf"https://ncpms.rda.go.kr/npms/NewIndcUserR.np?indcMon=&indcSeq={latest_number}"
-
+    logging.info(f"latest_number: {latest_number}")
     res = requests.get(pest_detail_url)
 
+    logging.info(f"res: {res.request}")
     html = res.text
 
     soup = BeautifulSoup(html, "html.parser")
@@ -129,12 +132,9 @@ async def get_pests(cropName: str) -> ApiResponse:
     # result_warning = []
     return ApiResponse(
         message="병해충 정보가 성공적으로 조회되었습니다.",
-        data={
-            "forecasts": result_forecast,  # 예보
-            "advisories": result_watch,  # 주의보
-            "warnings": result_warning  # 경보
-        }).to_response()
+        data=PestResponse(forecasts=result_forecast, advisories=result_watch, warnings=result_warning)
+    ).to_response()
 
 
 if __name__ == "__main__":
-    pass
+    get_pests("감자")
