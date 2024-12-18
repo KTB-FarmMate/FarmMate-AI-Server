@@ -18,6 +18,11 @@
     font-size: 19px;
 }
 
+.catalog_container .content {
+    border: 1px solid lightgray;
+    border-radius: 5px;
+}
+
 .content_container {
     background: #f7f7f8;
     padding: 6vw;
@@ -69,25 +74,50 @@
 }
 
 .fests_info_container .content {
-    padding-left: 5vw;
-    font-size: 13px;
+    border: 1px solid lightgray;
+    padding: 13px;
+    border-radius: 5px;
+    font-size: 12px;
+    background: #f1f1f1;
+    margin-top: 1vh;
 }
 
 .img_list {
     display: flex;
-    flex-direction: row;
-    justify-content: space-evenly;
+    flex-direction: column;
+    flex-wrap: wrap;
+    padding: 10px;
 }
 
 .fests_img_container img {
-    width: 30vw;
+    width: 74vw;
 }
 
 .img_list figure {
     margin: 6px;
-    width: min-content;
+    /*width: min-content;*/
+    border: 1px solid #686868;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    padding: 7px;
+    align-items: center;
 }
 
 figure figcaption {
-    font-size: 12px;
+    font-size: 14px;
+    font-weight: bold;
+    margin-top: 1vh;
+}
+
+.main_title {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+hr {
+    border: none;
+    border-top: 2px solid #727272;
+    width: -webkit-fill-available;
+    margin-top: 4vh;
 }
