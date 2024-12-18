@@ -107,7 +107,13 @@ function get_short_weather(cropName) {
         .then(data => {
             // 오늘 데이터를 별도로 처리
             const first_day = data[0].forecastDate;
-            const todayDate = new Date().toISOString().split("T")[0]; // 오늘 날짜 (YYYY-MM-DD)
+            const todayDate = new Date().toLocaleDateString('ko-KR', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            }).replace(/\. /g, '-').replace('.', '');
+             // 오늘 날짜 (YYYY-MM-DD)
+            console.log(first_day, todayDate);
             if (first_day === todayDate) {
                 // const todayCard = document.createElement("div");
                 const todayCard = document.querySelector(".days")
