@@ -171,19 +171,15 @@ function send_message(memberId, cropName) {
     })
         .then(response => {
             // 상태 코드와 Content-Type 확인
-            if (!response.ok) {
+            if (response.message === undefined) {
                 console.warn(`HTTP error! status: ${response.status}`);
                 return Promise.reject({error: true, status: response.status});
             }
-            const contentType = response.headers.get("Content-Type");
-            if (!contentType || !contentType.includes("application/json")) {
-                console.warn("Response is not JSON");
-                return Promise.reject({error: true, status: 500}); // JSON 형식이 아니면 에러 처리
-            }
-            return response.json(); // JSON 데이터 반환
+            return response; // JSON 데이터 반환
         })
         .then(data => {
             if (data.error) {
+                console.log(data);
                 console.warn(`Server error with status: ${data.status}`);
                 return; // 에러가 반환되면 이후 로직 실행 안 함
             }
