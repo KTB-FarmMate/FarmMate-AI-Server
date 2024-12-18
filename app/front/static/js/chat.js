@@ -289,8 +289,9 @@ function handleBookmark(element) {
 
 function deleteBookmark(memberId, threadId, bookmarkId) {
     fetch(`${BE_SERVER}/members/${memberId}/threads/${threadId}/bookmarks/${bookmarkId}`, {
-        method: "POST",
+        method: "DELETE",
     }).then(response => {
+        console.log(response);
         if (!response.ok) {
             console.error(`HTTP error! status: ${response.status}`);
             return false

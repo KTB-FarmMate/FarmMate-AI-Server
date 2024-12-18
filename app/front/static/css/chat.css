@@ -41,7 +41,7 @@
     background: white;
 }
 
-.chat_bar_warpper {
+.chat_bar_wrapper {
     height: -webkit-fill-available;
 }
 
@@ -153,6 +153,6 @@
     flex-direction: column;
 }
 
-.message_list_warpper {
+.message_list_wrapper {
     margin-bottom: 2vh;
 }
