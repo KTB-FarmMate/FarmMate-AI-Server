@@ -80,7 +80,8 @@ function get_guidance(memberId, cropName) {
         })
         .then(data => {
             console.log(data);
-            const card_ul = document.querySelector(".card_content ul");
+            const card_ul = document.querySelector(".guidance_list .card_content ul");
+            card_ul.innerHTML = "";
             data["recommendedActions"].forEach((action) => {
                 const li = document.createElement("li");
                 li.textContent = action

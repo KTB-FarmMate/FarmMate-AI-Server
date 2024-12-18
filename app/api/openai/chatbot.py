@@ -407,7 +407,7 @@ class DashBoardResponse(BaseModel):
                     {
                         "message": "상태 정보가 올바르게 반환되었습니다.",
                         "data": {
-                            "recommendedActions": ["물 주기", "비료 주기", "영양제 주기"]
+                            "recommendedActions": ["묘판 설치", "싹 틔우기", "영양제 주기"]
                         }
                     }
                 }

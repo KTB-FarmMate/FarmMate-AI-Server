@@ -24,6 +24,10 @@ main > div {
     margin-top: 25px;
 }
 
+.card-container {
+    margin-bottom: 10vh;
+}
+
 
 .card_header {
     align-items: center;
@@ -57,7 +61,7 @@ main > div {
     flex-direction: row;
 }
 
-.align-center{
+.align-center {
     align-items: center;
 }
 

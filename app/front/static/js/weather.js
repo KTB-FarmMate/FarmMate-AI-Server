@@ -126,7 +126,7 @@ function get_short_weather(cropName) {
                     `).join("")}
                 </div>
             `;
-            container.appendChild(todayCard);
+            // container.appendChild(todayCard);
 
             // 나머지 2일 처리
             data.slice(1, 4).forEach((day, index) => {

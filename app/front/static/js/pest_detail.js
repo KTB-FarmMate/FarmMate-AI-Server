@@ -6,19 +6,19 @@ function get_pest_detail(cropName, pestName) {
     const crop_name = document.querySelector(".crop_name");
 
     // 질병 이미지 정보
-    const fest_img_list = document.querySelector(".fests_img_container.img_list");
+    const fest_img_list = document.querySelector(".fests_img_container .img_list");
     // 질병 표지 정보
-    const fest_preview_img = document.querySelector(".fest_img.img");
+    const fest_preview_img = document.querySelector(".fest_img img");
 
 
     // 발생 환경
-    const occurrence_env_content = document.querySelector(".occurrence_env_container.content");
+    const occurrence_env_content = document.querySelector(".occurrence_env_container .content");
 
     // 증상 설명
-    const description_content = document.querySelector(".occurrence_env_container.content");
+    const description_content = document.querySelector(".occurrence_env_container .content");
 
     // 예방 방법
-    const control_content = document.querySelector(".control_container.content");
+    const control_content = document.querySelector(".control_container .content");
     fetch(`${BE_SERVER}/pests/${pestName}?cropName=${cropName}`)
         .then(response => {
             if (response.ok) {

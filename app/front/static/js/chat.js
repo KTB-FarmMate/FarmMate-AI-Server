@@ -10,10 +10,10 @@ function determineRole(role, idx) {
 /**
  * 메시지 요소를 생성
  */
-function createMessageElement(role, text) {
+function createMessageElement(bookmarklist, role, text) {
     return role === "user"
         ? createUserMessage(text)
-        : createAssistantMessage(text);
+        : createAssistantMessage(bookmarklist, text);
 }
 
 function load_messages(memberId, cropName) {
@@ -28,6 +28,12 @@ function load_messages(memberId, cropName) {
     const message_list = document.querySelector('.message_list');
     chat_body.remove();
     message_list.style.display = 'flex';
+    let bookmark_list
+    fetch(`${BE_SERVER}/members/${memberId}/threads/${threadId}/bookmarks`, {
+        method: 'GET',
+    }).then(res => res.json()).then(data => {
+        bookmark_list = data;
+    })
 
     fetchWithRetry(url, {}, 5, 1000)
         .then(messages => {
@@ -45,7 +51,7 @@ function load_messages(memberId, cropName) {
                 // 메시지 검증: msg.text와 msg.role의 유효성 확인
                 if (msg.text && !msg.text.includes("[시스템 메시지]")) {
                     const role = determineRole(msg.role, idx);
-                    const messageElement = createMessageElement(role, msg.text);
+                    const messageElement = createMessageElement(bookmark_list, role, msg.text);
 
                     messageList.appendChild(messageElement);
                     idx++; // 인덱스 증가
@@ -81,10 +87,16 @@ function createUserMessage(content) {
 }
 
 // AI 응답 메시지 생성
-function createAssistantMessage(content) {
+function createAssistantMessage(bookmarklist, content) {
     const wrapper = document.createElement("div");
     wrapper.className = "message_list_warpper flex flex-column";
-
+    let bookmarkId = '';
+    for (const bookmark of bookmarklist) {
+        if (bookmark.answer === content) {
+            bookmarkId = bookmark.bookmarkId;
+            break; // 조건을 만족하면 반복 종료
+        }
+    }
     wrapper.innerHTML = `
         <div class="assistant">
             <div class="chat_setting">
@@ -98,7 +110,7 @@ function createAssistantMessage(content) {
                     <div class="share">
                         <img src="/front/static/img/share.png" alt="">
                     </div>
-                    <div class="bookmark" onclick="handleBookmark(this)">
+                    <div class="bookmark" onclick="handleBookmark(this)" data-bookmarkId="${bookmarkId}">
                         <img src="/front/static/img/bookmark.png" alt="">
                     </div>
                 </div>
@@ -158,11 +170,17 @@ function send_message(memberId, cropName) {
         body: JSON.stringify({"message": userMessageContent})
     })
         .then(response => {
+            // 상태 코드와 Content-Type 확인
             if (!response.ok) {
                 console.warn(`HTTP error! status: ${response.status}`);
-                return {error: true, status: response.status}; // 에러 객체 반환
+                return Promise.reject({error: true, status: response.status});
             }
-            return response.json();
+            const contentType = response.headers.get("Content-Type");
+            if (!contentType || !contentType.includes("application/json")) {
+                console.warn("Response is not JSON");
+                return Promise.reject({error: true, status: 500}); // JSON 형식이 아니면 에러 처리
+            }
+            return response.json(); // JSON 데이터 반환
         })
         .then(data => {
             if (data.error) {
@@ -170,20 +188,24 @@ function send_message(memberId, cropName) {
                 return; // 에러가 반환되면 이후 로직 실행 안 함
             }
 
-            const assistantMessageContent = data["message"];
+            // 정상 응답 처리
+            const assistantMessageContent = data.message; // JSON에서 메시지 추출
             const assistantMessage = createAssistantMessage(assistantMessageContent);
             messageList.appendChild(assistantMessage);
 
             messageList.scrollTop = messageList.scrollHeight; // 스크롤 하단 이동
         })
         .catch(error => {
+            // 네트워크 오류 또는 처리되지 않은 에러
             console.error("Error sending message:", error);
+            alert(`메시지 전송 중 오류가 발생했습니다: ${error.status || "알 수 없음"}`);
         });
 }
 
 function handleBookmark(element) {
     // 현재 클릭된 bookmark 버튼을 기준으로 부모 .message_list_warpper 찾기
     const wrapper = element.closest(".message_list_warpper");
+
     const cropName = get_cropName();
     const memberId = get_memberId();
 
@@ -193,6 +215,18 @@ function handleBookmark(element) {
     }
 
     const threadId = JSON.parse(localStorage.getItem("crops_data"))[cropName].threadId;
+
+    const img = element.querySelector("img");
+    if (element.dataset.bookmarkId === "") {
+        img.src = "/front/static/img/bookmark_chk.png";
+    } else {
+        if (deleteBookmark(memberId, threadId, element.dataset.bookmarkId)) {
+            img.src = "/front/static/img/bookmark.png";
+        } else {
+            console.log("북마크 삭제 실패");
+        }
+        return;
+    }
 
     // user 질문 가져오기
     const userMessage = wrapper.querySelector(".user .message span");
@@ -227,6 +261,7 @@ function handleBookmark(element) {
             return r.json(); // 성공 응답만 JSON 파싱
         })
         .then(data => {
+            element.dataset.bookmarkId = data.bookmarkId;
             console.log("Bookmark response data:", data);
             // 성공적으로 처리된 데이터를 사용할 수 있음
         })
@@ -240,52 +275,16 @@ function handleBookmark(element) {
     // saveToBookmarks(question, answer, crop_name);
 }
 
-function saveToBookmarks(question, answer, crop_name) {
-    // localStorage에서 bookmarks 가져오기
-    let bookmarks = localStorage.getItem("bookmarks");
-
-    // 초기화 (없으면 기본 구조 생성)
-    if (!bookmarks) {
-        bookmarks = {
-            "감자": [],
-            "고구마": [],
-            "당근": [],
-            "양파": []
-        };
-    } else {
-        bookmarks = JSON.parse(bookmarks);
-    }
-
-    // 현재 날짜
-    const currentDate = new Date().toISOString().split("T")[0]; // yyyy-mm-dd 형식
-
-    // 작물별 데이터 확인 및 초기화
-    if (!bookmarks[crop_name]) {
-        bookmarks[crop_name] = [];
-    }
-
-    // 해당 날짜에 대한 데이터 찾기
-    let todayData = bookmarks[crop_name].find(entry => entry.date === currentDate);
-
-    if (!todayData) {
-        // 날짜별 데이터가 없으면 새로 추가
-        todayData = {
-            date: currentDate,
-            items: []
-        };
-        bookmarks[crop_name].push(todayData);
-    }
-
-    // 오늘 날짜 데이터에 새로운 질문/답변 추가
-    todayData.items.push({
-        "질문제목": question,
-        "질문내용": answer
-    });
-
-    // localStorage에 저장
-    localStorage.setItem("bookmarks", JSON.stringify(bookmarks));
-
-    console.log("북마크가 저장되었습니다:", bookmarks);
+function deleteBookmark(memberId, threadId, bookmarkId) {
+    fetch(`${BE_SERVER}/members/${memberId}/threads/${threadId}/bookmarks/${bookmarkId}`, {
+        method: "POST",
+    }).then(response => {
+        if (!response.ok) {
+            console.error(`HTTP error! status: ${response.status}`);
+            return false
+        }
+    })
+    return true;
 }
 
 
