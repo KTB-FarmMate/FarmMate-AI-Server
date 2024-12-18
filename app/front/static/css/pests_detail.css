@@ -82,3 +82,12 @@
 .fests_img_container img {
     width: 30vw;
 }
+
+.img_list figure {
+    margin: 6px;
+    width: min-content;
+}
+
+figure figcaption {
+    font-size: 12px;
+}

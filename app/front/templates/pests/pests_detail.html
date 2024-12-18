@@ -19,16 +19,16 @@
                     <img src="{{ url_for('static', path='/img/fest.png') }}" alt="">
                 </div>
                 <div class="fest_info">
-                    <div class="fest_name">
+                    <div class="fest_name kor">
                         한글명: 탄저병
                     </div>
-                    <div class="fest_name">
+                    <div class="fest_name chn">
                         한문명: 炭疽病
                     </div>
-                    <div class="fest_name">
+                    <div class="fest_name eng">
                         영문명: Anthracnose
                     </div>
-                    <div class="fest_name">
+                    <div class="crop_name">
                         작물명: 복숭아
                     </div>
                 </div>
@@ -57,7 +57,7 @@
             </div>
             <div class="control_container flex flex-column">
                 <div class="title">
-                    - 방제방법
+                    - 예방 방법
                 </div>
                 <div class="content">
                     - 병든 가지와 열매는 일찍 제거한다.
@@ -68,8 +68,13 @@
         <div class="fests_img_container flex flex-column">
             <span>▶ 병 사진 정보</span>
             <div class="img_list">
-                <img src="{{ url_for('static', path='/img/pests/pest_1.png') }}" alt="">
-                <img src="{{ url_for('static', path='/img/pests/pest_3.png') }}" alt="">
+                <figure>
+                    <img src="{{ url_for('static', path='/img/pests/pest_1.png') }}" alt="">
+                    <figcaption>이미지 설명</figcaption>
+                </figure>
+                <figure><img src="{{ url_for('static', path='/img/pests/pest_3.png') }}" alt="">
+                    <figcaption>이미지 설명</figcaption>
+                </figure>
             </div>
         </div>
     </div>
@@ -85,5 +90,8 @@
     <script>
         document.querySelector(".info").dataset.selected = 'true';
     </script>
-{#    <script src="{{ url_for('static', path='/js/pests_detail.js') }}"></script>#}
+    <script src="/js/pest_detail.js"></script>
+    <script>
+    get_pest_detail('{{ cropName }}', '{{ pestName }}')
+    </script>
 {% endblock %}
