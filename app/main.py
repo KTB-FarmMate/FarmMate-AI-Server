@@ -16,6 +16,9 @@ app = FastAPI(
     openapi_url="/openapi.json",
     docs_url="/docs",
     redoc_url="/redoc",
+    server=[
+        {"url": "/ai", "description": "챗봇 관련 API"}
+    ]
 )
 
 app.add_middleware(
@@ -42,7 +45,7 @@ front_app = FastAPI(
 )
 # 메인 앱 라우터 등록
 app.include_router(health_router, prefix="/health")
-app.include_router(openai_router, prefix="/members/{memberId}/threads")
+app.include_router(openai_router, prefix="/ai/members/{memberId}/threads")
 app.include_router(pest_router, prefix="/ai")
 
 # # Front 앱 라우터 등록
