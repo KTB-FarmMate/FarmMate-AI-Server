@@ -15,7 +15,7 @@ function get_pest_detail(cropName, pestName) {
     const occurrence_env_content = document.querySelector(".occurrence_env_container .content");
 
     // 증상 설명
-    const description_content = document.querySelector(".occurrence_env_container .content");
+    const description_content = document.querySelector(".description_container .content");
 
     // 예방 방법
     const control_content = document.querySelector(".control_container .content");

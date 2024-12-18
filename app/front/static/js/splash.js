@@ -42,14 +42,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (memberId != null) {
         setTimeout(() => {
-            if (localStorage.getItem("crops") == null) {
-                location.href = `./members/${memberId}/recommend`;
+            const cropsData = JSON.parse(localStorage.getItem("crops_data") || "{}");
+
+            // created가 true인 항목이 하나라도 있는지 확인
+            const hasCreatedCrop = Object.values(cropsData).some(crop => crop.created);
+
+            if (!hasCreatedCrop) {
+                location.href = `/front/members/${memberId}/recommend`;
             } else {
-                location.href = `./members/${memberId}`;
+                location.href = `/front/members/${memberId}`;
             }
         }, 2000);
     } else {
         alert("멤버 아이디가 올바르게 생성되지 않았습니다.");
         window.location.reload();
     }
-});
+})
+;
