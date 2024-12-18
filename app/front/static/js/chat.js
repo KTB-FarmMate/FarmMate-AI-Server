@@ -1,3 +1,21 @@
+// 북마크 목록 로드
+function loadBookmarkList() {
+    const memberId = get_memberId();
+    const threadId = JSON.parse(localStorage.getItem("crops_data"))[localStorage.getItem("select_crop")].threadId;
+    let bookmark_list
+    fetch(`${BE_SERVER}/members/${memberId}/threads/${threadId}/bookmarks`, {
+        method: 'GET',
+    })
+        .then(res => res.json())
+        .then(data => {
+            console.log(data);
+            bookmark_list = data;
+        })
+    return bookmark_list
+}
+
+const bookmark_list = loadBookmarkList();
+
 /**
  * 메시지의 역할(role)을 결정
  */
@@ -10,7 +28,7 @@ function determineRole(role, idx) {
 /**
  * 메시지 요소를 생성
  */
-function createMessageElement(bookmarklist, role, text) {
+function createMessageElement(role, text) {
     return role === "user"
         ? createUserMessage(text)
         : createAssistantMessage(text);
@@ -28,12 +46,7 @@ function load_messages(memberId, cropName) {
     const message_list = document.querySelector('.message_list');
     chat_body.remove();
     message_list.style.display = 'flex';
-    let bookmark_list
-    fetch(`${BE_SERVER}/members/${memberId}/threads/${threadId}/bookmarks`, {
-        method: 'GET',
-    }).then(res => res.json()).then(data => {
-        bookmark_list = data;
-    })
+
 
     fetchWithRetry(url, {}, 5, 1000)
         .then(messages => {
@@ -51,7 +64,7 @@ function load_messages(memberId, cropName) {
                 // 메시지 검증: msg.text와 msg.role의 유효성 확인
                 if (msg.text && !msg.text.includes("[시스템 메시지]")) {
                     const role = determineRole(msg.role, idx);
-                    const messageElement = createMessageElement(bookmark_list, role, msg.text);
+                    const messageElement = createMessageElement(role, msg.text);
 
                     messageList.appendChild(messageElement);
                     idx++; // 인덱스 증가
@@ -90,7 +103,7 @@ function createUserMessage(content) {
 function createAssistantMessage(content) {
     const wrapper = document.createElement("div");
     wrapper.className = "message_list_wrapper flex flex-column";
-
+    const result = bookmark_list.find(item => item.answer === content);
     wrapper.innerHTML = `
         <div class="assistant">
             <div class="chat_setting">
@@ -104,7 +117,7 @@ function createAssistantMessage(content) {
                     <div class="share">
                         <img src="/front/static/img/share.png" alt="">
                     </div>
-                    <div class="bookmark" onclick="handleBookmark(this)" data-bookmark-id="">
+                    <div class="bookmark" onclick="handleBookmark(this)" data-bookmark-id="${result.bookmarkId}">
                         <img src="/front/static/img/bookmark.png" alt="">
                     </div>
                 </div>
@@ -235,6 +248,7 @@ function handleBookmark(element) {
         img.src = "/front/static/img/bookmark_chk.png";
     } else {
         if (deleteBookmark(memberId, threadId, element.dataset.bookmarkId)) {
+            element.dataset.bookmarkId = "";
             img.src = "/front/static/img/bookmark.png";
         } else {
             console.log("북마크 삭제 실패");
@@ -286,7 +300,7 @@ function handleBookmark(element) {
         });
 }
 
-
+// 작물 정보 DELETE 후 다시 CREATE 시 에러 발생
 function deleteBookmark(memberId, threadId, bookmarkId) {
     fetch(`${BE_SERVER}/members/${memberId}/threads/${threadId}/bookmarks/${bookmarkId}`, {
         method: "DELETE",
