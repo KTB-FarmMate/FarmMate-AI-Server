@@ -70,7 +70,7 @@ function load_messages(memberId, cropName) {
 // 사용자 메시지 생성
 function createUserMessage(content) {
     const wrapper = document.createElement("div");
-    wrapper.className = "message_list_warpper flex flex-column";
+    wrapper.className = "message_list_wrapper flex flex-column";
 
     wrapper.innerHTML = `
         <div class="user">
@@ -89,7 +89,7 @@ function createUserMessage(content) {
 // AI 응답 메시지 생성
 function createAssistantMessage(content) {
     const wrapper = document.createElement("div");
-    wrapper.className = "message_list_warpper flex flex-column";
+    wrapper.className = "message_list_wrapper flex flex-column";
 
     wrapper.innerHTML = `
         <div class="assistant">
@@ -104,13 +104,13 @@ function createAssistantMessage(content) {
                     <div class="share">
                         <img src="/front/static/img/share.png" alt="">
                     </div>
-                    <div class="bookmark" onclick="handleBookmark(this)" data-bookmarkid="">
+                    <div class="bookmark" onclick="handleBookmark(this)" data-bookmark-id="">
                         <img src="/front/static/img/bookmark.png" alt="">
                     </div>
                 </div>
             </div>
             <div class="message">
-                <span>${content}</span>
+                <p>${content}</p>
             </div>
         </div>
     `;
@@ -193,25 +193,48 @@ function send_message(memberId, cropName) {
         });
 }
 
+function findPreviousWrapper(element) {
+    let current = element.closest(".message_list_wrapper");
+    if (!current) return null; // 현재 요소의 가장 가까운 wrapper가 없으면 null 반환
+
+    // 이전 형제를 탐색
+    while (current.previousElementSibling) {
+        current = current.previousElementSibling;
+
+        // 이전 형제가 `.message_list_wrapper` 클래스인지 확인
+        if (current.classList.contains("message_list_wrapper")) {
+            return current; // 바로 위의 wrapper 반환
+        }
+    }
+
+    // 위쪽에 더 이상 wrapper가 없으면 null 반환
+    return null;
+}
+
 function handleBookmark(element) {
-    // 현재 클릭된 bookmark 버튼을 기준으로 부모 .message_list_warpper 찾기
-    const wrapper = element.closest(".message_list_warpper");
+    // 현재 클릭된 bookmark 버튼을 기준으로 부모 .message_list_wrapper 찾기
+    const assistant_wrapper = element.closest(".message_list_wrapper");
+    const user_wrapper = assistant_wrapper.previousElementSibling;
 
     const cropName = get_cropName();
     const memberId = get_memberId();
 
-    if (!wrapper) {
-        console.error("message_list_warpper를 찾을 수 없습니다.");
+    if (!assistant_wrapper) {
+        console.error("message_list_wrapper를 찾을 수 없습니다.");
+        return;
+    }
+    if (!user_wrapper) {
+        console.error("user_wrapper 찾을 수 없습니다.");
         return;
     }
 
     const threadId = JSON.parse(localStorage.getItem("crops_data"))[cropName].threadId;
 
     const img = element.querySelector("img");
-    if (element.dataset.bookmarkid === "") {
+    if (element.dataset.bookmarkId === "") {
         img.src = "/front/static/img/bookmark_chk.png";
     } else {
-        if (deleteBookmark(memberId, threadId, element.dataset.bookmarkid)) {
+        if (deleteBookmark(memberId, threadId, element.dataset.bookmarkId)) {
             img.src = "/front/static/img/bookmark.png";
         } else {
             console.log("북마크 삭제 실패");
@@ -220,11 +243,12 @@ function handleBookmark(element) {
     }
 
     // user 질문 가져오기
-    const userMessage = wrapper.querySelector(".user .message span");
-    const question = userMessage ? userMessage.textContent.trim() : "질문 없음";
+    // const userMessage = assistant_wrapper.querySelector(".user .message span");
+    const user_question_wrapper = user_wrapper.querySelector(".user .message")
+    const question = user_question_wrapper ? user_question_wrapper.textContent.trim() : "질문 없음";
 
     // assistant 답변 가져오기
-    const assistantMessage = wrapper.querySelector(".assistant .message");
+    const assistantMessage = assistant_wrapper.querySelector(".assistant .message");
     const answer = assistantMessage ? assistantMessage.textContent.trim() : "답변 없음";
 
     // 결과 출력
@@ -260,11 +284,8 @@ function handleBookmark(element) {
             console.error("Fetch error while creating bookmark:", error.message);
             alert(`북마크 저장 실패: ${error.message}`); // 사용자에게 에러 메시지 표시
         });
-
-
-    // 원하는 작업 수행 (예: localStorage에 저장)
-    // saveToBookmarks(question, answer, crop_name);
 }
+
 
 function deleteBookmark(memberId, threadId, bookmarkId) {
     fetch(`${BE_SERVER}/members/${memberId}/threads/${threadId}/bookmarks/${bookmarkId}`, {

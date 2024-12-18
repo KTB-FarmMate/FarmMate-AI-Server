@@ -112,7 +112,7 @@ function createBookmarkItem(entry) {
                 <p><strong>질문:</strong> ${question}</p>
             </div>
             <div class="toggle">
-                <img src="/path/to/toggle-icon.png" alt="Toggle">
+                <img src="/front/static/img/arrow.png" alt="Toggle">
             </div>
         </div>
         <div class="details hidden">
