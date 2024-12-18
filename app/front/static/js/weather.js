@@ -134,7 +134,8 @@ function get_short_weather(cropName) {
                 </div>
             </div>
             <div class="temp_summary">
-                최고: ${day.maxTemperature}° / 최저: ${day.minTemperature}°
+                최고: ${day.maxTemperature === -999 ? "미정" : `${day.maxTemperature}°`} / 
+                최저: ${day.minTemperature === -999 ? "미정" : `${day.minTemperature}°`}
             </div>
         </div>
         <div class="hourly_weather_container" id="day-${index}" style="display: none;">

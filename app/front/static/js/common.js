@@ -1,6 +1,6 @@
 const BE_SERVER = "https://api.farmmate.net"
 // const BE_SERVER = "http://43.202.163.157:8080"
-function fetchWithRetry(url, options={}, maxRetries = 5, delay = 1000) {
+function fetchWithRetry(url, options={}, maxRetries = 5, delay = 500) {
     let attempts = 0;
 
     function attemptFetch() {
