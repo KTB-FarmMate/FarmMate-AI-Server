@@ -11,8 +11,8 @@
 {% block content %}
     <div class="fests_detail_container flex flex-column">
         <div class="catalog_container flex flex-column">
-            <div class="title">
-                ▶ 도감정보
+            <div class="main_title">
+                ⮞ 도감정보
             </div>
             <div class="content flex flex-row">
                 <div class="fest_img ">
@@ -34,11 +34,14 @@
                 </div>
             </div>
         </div>
+        <hr/>
         <div class="fests_info_container flex flex-column">
-            <span>▶ 일반정보</span>
+            <span class="main_title">
+                ⮞ 일반정보
+            </span>
             <div class="occurrence_env_container flex flex-column">
                 <div class="title">
-                    - 발생환경
+                    • 발생환경
                 </div>
                 <div class="content">
                     병든 결과지의 조직 속에서 자낭각 및 균사로 겨울을 지낸 후, 표면에 분생포자를 형성하여 1차 전염원이 된다.
@@ -47,7 +50,7 @@
             </div>
             <div class="description_container flex flex-column">
                 <div class="title">
-                    - 증상설명
+                    • 증상설명
                 </div>
                 <div class="content">
                     과실, 가지, 잎에 발생한다. 과실에는 갈색의 작은 반점이 형성되고, 점차 커지면서 대형 병무늬가 형성된다.
@@ -57,7 +60,7 @@
             </div>
             <div class="control_container flex flex-column">
                 <div class="title">
-                    - 예방 방법
+                    • 예방 방법
                 </div>
                 <div class="content">
                     - 병든 가지와 열매는 일찍 제거한다.
@@ -65,8 +68,11 @@
                 </div>
             </div>
         </div>
+        <hr/>
         <div class="fests_img_container flex flex-column">
-            <span>▶ 병 사진 정보</span>
+            <span class="main_title">
+                ⮞ 사진 정보
+            </span>
             <div class="img_list">
                 <figure>
                     <img src="{{ url_for('static', path='/img/pests/pest_1.png') }}" alt="">

@@ -60,6 +60,7 @@ function get_pest_detail(cropName, pestName) {
                 image_element.alt = image.imageTitle ?? "";
                 figcaption_element.innerHTML = image.imageTitle ?? "";
                 figure_element.appendChild(image_element);
+                figure_element.appendChild(figcaption_element);
                 fest_img_list.appendChild(figure_element);
             })
         })
