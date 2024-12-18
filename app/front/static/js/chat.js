@@ -13,7 +13,7 @@ function determineRole(role, idx) {
 function createMessageElement(bookmarklist, role, text) {
     return role === "user"
         ? createUserMessage(text)
-        : createAssistantMessage(bookmarklist, text);
+        : createAssistantMessage(text);
 }
 
 function load_messages(memberId, cropName) {
@@ -77,9 +77,9 @@ function createUserMessage(content) {
             <div class="message">
                 <span>${content}</span>
             </div>
-            <div class="edit_btn">
-                <img src="/front/static/img/edit.png" alt="">
-            </div>
+<!--            <div class="edit_btn">-->
+<!--                <img src="/front/static/img/edit.png" alt="">-->
+<!--            </div>-->
         </div>
     `;
 
@@ -87,16 +87,10 @@ function createUserMessage(content) {
 }
 
 // AI 응답 메시지 생성
-function createAssistantMessage(bookmarklist, content) {
+function createAssistantMessage(content) {
     const wrapper = document.createElement("div");
     wrapper.className = "message_list_warpper flex flex-column";
-    let bookmarkId = '';
-    for (const bookmark of bookmarklist) {
-        if (bookmark.answer === content) {
-            bookmarkId = bookmark.bookmarkId;
-            break; // 조건을 만족하면 반복 종료
-        }
-    }
+
     wrapper.innerHTML = `
         <div class="assistant">
             <div class="chat_setting">
@@ -110,7 +104,7 @@ function createAssistantMessage(bookmarklist, content) {
                     <div class="share">
                         <img src="/front/static/img/share.png" alt="">
                     </div>
-                    <div class="bookmark" onclick="handleBookmark(this)" data-bookmarkId="${bookmarkId}">
+                    <div class="bookmark" onclick="handleBookmark(this)" data-bookmarkid="">
                         <img src="/front/static/img/bookmark.png" alt="">
                     </div>
                 </div>
@@ -183,6 +177,7 @@ function send_message(memberId, cropName) {
                 console.warn(`Server error with status: ${data.status}`);
                 return; // 에러가 반환되면 이후 로직 실행 안 함
             }
+            console.log(data);
 
             // 정상 응답 처리
             const assistantMessageContent = data.message; // JSON에서 메시지 추출
@@ -213,10 +208,10 @@ function handleBookmark(element) {
     const threadId = JSON.parse(localStorage.getItem("crops_data"))[cropName].threadId;
 
     const img = element.querySelector("img");
-    if (element.dataset.bookmarkId === "") {
+    if (element.dataset.bookmarkid === "") {
         img.src = "/front/static/img/bookmark_chk.png";
     } else {
-        if (deleteBookmark(memberId, threadId, element.dataset.bookmarkId)) {
+        if (deleteBookmark(memberId, threadId, element.dataset.bookmarkid)) {
             img.src = "/front/static/img/bookmark.png";
         } else {
             console.log("북마크 삭제 실패");
@@ -247,14 +242,14 @@ function handleBookmark(element) {
             "chattedAt": new Date().toISOString() // 현재 시간을 ISO 형식으로 자동 설정
         })
     })
-        .then(r => {
-            if (!r.ok) {
-                console.error(`HTTP error! status: ${r.status}`);
-                return r.text().then(text => { // 에러 응답이 텍스트일 경우
+        .then(response => {
+            if (response.bookmarkId === undefined) {
+                console.error(`HTTP error! status: ${response}`);
+                return response.text().then(text => { // 에러 응답이 텍스트일 경우
                     throw new Error(`Error Response: ${text}`);
                 });
             }
-            return r.json(); // 성공 응답만 JSON 파싱
+            return response; // 성공 응답만 JSON 파싱
         })
         .then(data => {
             element.dataset.bookmarkId = data.bookmarkId;

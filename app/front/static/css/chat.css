@@ -8,7 +8,8 @@
 
 .chat_body {
     width: -webkit-fill-available;
-    height: 50vh;
+    height: 77vh;
+    overflow: scroll;
 }
 
 .macro_container {
@@ -125,7 +126,7 @@
 .assistant {
     display: flex;
     flex-direction: column;
-    margin-top: 5vh;
+    /*margin-top: 5vh;*/
     background: #d1d1ff;
     padding: 3vw;
     border-radius: 10px;
@@ -148,4 +149,8 @@
 .message_list {
     display: flex;
     flex-direction: column;
+}
+
+.message_list_warpper {
+    margin-bottom: 2vh;
 }
