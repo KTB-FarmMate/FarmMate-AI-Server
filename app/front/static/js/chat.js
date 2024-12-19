@@ -11,10 +11,8 @@ function loadBookmarkList() {
             console.log(data);
             bookmark_list = data;
         })
-    return bookmark_list
+    return  bookmark_list || [];
 }
-
-const bookmark_list = loadBookmarkList();
 
 /**
  * 메시지의 역할(role)을 결정
@@ -103,7 +101,7 @@ function createUserMessage(content) {
 function createAssistantMessage(content) {
     const wrapper = document.createElement("div");
     wrapper.className = "message_list_wrapper flex flex-column";
-    const result = bookmark_list.find(item => item.answer === content);
+    const result = loadBookmarkList().find(item => item.answer === content);
     wrapper.innerHTML = `
         <div class="assistant">
             <div class="chat_setting">
@@ -344,6 +342,5 @@ document.addEventListener("DOMContentLoaded", () => {
             sendButtonArea.style.pointerEvents = "none"; // 클릭 불가능
         }
     });
-
 
 })
