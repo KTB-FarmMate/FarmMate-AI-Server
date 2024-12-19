@@ -1,0 +1,67 @@
+.setting {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+    padding-left: 3vw;
+    padding-right: 3vw;
+    border-radius: 7px;
+    background: #f7f7f8;
+    box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.25);
+    margin-bottom: 2vh;
+}
+
+/* 토글 스위치 기본 스타일 */
+.toggle_switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 30px;
+}
+
+.toggle_switch .toggle_input {
+    display: none; /* 기본 체크박스 숨김 */
+}
+
+/* 슬라이더 스타일 */
+.toggle_switch .toggle_slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #a8a8a8;
+    transition: background-color 0.3s, transform 0.3s;
+    border-radius: 25px;
+}
+
+/* 슬라이더 핸들 */
+.toggle_switch .toggle_slider::before {
+    content: "";
+    position: absolute;
+    height: 24px;
+    width: 24px;
+    left: 4px;
+    bottom: 3px;
+    background-color: white;
+    transition: transform 0.3s;
+    border-radius: 50%;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* 체크된 상태 스타일 */
+.toggle_switch .toggle_input:checked + .toggle_slider {
+    background-color: #8e90fd;
+}
+
+.toggle_switch .toggle_input:checked + .toggle_slider::before {
+    transform: translateX(28px);
+}
+
+
+.setting_name p {
+    font-weight: bold;
+    font-size: 16px;
+}

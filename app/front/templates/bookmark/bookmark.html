@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block style %}
+    <link rel="stylesheet" href="/front/static/css/bookmark.css">
+{% endblock %}
+
+{% block header %}
+    {% include "header/only_back.html" %}
+{% endblock %}
+
+{% block content %}
+    {% include "search_bar.html" %}
+    <div class="bookmark-container">
+    </div>
+{% endblock %}
+
+{% block footer %}
+    {% include "footer/footer.html" %}
+{% endblock %}
+
+{% block script %}
+    <script src="/front/static/js/bookmark.js"></script>
+    <script>
+        load_bookmark('{{ memberId }}','{{ cropName }}');
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let imgs = document.querySelectorAll('.toggle img');
+            imgs.forEach(img => {
+                img.src = "/front/static/img/arrow.png"
+            })
+        })
+    </script>
+{% endblock %}

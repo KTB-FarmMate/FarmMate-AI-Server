@@ -1,0 +1,36 @@
+/* 숨겨진 상태 */
+.footer_content.hidden {
+    display: none;
+}
+
+.footer_content {
+    display: block;
+    position: fixed;
+    bottom: 0;
+    width: 100vw;
+    background: white;
+}
+
+.footer_wrapper {
+    justify-content: space-evenly
+}
+
+.navi_container img {
+    width: 20px;
+}
+
+.navi_container {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 50px;
+    margin-bottom: 5px;
+}
+
+.navi_container[data-selected="true"] {
+    background-color: lightgreen;
+}

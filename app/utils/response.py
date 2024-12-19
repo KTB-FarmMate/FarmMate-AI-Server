@@ -1,31 +1,32 @@
-# app/utils/response.py
-
-from typing import Any, Optional
+from pydantic import BaseModel, Field
+from typing import Optional, Generic, TypeVar
 from fastapi.responses import JSONResponse
 
+T = TypeVar("T")
 
-def create_response(*,
-                    status_code: int,
-                    message: str,
-                    data: Any = None,
-                    error: Optional[dict[str, str]] = None) -> JSONResponse:
-    """통합 응답 생성 함수
-    - status_code로 성공/실패 판단 (2xx는 성공, 4xx/5xx는 실패)
-    - error는 실패시에만 포함
-    """
-    content = {
-        "message": message
-    }
 
-    # 상태 코드가 성공일 경우 (2xx), data만 포함
-    if 200 <= status_code < 300:
-        content["data"] = data
+class ErrorDetail(BaseModel):
+    """에러 상세 정보 모델"""
+    code: str
+    message: str
+    details: Optional[str] = None
 
-    # 상태 코드가 실패일 경우 (4xx, 5xx), error만 포함
-    else:
-        content["error"] = error
 
-    return JSONResponse(
-        status_code=status_code,
-        content=content
-    )
+class ApiResponse(BaseModel, Generic[T]):
+    """표준 응답 모델"""
+    message: str
+    data: Optional[T] = None
+    error: Optional[ErrorDetail] = None
+    status_code: int = 200  # 내부적으로만 사용
+
+    class Config:
+        exclude_none = True  # None 값을 제외하는 설정
+
+    def to_response(self):
+        """JSON 응답으로 변환 (status_code는 응답 본문에 포함되지 않음)"""
+        # 응답 내용에서 status_code를 제외
+        content = self.model_dump(exclude={"status_code"}, exclude_none=True)
+        return JSONResponse(
+            content=content,
+            status_code=self.status_code  # 상태 코드를 HTTP 응답에만 설정
+        )
