@@ -1,18 +1,22 @@
 // 북마크 목록 로드
-function loadBookmarkList() {
+async function loadBookmarkList() {
     const memberId = get_memberId();
     const threadId = JSON.parse(localStorage.getItem("crops_data"))[localStorage.getItem("select_crop")].threadId;
-    let bookmark_list
-    fetch(`${BE_SERVER}/members/${memberId}/threads/${threadId}/bookmarks`, {
-        method: 'GET',
-    })
-        .then(res => res.json())
-        .then(data => {
-            console.log(data);
-            bookmark_list = data;
-        })
-    return  bookmark_list || [];
+
+    try {
+        const response = await fetch(`${BE_SERVER}/members/${memberId}/threads/${threadId}/bookmarks`);
+        if (response.ok) {
+            return await response.json() || [];
+        } else {
+            console.error(`Failed to fetch bookmark list: ${response.status} ${response.statusText}`);
+            return [];
+        }
+    } catch (error) {
+        console.error("Error fetching bookmark list:", error);
+        return [];
+    }
 }
+
 
 /**
  * 메시지의 역할(role)을 결정
