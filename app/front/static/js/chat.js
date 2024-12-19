@@ -1,3 +1,30 @@
+marked.setOptions({
+    sanitize: true
+});
+
+// 클립보드 복사 함수
+
+function copy_clipboard(event) {
+    const target = event.target;
+    const textToCopy = target.closest(".chat_setting").nextElementSibling.textContent.trim();
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        showCopyAlert();
+    }).catch(err => {
+        console.error("클립보드 복사 실패:", err);
+    });
+}
+
+function showCopyAlert() {
+    const alertBox = document.getElementById("copy-alert");
+    alertBox.classList.add("show");
+
+    // 3초 후에 알림 박스 숨기기
+    setTimeout(() => {
+        alertBox.classList.remove("show");
+    }, 1000);
+}
+
+
 // 북마크 데이터를 캐싱하기 위한 전역 변수
 let bookmarkList = [];
 
@@ -12,10 +39,11 @@ async function loadBookmarkList() {
             bookmarkList = await response.json(); // 데이터를 캐싱
             console.log("Bookmark list loaded:", bookmarkList);
         } else {
-            console.error("HTTP Error: ", response.status);
+            throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
         }
     } catch (error) {
         console.error("Error fetching bookmark list:", error);
+        throw error; // 에러를 호출한 곳으로 전달
     }
 }
 
@@ -61,25 +89,31 @@ function load_messages() {
     fetchWithRetry(url, {}, 5, 1000)
         .then(messages => {
             const messageList = document.querySelector(".message_list");
-            messageList.innerHTML = ""; // 기존 메시지 초기화
-            console.log("Loaded messages:", messages);
 
-            if (!messages || !Array.isArray(messages["messages"])) {
-                throw new Error("Invalid message data format"); // 데이터 검증
+            if (messages["messages"].length > 1) {
+                messageList.innerHTML = ""; // 기존 메시지 초기화
+                console.log("Loaded messages:", messages);
+
+                if (!messages || !Array.isArray(messages["messages"])) {
+                    throw new Error("Invalid message data format"); // 데이터 검증
+                }
+
+                let idx = 0; // 메시지 순서를 나타내는 인덱스
+
+                messages["messages"].forEach(msg => {
+                    // 메시지 검증: msg.text와 msg.role의 유효성 확인
+                    if (msg.text && !msg.text.includes("[시스템 메시지]")) {
+                        const role = determineRole(msg.role, idx);
+                        const messageElement = createMessageElement(role, msg.text);
+
+                        messageList.appendChild(messageElement);
+                        idx++; // 인덱스 증가
+                    }
+                });
+            } else {
+                console.log("No messages found.");
             }
 
-            let idx = 0; // 메시지 순서를 나타내는 인덱스
-
-            messages["messages"].forEach(msg => {
-                // 메시지 검증: msg.text와 msg.role의 유효성 확인
-                if (msg.text && !msg.text.includes("[시스템 메시지]")) {
-                    const role = determineRole(msg.role, idx);
-                    const messageElement = createMessageElement(role, msg.text);
-
-                    messageList.appendChild(messageElement);
-                    idx++; // 인덱스 증가
-                }
-            });
         })
         .catch(error => {
             console.error("Failed to load messages after retries:", error);
@@ -102,7 +136,6 @@ function createUserMessage(content) {
             </div>
         </div>
     `;
-
     return wrapper;
 }
 
@@ -117,6 +150,8 @@ function createAssistantMessage(content) {
     // 찾은 결과가 없을 때 기본값 처리
     const result = bookmarkList.find(item => item.answer === content) || {}; // 기본값은 빈 객체
     console.log("result:", result);
+
+    const marked_content = marked.parse(content);
 
     // result.bookmarkId가 없으면 빈 문자열 사용
     const bookmarkId = result.bookmarkId || "";
@@ -140,16 +175,22 @@ function createAssistantMessage(content) {
                 </div>
             </div>
             <div class="message">
-                <p>${content}</p>
+                ${marked_content}
             </div>
         </div>
     `;
+
+    wrapper.querySelector(".copy").addEventListener("click", (e) => {
+        copy_clipboard(e);
+    })
 
     return wrapper;
 }
 
 function send_message(memberId, cropName) {
     // 전송 버튼 비활성화 상태일 경우 함수 종료
+    const chat_body = document.querySelector(".chat_body ");
+
     const crops_data = JSON.parse(localStorage.getItem('crops_data'));
     console.log(crops_data);
     const threadId = crops_data[cropName].threadId
@@ -162,13 +203,18 @@ function send_message(memberId, cropName) {
 
     const userMessageContent = sendInput.value.trim();
     if (!userMessageContent) {
-        alert("메시지를 입력하세요!");
+        // alert("메시지를 입력하세요!");
         return;
     }
 
     // 사용자 메시지를 동적으로 추가
     const userMessage = createUserMessage(userMessageContent);
     messageList.appendChild(userMessage);
+
+    chat_body.scrollTo({
+        top: chat_body.scrollHeight,
+        behavior: "smooth"
+    });
 
     // 입력 필드 초기화
     sendInput.value = "";
@@ -202,7 +248,10 @@ function send_message(memberId, cropName) {
             const assistantMessage = createAssistantMessage(assistantMessageContent);
             messageList.appendChild(assistantMessage);
 
-            messageList.scrollTop = messageList.scrollHeight; // 스크롤 하단 이동
+            chat_body.scrollTo({
+                top: chat_body.scrollHeight,
+                behavior: "smooth"
+            });
         })
         .catch(error => {
             // 네트워크 오류 또는 처리되지 않은 에러
@@ -307,6 +356,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const inputArea = document.querySelector(".input_area input");
     const footerContent = document.querySelector(".footer_content");
     const sendButtonArea = document.querySelector(".send_btn_area");
+    const chat_body = document.querySelector(".chat_body");
 
     // input에 focus 시 footer 숨김
     inputArea.addEventListener("focus", () => {
@@ -342,4 +392,21 @@ document.addEventListener("DOMContentLoaded", () => {
     })();
 
     load_messages();
+
+    chat_body.scrollTo({
+        top: chat_body.scrollHeight,
+        behavior: "smooth"
+    });
+
+//     const assistant = document.querySelector(".assistant .message");
+//             const markdownContent = `
+// # 마크다운 테스트
+// - **강조**: 굵게 표시됩니다.
+// - *기울임*: 이렇게 표시됩니다.
+// - 목록 항목 1
+// - 목록 항목 2
+//   - 하위 목록
+//   - 하위 목록
+// `;
+//     assistant.innerHTML = marked.parse(markdownContent);
 })

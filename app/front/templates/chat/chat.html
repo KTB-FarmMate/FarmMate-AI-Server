@@ -78,6 +78,8 @@
             </div>
         </div>
     </div>
+    <!-- 알림 박스 -->
+    <div id="copy-alert" class="copy-alert">복사됨</div>
 {% endblock %}
 
 {% block footer %}
@@ -85,6 +87,12 @@
 {% endblock %}
 
 {% block script %}
+    <script>
+        document.querySelector(".copy").addEventListener("click", (e) => {
+            copy_clipboard(e);
+        })
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="/front/static/js/chat.js"></script>
     <script>
         document.querySelector(".chatbot").dataset.selected = 'true';
