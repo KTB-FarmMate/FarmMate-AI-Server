@@ -61,25 +61,32 @@ function load_messages() {
     fetchWithRetry(url, {}, 5, 1000)
         .then(messages => {
             const messageList = document.querySelector(".message_list");
-            messageList.innerHTML = ""; // 기존 메시지 초기화
-            console.log("Loaded messages:", messages);
 
-            if (!messages || !Array.isArray(messages["messages"])) {
-                throw new Error("Invalid message data format"); // 데이터 검증
+
+            if (messages["messages"].length > 1) {
+                messageList.innerHTML = ""; // 기존 메시지 초기화
+                console.log("Loaded messages:", messages);
+
+                if (!messages || !Array.isArray(messages["messages"])) {
+                    throw new Error("Invalid message data format"); // 데이터 검증
+                }
+
+                let idx = 0; // 메시지 순서를 나타내는 인덱스
+
+                messages["messages"].forEach(msg => {
+                    // 메시지 검증: msg.text와 msg.role의 유효성 확인
+                    if (msg.text && !msg.text.includes("[시스템 메시지]")) {
+                        const role = determineRole(msg.role, idx);
+                        const messageElement = createMessageElement(role, msg.text);
+
+                        messageList.appendChild(messageElement);
+                        idx++; // 인덱스 증가
+                    }
+                });
+            }else{
+                console.log("No messages found.");
             }
 
-            let idx = 0; // 메시지 순서를 나타내는 인덱스
-
-            messages["messages"].forEach(msg => {
-                // 메시지 검증: msg.text와 msg.role의 유효성 확인
-                if (msg.text && !msg.text.includes("[시스템 메시지]")) {
-                    const role = determineRole(msg.role, idx);
-                    const messageElement = createMessageElement(role, msg.text);
-
-                    messageList.appendChild(messageElement);
-                    idx++; // 인덱스 증가
-                }
-            });
         })
         .catch(error => {
             console.error("Failed to load messages after retries:", error);
@@ -102,7 +109,6 @@ function createUserMessage(content) {
             </div>
         </div>
     `;
-
     return wrapper;
 }
 
