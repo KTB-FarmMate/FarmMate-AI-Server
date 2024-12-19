@@ -62,7 +62,6 @@ function load_messages() {
         .then(messages => {
             const messageList = document.querySelector(".message_list");
 
-
             if (messages["messages"].length > 1) {
                 messageList.innerHTML = ""; // 기존 메시지 초기화
                 console.log("Loaded messages:", messages);
@@ -83,7 +82,7 @@ function load_messages() {
                         idx++; // 인덱스 증가
                     }
                 });
-            }else{
+            } else {
                 console.log("No messages found.");
             }
 
@@ -156,6 +155,8 @@ function createAssistantMessage(content) {
 
 function send_message(memberId, cropName) {
     // 전송 버튼 비활성화 상태일 경우 함수 종료
+    const chat_body = document.querySelector(".chat_body ");
+
     const crops_data = JSON.parse(localStorage.getItem('crops_data'));
     console.log(crops_data);
     const threadId = crops_data[cropName].threadId
@@ -175,6 +176,11 @@ function send_message(memberId, cropName) {
     // 사용자 메시지를 동적으로 추가
     const userMessage = createUserMessage(userMessageContent);
     messageList.appendChild(userMessage);
+
+    chat_body.scrollTo({
+        top: chat_body.scrollHeight,
+        behavior: "smooth"
+    });
 
     // 입력 필드 초기화
     sendInput.value = "";
@@ -208,7 +214,10 @@ function send_message(memberId, cropName) {
             const assistantMessage = createAssistantMessage(assistantMessageContent);
             messageList.appendChild(assistantMessage);
 
-            messageList.scrollTop = messageList.scrollHeight; // 스크롤 하단 이동
+            chat_body.scrollTo({
+                top: chat_body.scrollHeight,
+                behavior: "smooth"
+            });
         })
         .catch(error => {
             // 네트워크 오류 또는 처리되지 않은 에러
@@ -313,6 +322,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const inputArea = document.querySelector(".input_area input");
     const footerContent = document.querySelector(".footer_content");
     const sendButtonArea = document.querySelector(".send_btn_area");
+    const chat_body = document.querySelector(".chat_body");
 
     // input에 focus 시 footer 숨김
     inputArea.addEventListener("focus", () => {
@@ -348,4 +358,9 @@ document.addEventListener("DOMContentLoaded", () => {
     })();
 
     load_messages();
+
+    chat_body.scrollTo({
+        top: chat_body.scrollHeight,
+        behavior: "smooth"
+    });
 })
