@@ -1,4 +1,7 @@
-// 북마크 목록 로드
+// 북마크 데이터를 캐싱하기 위한 전역 변수
+let bookmarkList = [];
+
+// 북마크 데이터를 로드하는 함수 (한 번만 호출)
 async function loadBookmarkList() {
     const memberId = get_memberId();
     const threadId = JSON.parse(localStorage.getItem("crops_data"))[localStorage.getItem("select_crop")].threadId;
@@ -6,14 +9,13 @@ async function loadBookmarkList() {
     try {
         const response = await fetch(`${BE_SERVER}/members/${memberId}/threads/${threadId}/bookmarks`);
         if (response.ok) {
-            return await response.json() || [];
+            bookmarkList = await response.json(); // 데이터를 캐싱
+            console.log("Bookmark list loaded:", bookmarkList);
         } else {
-            console.error(`Failed to fetch bookmark list: ${response.status} ${response.statusText}`);
-            return [];
+            console.error("HTTP Error: ", response.status);
         }
     } catch (error) {
         console.error("Error fetching bookmark list:", error);
-        return [];
     }
 }
 
@@ -36,17 +38,23 @@ function createMessageElement(role, text) {
         : createAssistantMessage(text);
 }
 
-function load_messages(memberId, cropName) {
+function load_messages() {
+    let memberId = get_memberId();
+    let cropName = get_cropName();
     const crops_data = JSON.parse(localStorage.getItem('crops_data'));
     console.log(crops_data);
     const threadId = crops_data[cropName].threadId
     const url = `${BE_SERVER}/members/${memberId}/threads/${threadId}`;
 
     const chat_head = document.querySelector('.chat_head ');
-    chat_head.remove();
+    if (chat_head) {
+        chat_head.remove();
+    }
     const chat_body = document.querySelector('.macro_container');
+    if (chat_body) {
+        chat_body.remove();
+    }
     const message_list = document.querySelector('.message_list');
-    chat_body.remove();
     message_list.style.display = 'flex';
 
 
@@ -92,9 +100,6 @@ function createUserMessage(content) {
             <div class="message">
                 <span>${content}</span>
             </div>
-<!--            <div class="edit_btn">-->
-<!--                <img src="/front/static/img/edit.png" alt="">-->
-<!--            </div>-->
         </div>
     `;
 
@@ -105,7 +110,17 @@ function createUserMessage(content) {
 function createAssistantMessage(content) {
     const wrapper = document.createElement("div");
     wrapper.className = "message_list_wrapper flex flex-column";
-    const result = loadBookmarkList().find(item => item.answer === content);
+
+    // Debugging logs
+    console.log("bookmarkList:", bookmarkList);
+
+    // 찾은 결과가 없을 때 기본값 처리
+    const result = bookmarkList.find(item => item.answer === content) || {}; // 기본값은 빈 객체
+    console.log("result:", result);
+
+    // result.bookmarkId가 없으면 빈 문자열 사용
+    const bookmarkId = result.bookmarkId || "";
+    const bookmark_img = result.bookmarkId ? "/front/static/img/bookmark_chk.png" : "/front/static/img/bookmark.png";
     wrapper.innerHTML = `
         <div class="assistant">
             <div class="chat_setting">
@@ -119,8 +134,8 @@ function createAssistantMessage(content) {
                     <div class="share">
                         <img src="/front/static/img/share.png" alt="">
                     </div>
-                    <div class="bookmark" onclick="handleBookmark(this)" data-bookmark-id="${result.bookmarkId}">
-                        <img src="/front/static/img/bookmark.png" alt="">
+                    <div class="bookmark" onclick="handleBookmark(this)" data-bookmark-id="${bookmarkId}">
+                        <img src="${bookmark_img}" alt="">
                     </div>
                 </div>
             </div>
@@ -131,18 +146,6 @@ function createAssistantMessage(content) {
     `;
 
     return wrapper;
-}
-
-
-let index = 0; // 현재 출력할 글자의 인덱스
-const interval = Math.random(); // 0.1 ~ 0.2초 랜덤 간격 설정
-
-function typeMessage(messageContext) {
-    if (index < messageContext.length) {
-        messageContext.innerHTML += messageContext[index];
-        index++;
-        setTimeout(typeMessage, interval); // 다음 글자 출력
-    }
 }
 
 function send_message(memberId, cropName) {
@@ -206,24 +209,6 @@ function send_message(memberId, cropName) {
             console.error("Error sending message:", error);
             alert(`메시지 전송 중 오류가 발생했습니다: ${error.status || "알 수 없음"}`);
         });
-}
-
-function findPreviousWrapper(element) {
-    let current = element.closest(".message_list_wrapper");
-    if (!current) return null; // 현재 요소의 가장 가까운 wrapper가 없으면 null 반환
-
-    // 이전 형제를 탐색
-    while (current.previousElementSibling) {
-        current = current.previousElementSibling;
-
-        // 이전 형제가 `.message_list_wrapper` 클래스인지 확인
-        if (current.classList.contains("message_list_wrapper")) {
-            return current; // 바로 위의 wrapper 반환
-        }
-    }
-
-    // 위쪽에 더 이상 wrapper가 없으면 null 반환
-    return null;
 }
 
 function handleBookmark(element) {
@@ -346,5 +331,15 @@ document.addEventListener("DOMContentLoaded", () => {
             sendButtonArea.style.pointerEvents = "none"; // 클릭 불가능
         }
     });
+    // 초기화 단계에서 북마크 데이터를 로드
+    (async () => {
+        try {
+            await loadBookmarkList();
+            console.log("북마크 데이터를 성공적으로 로드했습니다.");
+        } catch (error) {
+            console.error("북마크 데이터를 로드하는 중 오류가 발생했습니다:", error);
+        }
+    })();
 
+    load_messages();
 })

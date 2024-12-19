@@ -30,10 +30,6 @@ function load_bookmark(memberId, cropName) {
                 return;
             }
 
-            // 현재 날짜 기준으로 주별 구분
-            const now = new Date();
-            const currentWeekStart = new Date(now.setDate(now.getDate() - now.getDay())); // 이번 주 시작일
-
             // 주별 데이터 그룹화
             let weekGroups = {
                 thisWeek: {
@@ -41,11 +37,20 @@ function load_bookmark(memberId, cropName) {
                     items: []
                 }
             };
+            const now = new Date();
+            const currentWeekStart = new Date(now.setDate(now.getDate() - now.getDay())); // 이번 주 시작일
 
-            // 데이터를 역순으로 순회
             data.forEach(entry => {
                 const entryDate = new Date(entry.addedAt); // 추가된 날짜
-                const weekDiff = Math.floor((currentWeekStart - entryDate) / (7 * 24 * 60 * 60 * 1000)); // 주 차이 계산
+                const diffTime = currentWeekStart - entryDate;
+
+                // 이번 주와의 차이를 주 단위로 계산
+                let weekDiff;
+                if (diffTime >= 0) {
+                    weekDiff = Math.floor(diffTime / (7 * 24 * 60 * 60 * 1000));
+                } else {
+                    weekDiff = 0; // 이번 주에 포함
+                }
 
                 const weekKey = weekDiff === 0 ? "thisWeek" : `${weekDiff}주전`;
                 if (!weekGroups[weekKey]) {
@@ -57,6 +62,7 @@ function load_bookmark(memberId, cropName) {
 
                 weekGroups[weekKey].items.push(entry);
             });
+
 
             // 기존 컨테이너 초기화
             container.innerHTML = "";

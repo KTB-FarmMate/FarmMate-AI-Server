@@ -87,8 +87,6 @@
 {% block script %}
     <script src="/front/static/js/chat.js"></script>
     <script>
-        console.log(`{{ memberId }}, {{ cropName }}`)
-        load_messages('{{ memberId }}', '{{ cropName }}');
         document.querySelector(".chatbot").dataset.selected = 'true';
     </script>
 {% endblock %}
