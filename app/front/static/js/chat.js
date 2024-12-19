@@ -169,7 +169,7 @@ function send_message(memberId, cropName) {
 
     const userMessageContent = sendInput.value.trim();
     if (!userMessageContent) {
-        alert("메시지를 입력하세요!");
+        // alert("메시지를 입력하세요!");
         return;
     }
 
