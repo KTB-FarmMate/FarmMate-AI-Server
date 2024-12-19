@@ -1,3 +1,30 @@
+marked.setOptions({
+    sanitize: true
+});
+
+// 클립보드 복사 함수
+
+function copy_clipboard(event) {
+    const target = event.target;
+    const textToCopy = target.closest(".chat_setting").nextElementSibling.textContent.trim();
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        showCopyAlert();
+    }).catch(err => {
+        console.error("클립보드 복사 실패:", err);
+    });
+}
+
+function showCopyAlert() {
+    const alertBox = document.getElementById("copy-alert");
+    alertBox.classList.add("show");
+
+    // 3초 후에 알림 박스 숨기기
+    setTimeout(() => {
+        alertBox.classList.remove("show");
+    }, 1000);
+}
+
+
 // 북마크 데이터를 캐싱하기 위한 전역 변수
 let bookmarkList = [];
 
@@ -12,10 +39,11 @@ async function loadBookmarkList() {
             bookmarkList = await response.json(); // 데이터를 캐싱
             console.log("Bookmark list loaded:", bookmarkList);
         } else {
-            console.error("HTTP Error: ", response.status);
+            throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
         }
     } catch (error) {
         console.error("Error fetching bookmark list:", error);
+        throw error; // 에러를 호출한 곳으로 전달
     }
 }
 
@@ -123,6 +151,8 @@ function createAssistantMessage(content) {
     const result = bookmarkList.find(item => item.answer === content) || {}; // 기본값은 빈 객체
     console.log("result:", result);
 
+    const marked_content = marked.parse(content);
+
     // result.bookmarkId가 없으면 빈 문자열 사용
     const bookmarkId = result.bookmarkId || "";
     const bookmark_img = result.bookmarkId ? "/front/static/img/bookmark_chk.png" : "/front/static/img/bookmark.png";
@@ -145,10 +175,14 @@ function createAssistantMessage(content) {
                 </div>
             </div>
             <div class="message">
-                <p>${content}</p>
+                ${marked_content}
             </div>
         </div>
     `;
+
+    wrapper.querySelector(".copy").addEventListener("click", (e) => {
+        copy_clipboard(e);
+    })
 
     return wrapper;
 }
@@ -363,4 +397,16 @@ document.addEventListener("DOMContentLoaded", () => {
         top: chat_body.scrollHeight,
         behavior: "smooth"
     });
+
+//     const assistant = document.querySelector(".assistant .message");
+//             const markdownContent = `
+// # 마크다운 테스트
+// - **강조**: 굵게 표시됩니다.
+// - *기울임*: 이렇게 표시됩니다.
+// - 목록 항목 1
+// - 목록 항목 2
+//   - 하위 목록
+//   - 하위 목록
+// `;
+//     assistant.innerHTML = marked.parse(markdownContent);
 })

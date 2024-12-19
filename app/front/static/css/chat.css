@@ -89,7 +89,7 @@
 
 .assistant .message {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     flex-wrap: nowrap;
     margin: 15px;
 }
@@ -157,3 +157,45 @@
     margin-bottom: 2vh;
 }
 
+
+/* copy alert */
+
+.copy-alert {
+    position: fixed;
+    bottom: 20%;
+    left: 46%;
+    transform: translateX(-50%) translateY(100%);
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    z-index: 1000;
+}
+
+.copy-alert.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* Markdown Style */
+.message {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 20px;
+}
+
+.message h1, .message h2, .message h3 {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.message ul {
+    padding-left: 20px;
+}
+
+.message strong {
+    color: #2c3e50;
+}
