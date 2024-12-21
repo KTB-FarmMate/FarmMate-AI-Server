@@ -20,7 +20,7 @@
 {% block content %}
     <div class="chat-container flex flex-column align-center">
         <div class="chat_head flex flex-column align-center">
-            <img style="width: 25vw;" src="{{ url_for('static', path='/img/logo.png') }}" alt="">
+            <img style="width: 25vw;" src="/front/static/img/logo.png" alt="">
             <h1 style="margin: 0"><span style="color: #339f00;">Farm</span><span style="color: #896010">Mate</span></h1>
         </div>
         <div class="chat_body flex flex-column">
@@ -39,25 +39,25 @@
                             <span>상추 키우는 법</span>
                         </div>
                         <div class="edit_btn">
-                            <img src="{{ url_for('static', path='/img/edit.png') }}" alt="">
+                            <img src="/front/static/img/edit.png" alt="">
                         </div>
                     </div>
                     <div class="assistant">
                         <div class="chat_setting">
                             <div class="profile_img">
-                                <img src="{{ url_for('static', path='/img/logo.png') }}" alt="">
+                                <img src="/front/static/img/logo.png" alt="">
                             </div>
                             <div class="setting_btns flex">
                                 <div class="copy">
-                                    <img src="{{ url_for('static', path='/img/copy.png') }}" alt="">
+                                    <img src="/front/static/img/copy.png" alt="">
                                 </div>
                                 <div class="share">
-                                    <img src="{{ url_for('static', path='/img/share.png') }}" alt="">
+                                    <img src="/front/static/img/share.png" alt="">
 
                                 </div>
                                 <div class="bookmark"
                                      onclick="handleBookmark(this)">
-                                    <img src="{{ url_for('static', path='/img/bookmark.png') }}" alt="">
+                                    <img src="/front/static/img/bookmark.png" alt="">
                                 </div>
                             </div>
                         </div>
@@ -73,7 +73,7 @@
                     <input type="text">
                 </div>
                 <div onclick="send_message('{{ memberId }}', '{{ cropName }}')" class="send_btn_area">
-                    <img src="{{ url_for('static', path='/img/send.png') }}" alt="">
+                    <img src="/front/static/img/send.png" alt="">
                 </div>
             </div>
         </div>

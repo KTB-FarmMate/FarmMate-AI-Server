@@ -140,9 +140,15 @@ function createUserMessage(content) {
 }
 
 // AI 응답 메시지 생성
-function createAssistantMessage(content) {
-    const wrapper = document.createElement("div");
-    wrapper.className = "message_list_wrapper flex flex-column";
+function createAssistantMessage(content, element = null, fake = false) {
+    // element가 있으면 사전에 정의된 기존 내용을 덮도록.
+    let wrapper
+    if (element == null) {
+        wrapper = document.createElement("div");
+        wrapper.className = "message_list_wrapper flex flex-column";
+    } else {
+        wrapper = element
+    }
 
     // Debugging logs
     console.log("bookmarkList:", bookmarkList);
@@ -150,8 +156,12 @@ function createAssistantMessage(content) {
     // 찾은 결과가 없을 때 기본값 처리
     const result = bookmarkList.find(item => item.answer === content) || {}; // 기본값은 빈 객체
     console.log("result:", result);
-
-    const marked_content = marked.parse(content);
+    let marked_content = "";
+    if (fake) {
+        marked_content = marked.parse(content);
+    }else{
+        marked_content = content;
+    }
 
     // result.bookmarkId가 없으면 빈 문자열 사용
     const bookmarkId = result.bookmarkId || "";

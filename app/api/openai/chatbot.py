@@ -8,7 +8,6 @@ from enum import Enum
 from datetime import datetime
 import logging
 
-
 # HTTP 및 API 관련 모듈
 import requests
 from fastapi import APIRouter, HTTPException
@@ -45,6 +44,7 @@ assistant = client.beta.assistants.retrieve(assistant_id=settings.ASSISTANT_ID)
 T = TypeVar('T')
 
 logging.basicConfig(level=logging.INFO)
+
 
 class BaseResponse(BaseModel, Generic[T]):
     """기본 응답 모델"""
